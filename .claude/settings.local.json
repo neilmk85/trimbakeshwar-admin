@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xcode-select -p)",
+      "Bash(mdfind -name Xcode.app)",
+      "Bash(flutter devices:*)",
+      "Bash(flutter run:*)"
+    ]
+  }
+}
