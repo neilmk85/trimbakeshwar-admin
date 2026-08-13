@@ -2,10 +2,20 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import 'admin_booking_detail_screen.dart';
 
 // ── Enums ─────────────────────────────────────────────────────────────────────
 
-enum _DatePreset { upcoming, today, yesterday, thisWeek, thisMonth, all, custom }
+enum _DatePreset {
+  upcoming,
+  today,
+  tomorrow,
+  yesterday,
+  thisWeek,
+  thisMonth,
+  all,
+  custom,
+}
 
 enum _SortBy { poojaDate, bookingDate }
 
@@ -37,12 +47,10 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   // ── Date helpers ────────────────────────────────────────────────────────────
 
-  static String _fmt(DateTime d) =>
-      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-
   bool _matchesDatePreset(AdminOrder o) {
     final today = DateTime.now();
-    final d = DateTime(o.poojaDate.year, o.poojaDate.month, o.poojaDate.day);
+    final ref = o.eventDate;
+    final d = DateTime(ref.year, ref.month, ref.day);
     final todayDate = DateTime(today.year, today.month, today.day);
 
     switch (_datePreset) {
@@ -52,6 +60,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
         return !d.isBefore(todayDate);
       case _DatePreset.today:
         return d == todayDate;
+      case _DatePreset.tomorrow:
+        return d == todayDate.add(const Duration(days: 1));
       case _DatePreset.yesterday:
         return d == todayDate.subtract(const Duration(days: 1));
       case _DatePreset.thisWeek:
@@ -62,10 +72,16 @@ class _BookingsScreenState extends State<BookingsScreen> {
         return !d.isBefore(from) && !d.isAfter(todayDate);
       case _DatePreset.custom:
         if (_customRange == null) return true;
-        final start = DateTime(_customRange!.start.year,
-            _customRange!.start.month, _customRange!.start.day);
-        final end = DateTime(_customRange!.end.year, _customRange!.end.month,
-            _customRange!.end.day);
+        final start = DateTime(
+          _customRange!.start.year,
+          _customRange!.start.month,
+          _customRange!.start.day,
+        );
+        final end = DateTime(
+          _customRange!.end.year,
+          _customRange!.end.month,
+          _customRange!.end.day,
+        );
         return !d.isBefore(start) && !d.isAfter(end);
     }
   }
@@ -86,7 +102,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
     }).toList();
 
     if (_sortBy == _SortBy.poojaDate) {
-      result.sort((a, b) => a.poojaDate.compareTo(b.poojaDate));
+      result.sort((a, b) => a.eventDate.compareTo(b.eventDate));
     } else {
       result.sort((a, b) => b.bookedOn.compareTo(a.bookedOn));
     }
@@ -99,11 +115,11 @@ class _BookingsScreenState extends State<BookingsScreen> {
       _searchCtrl.text.isNotEmpty;
 
   void _clearFilters() => setState(() {
-        _selectedPoojaName = null;
-        _datePreset = _DatePreset.upcoming;
-        _customRange = null;
-        _searchCtrl.clear();
-      });
+    _selectedPoojaName = null;
+    _datePreset = _DatePreset.upcoming;
+    _customRange = null;
+    _searchCtrl.clear();
+  });
 
   // ── Build ───────────────────────────────────────────────────────────────────
 
@@ -123,8 +139,7 @@ class _BookingsScreenState extends State<BookingsScreen> {
                 _FilterPanel(
                   poojaNames: poojaNames,
                   selectedPoojaName: _selectedPoojaName,
-                  onPoojaChanged: (v) =>
-                      setState(() => _selectedPoojaName = v),
+                  onPoojaChanged: (v) => setState(() => _selectedPoojaName = v),
                   datePreset: _datePreset,
                   customRange: _customRange,
                   onPresetChanged: (p) async {
@@ -137,7 +152,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                         builder: (ctx, child) => Theme(
                           data: Theme.of(ctx).copyWith(
                             colorScheme: const ColorScheme.light(
-                                primary: AdminColors.primary),
+                              primary: AdminColors.primary,
+                            ),
                           ),
                           child: child!,
                         ),
@@ -170,10 +186,12 @@ class _BookingsScreenState extends State<BookingsScreen> {
                   child: error != null && data.orders.isEmpty
                       ? _buildEmpty(error)
                       : filtered.isEmpty
-                          ? _buildEmpty(data.orders.isEmpty
+                      ? _buildEmpty(
+                          data.orders.isEmpty
                               ? 'No bookings yet.'
-                              : 'No bookings match the filters.')
-                          : _buildList(filtered),
+                              : 'No bookings match the filters.',
+                        )
+                      : _buildList(filtered),
                 ),
               ],
             );
@@ -184,28 +202,36 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   Widget _buildList(List<AdminOrder> orders) => ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        itemCount: orders.length,
-        itemBuilder: (_, i) => _BookingCard(order: orders[i]),
-      );
+    padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+    itemCount: orders.length,
+    itemBuilder: (_, i) => _BookingCard(order: orders[i]),
+  );
 
   Widget _buildEmpty(String msg) => Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.receipt_long_outlined,
-                  size: 72, color: AdminColors.grey400),
-              const SizedBox(height: 16),
-              Text(msg,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: AdminColors.grey500, fontSize: 14, height: 1.5)),
-            ],
+    child: Padding(
+      padding: const EdgeInsets.all(32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 72,
+            color: AdminColors.grey400,
           ),
-        ),
-      );
+          const SizedBox(height: 16),
+          Text(
+            msg,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AdminColors.grey500,
+              fontSize: 14,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 // ── Filter panel ──────────────────────────────────────────────────────────────
@@ -250,6 +276,7 @@ class _FilterPanel extends StatelessWidget {
   static const _dateLabels = {
     _DatePreset.upcoming: 'Upcoming',
     _DatePreset.today: 'Today',
+    _DatePreset.tomorrow: 'Tomorrow',
     _DatePreset.yesterday: 'Yesterday',
     _DatePreset.thisWeek: 'This Week',
     _DatePreset.thisMonth: 'This Month',
@@ -262,8 +289,19 @@ class _FilterPanel extends StatelessWidget {
     final s = customRange!.start;
     final e = customRange!.end;
     const m = [
-      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     if (s.year == e.year && s.month == e.month && s.day == e.day) {
       return '${s.day} ${m[s.month]}';
@@ -277,18 +315,21 @@ class _FilterPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: panelBg,
         border: Border(
-            bottom: BorderSide(color: AdminColors.primary.withValues(alpha: 0.1))),
+          bottom: BorderSide(color: AdminColors.primary.withValues(alpha: 0.1)),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Row 1: Search + sort ──────────────────────────────────────────
+          // ── Row 1: Search + sort + calendar ───────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
             child: Row(
               children: [
                 Expanded(child: _searchBar(context)),
                 const SizedBox(width: 8),
+                _calendarButton(context),
+                const SizedBox(width: 6),
                 _sortButton(context),
                 if (poojaNames.isNotEmpty) ...[
                   const SizedBox(width: 6),
@@ -297,32 +338,7 @@ class _FilterPanel extends StatelessWidget {
               ],
             ),
           ),
-          // ── Row 2: Date preset chips ──────────────────────────────────────
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
-              children: _DatePreset.values.map((p) {
-                final active = datePreset == p;
-                final label =
-                    p == _DatePreset.custom && datePreset == _DatePreset.custom
-                        ? _customLabel()
-                        : _dateLabels[p]!;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: _DateChip(
-                    label: label,
-                    active: active,
-                    chipActive: chipActive,
-                    chipActiveFg: chipActiveFg,
-                    onTap: () => onPresetChanged(p),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          // ── Row 3: Result count + clear ───────────────────────────────────
+          // ── Row 2: Result count + clear ───────────────────────────────────
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 2, 12, 8),
             child: Row(
@@ -330,9 +346,10 @@ class _FilterPanel extends StatelessWidget {
                 Text(
                   '$resultCount booking${resultCount == 1 ? '' : 's'}',
                   style: TextStyle(
-                      fontSize: 11,
-                      color: AdminColors.primary.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.w600),
+                    fontSize: 11,
+                    color: AdminColors.primary.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 if (hasFilter) ...[
                   const Spacer(),
@@ -341,16 +358,20 @@ class _FilterPanel extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.filter_alt_off_rounded,
-                            size: 12,
-                            color: AdminColors.primary.withValues(alpha: 0.7)),
+                        Icon(
+                          Icons.filter_alt_off_rounded,
+                          size: 12,
+                          color: AdminColors.primary.withValues(alpha: 0.7),
+                        ),
                         const SizedBox(width: 3),
-                        Text('Clear',
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: AdminColors.primary
-                                    .withValues(alpha: 0.7),
-                                fontWeight: FontWeight.w600)),
+                        Text(
+                          'Clear',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: AdminColors.primary.withValues(alpha: 0.7),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -371,9 +392,10 @@ class _FilterPanel extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
-              color: AdminColors.primary.withValues(alpha: 0.08),
-              blurRadius: 6,
-              offset: const Offset(0, 2)),
+            color: AdminColors.primary.withValues(alpha: 0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: TextField(
@@ -383,25 +405,85 @@ class _FilterPanel extends StatelessWidget {
         decoration: InputDecoration(
           hintText: 'Name or mobile...',
           hintStyle: TextStyle(fontSize: 13, color: AdminColors.grey400),
-          prefixIcon: Icon(Icons.search_rounded,
-              size: 16,
-              color: searchCtrl.text.isNotEmpty
-                  ? AdminColors.primary
-                  : AdminColors.grey400),
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            size: 16,
+            color: searchCtrl.text.isNotEmpty
+                ? AdminColors.primary
+                : AdminColors.grey400,
+          ),
           suffixIcon: searchCtrl.text.isNotEmpty
               ? GestureDetector(
                   onTap: () {
                     searchCtrl.clear();
                     onSearchChanged();
                   },
-                  child: Icon(Icons.close_rounded,
-                      size: 14, color: AdminColors.grey400),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: 14,
+                    color: AdminColors.grey400,
+                  ),
                 )
               : null,
           filled: false,
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 0,
+            horizontal: 4,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _calendarButton(BuildContext context) {
+    final active = datePreset != _DatePreset.upcoming;
+    return PopupMenuButton<_DatePreset>(
+      onSelected: onPresetChanged,
+      itemBuilder: (_) => _DatePreset.values.map((preset) {
+        final label = preset == _DatePreset.custom && datePreset == _DatePreset.custom
+            ? _customLabel()
+            : _dateLabels[preset]!;
+        return PopupMenuItem(
+          value: preset,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (datePreset == preset)
+                const Icon(Icons.check, size: 18, color: AdminColors.primary)
+              else
+                const SizedBox(width: 18),
+              const SizedBox(width: 10),
+              Text(label),
+            ],
+          ),
+        );
+      }).toList(),
+      child: Container(
+        height: 36,
+        width: 36,
+        decoration: BoxDecoration(
+          color: active ? chipActive.withValues(alpha: 0.12) : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active
+                ? chipActive.withValues(alpha: 0.5)
+                : AdminColors.primary.withValues(alpha: 0.15),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AdminColors.primary.withValues(alpha: 0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          Icons.calendar_today_rounded,
+          size: 16,
+          color: active
+              ? chipActive
+              : AdminColors.primary.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -438,7 +520,8 @@ class _FilterPanel extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (_) => _PoojaPickerSheet(
         poojaNames: poojaNames,
         selected: selectedPoojaName,
@@ -487,9 +570,10 @@ class _DateChip extends StatelessWidget {
           boxShadow: active
               ? [
                   BoxShadow(
-                      color: chipActive.withValues(alpha: 0.25),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2))
+                    color: chipActive.withValues(alpha: 0.25),
+                    blurRadius: 6,
+                    offset: const Offset(0, 2),
+                  ),
                 ]
               : null,
         ),
@@ -534,33 +618,88 @@ class _IconChipButton extends StatelessWidget {
           color: active ? chipActive.withValues(alpha: 0.12) : Colors.white,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-              color: active
-                  ? chipActive.withValues(alpha: 0.5)
-                  : AdminColors.primary.withValues(alpha: 0.15)),
+            color: active
+                ? chipActive.withValues(alpha: 0.5)
+                : AdminColors.primary.withValues(alpha: 0.15),
+          ),
           boxShadow: [
             BoxShadow(
-                color: AdminColors.primary.withValues(alpha: 0.06),
-                blurRadius: 4,
-                offset: const Offset(0, 2)),
+              color: AdminColors.primary.withValues(alpha: 0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
           ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 14,
-                color: active ? chipActive : AdminColors.primary.withValues(alpha: 0.7)),
+            Icon(
+              icon,
+              size: 14,
+              color: active
+                  ? chipActive
+                  : AdminColors.primary.withValues(alpha: 0.7),
+            ),
             const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: active
-                      ? chipActive
-                      : AdminColors.primary.withValues(alpha: 0.7)),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: active
+                    ? chipActive
+                    : AdminColors.primary.withValues(alpha: 0.7),
+              ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _IconButton extends StatelessWidget {
+  final IconData icon;
+  final bool active;
+  final Color chipActive;
+  final VoidCallback onTap;
+
+  const _IconButton({
+    required this.icon,
+    required this.active,
+    required this.chipActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 36,
+        width: 36,
+        decoration: BoxDecoration(
+          color: active ? chipActive.withValues(alpha: 0.12) : Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: active
+                ? chipActive.withValues(alpha: 0.5)
+                : AdminColors.primary.withValues(alpha: 0.15),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AdminColors.primary.withValues(alpha: 0.06),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Icon(
+          icon,
+          size: 16,
+          color: active
+              ? chipActive
+              : AdminColors.primary.withValues(alpha: 0.7),
         ),
       ),
     );
@@ -595,13 +734,16 @@ class _PoojaPickerSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                  color: AdminColors.grey300,
-                  borderRadius: BorderRadius.circular(2)),
+                color: AdminColors.grey300,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Filter by Pooja',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const Text(
+            'Filter by Pooja',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 16),
           Wrap(
             spacing: 8,
@@ -609,7 +751,8 @@ class _PoojaPickerSheet extends StatelessWidget {
             children: [
               _chip('All Poojas', selected == null, () => onSelected(null)),
               ...poojaNames.map(
-                  (n) => _chip(n, selected == n, () => onSelected(n))),
+                (n) => _chip(n, selected == n, () => onSelected(n)),
+              ),
             ],
           ),
         ],
@@ -626,9 +769,10 @@ class _PoojaPickerSheet extends StatelessWidget {
           color: active ? chipActive : Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-              color: active
-                  ? chipActive
-                  : AdminColors.primary.withValues(alpha: 0.25)),
+            color: active
+                ? chipActive
+                : AdminColors.primary.withValues(alpha: 0.25),
+          ),
         ),
         child: Text(
           label,
@@ -645,326 +789,376 @@ class _PoojaPickerSheet extends StatelessWidget {
 
 // ── Booking card ──────────────────────────────────────────────────────────────
 
-class _BookingCard extends StatefulWidget {
+class _BookingCard extends StatelessWidget {
   final AdminOrder order;
   const _BookingCard({required this.order});
 
-  @override
-  State<_BookingCard> createState() => _BookingCardState();
-}
+  String _formatDate(DateTime dt) {
+    const m = [
+      '',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${dt.day} ${m[dt.month]} ${dt.year}';
+  }
 
-class _BookingCardState extends State<_BookingCard> {
-  bool _cancelling = false;
-
-  AdminOrder get order => widget.order;
-
-  Future<void> _confirmCancel() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Booking'),
-        content: Text(
-            'Cancel booking for "${order.poojaName}"?\nOrder: ${order.orderId}'),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('No')),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Yes, Cancel')),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
-    setState(() => _cancelling = true);
-    final err = await AdminDataService.cancelBooking(order.orderId);
-    if (!mounted) return;
-    setState(() => _cancelling = false);
-    if (err != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(err), backgroundColor: Colors.red));
+  String _formatAmount(int amount) {
+    final str = amount.toString();
+    if (str.length <= 3) return '₹$str';
+    if (str.length <= 5) {
+      return '₹${str.substring(0, str.length - 3)},${str.substring(str.length - 3)}';
     }
+    return '₹${str.substring(0, str.length - 5)},${str.substring(str.length - 5, str.length - 3)},${str.substring(str.length - 3)}';
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 10,
-              offset: const Offset(0, 3)),
-        ],
+    return GestureDetector(
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => AdminBookingDetailScreen(order: order),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: order.poojaColor.withValues(alpha: 0.12),
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.07),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                      color: order.poojaColor, shape: BoxShape.circle),
-                  child: const Center(
-                    child: Text('ॐ',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w300)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header strip ─────────────────────────────────────────────────
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: order.cancelled
+                    ? const LinearGradient(
+                        colors: [Color(0xFFB71C1C), Color(0xFFE53935)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : AdminColors.appBarGradient,
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(14)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      order.isRoomOnly
+                          ? Icons.hotel_rounded
+                          : Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(order.poojaName,
-                          style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                              color: order.poojaColor)),
-                      if (order.userName.isNotEmpty)
-                        Text(order.userName,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.displayTitle,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        if (order.userName.isNotEmpty)
+                          Text(
+                            order.userName,
                             style: TextStyle(
-                                fontSize: 12,
-                                color:
-                                    order.poojaColor.withValues(alpha: 0.8))),
+                              fontSize: 12,
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                        if (order.isPrivatePooja) ...[
+                          const SizedBox(height: 3),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 7, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.lock_person_outlined,
+                                    size: 10, color: Colors.white),
+                                SizedBox(width: 3),
+                                Text('Private Pooja',
+                                    style: TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  _statusBadge(),
+                ],
+              ),
+            ),
+
+            // ── Body ─────────────────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _detailRow(
+                    order.isRoomOnly
+                        ? Icons.hotel_rounded
+                        : Icons.calendar_today_outlined,
+                    order.isRoomOnly ? 'Check-in Date' : 'Pooja Date',
+                    _formatDate(order.eventDate),
+                    tag: order.rescheduled ? 'Rescheduled' : null,
+                    tagColor: const Color(0xFF6A1B9A),
+                    bold: true,
+                  ),
+                  if (!order.isRoomOnly) ...[
+                    const SizedBox(height: 8),
+                    _detailRow(Icons.people_outline, 'Persons',
+                        '${order.numberOfPeople}'),
+                    const SizedBox(height: 8),
+                    _detailRow(Icons.family_restroom_outlined, 'Gotra',
+                        order.gotra),
+                  ],
+                  if (order.numberOfRooms > 0) ...[
+                    const SizedBox(height: 8),
+                    _detailRow(
+                      Icons.hotel_rounded,
+                      'Stay',
+                      '${order.numberOfRooms} room${order.numberOfRooms > 1 ? 's' : ''}'
+                          ' × ${order.numberOfNights} night${order.numberOfNights > 1 ? 's' : ''}',
+                    ),
+                  ],
+                  const Divider(height: 20, color: Color(0xFFE0E0E0)),
+                  if (!order.isRoomOnly)
+                    _costRow(
+                      order.isPrivatePooja
+                          ? 'Private Pooja Cost'
+                          : 'Pooja Cost',
+                      null,
+                      _formatAmount(order.poojaAmount),
+                    ),
+                  if (order.numberOfRooms > 0) ...[
+                    const SizedBox(height: 4),
+                    _costRow(
+                      'Stay',
+                      '${order.numberOfRooms} rm'
+                          ' × ${order.numberOfNights} nights'
+                          ' × ${_formatAmount(order.stayRatePerRoom)}',
+                      _formatAmount(order.stayAmount),
+                    ),
+                  ],
+                  const Divider(height: 16, color: Color(0xFFE0E0E0)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        order.cancelled ? 'Amount' : 'Amount Paid',
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87),
+                      ),
+                      Text(
+                        _formatAmount(order.totalAmount),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: order.cancelled
+                              ? const Color(0xFFC62828)
+                              : order.poojaColor,
+                          decoration: order.cancelled
+                              ? TextDecoration.lineThrough
+                              : null,
+                          decorationColor: AdminColors.grey500,
+                        ),
+                      ),
                     ],
                   ),
-                ),
-                order.cancelled ? _cancelledBadge() : _confirmedBadge(),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Pooja details ──────────────────────────────────────────
-                _row(Icons.calendar_today_rounded, 'Pooja Date',
-                    _date(order.poojaDate)),
-                const SizedBox(height: 8),
-                _row(Icons.people_rounded, 'People',
-                    order.numberOfPeople.toString()),
-                const SizedBox(height: 8),
-                _row(Icons.family_restroom_rounded, 'Gotra', order.gotra),
-                const SizedBox(height: 8),
-                _row(Icons.currency_rupee_rounded, 'Amount Paid',
-                    '₹${_fmt(order.totalAmount)}',
-                    valueColor: Colors.green.shade700, bold: true),
-
-                // ── Booked by ──────────────────────────────────────────────
-                if (order.userName.isNotEmpty || order.userPhone.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Divider(height: 1),
-                  ),
-                  _sectionLabel('Booked By'),
-                  const SizedBox(height: 8),
-                  if (order.userName.isNotEmpty)
-                    _row(Icons.person_rounded, 'Name', order.userName),
-                  if (order.userPhone.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _row(Icons.phone_rounded, 'Phone', order.userPhone),
-                  ],
-                ],
-
-                // ── Booked For ─────────────────────────────────────────────
-                if (order.bookedForName.isNotEmpty ||
-                    order.bookedForPhone.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Divider(height: 1),
-                  ),
-                  _sectionLabel('Pooja For'),
-                  const SizedBox(height: 8),
-                  if (order.bookedForName.isNotEmpty)
-                    _row(Icons.person_outline_rounded, 'Name',
-                        order.bookedForName),
-                  if (order.bookedForPhone.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _row(Icons.phone_outlined, 'Phone', order.bookedForPhone),
-                  ],
-                  if (order.bookedForEmail.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _row(Icons.email_outlined, 'Email', order.bookedForEmail),
-                  ],
-                  if (order.bookedForCity.isNotEmpty ||
-                      order.bookedForZipCode.isNotEmpty) ...[
-                    const SizedBox(height: 6),
-                    _row(
-                      Icons.location_on_outlined,
-                      'Location',
-                      [
-                        order.bookedForCity,
-                        order.bookedForZipCode,
-                        order.bookedForCountry,
-                      ].where((s) => s.isNotEmpty).join(', '),
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Booked on ${_formatDate(order.bookedOn)}',
+                      style: const TextStyle(
+                          fontSize: 11, color: Color(0xFF9CA3AF)),
                     ),
-                  ],
+                  ),
                 ],
-
-                // ── Footer ─────────────────────────────────────────────────
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 10),
-                  child: Divider(height: 1),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Order ID: ${order.orderId}',
-                              style: TextStyle(
-                                  fontSize: 11,
-                                  color: AdminColors.grey500,
-                                  fontFamily: 'monospace')),
-                          const SizedBox(height: 2),
-                          Text('Booked ${_date(order.bookedOn)}',
-                              style: TextStyle(
-                                  fontSize: 11, color: AdminColors.grey500)),
-                        ],
-                      ),
-                    ),
-                    if (!order.cancelled)
-                      _cancelling
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2))
-                          : TextButton.icon(
-                              onPressed: _confirmCancel,
-                              icon: const Icon(Icons.cancel_outlined, size: 14),
-                              label: const Text('Cancel'),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.red.shade700,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 6),
-                                textStyle: const TextStyle(
-                                    fontSize: 12, fontWeight: FontWeight.w600),
-                              ),
-                            ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _cancelledBadge() => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+  Widget _statusBadge() {
+    if (order.cancelled) {
+      return Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: Colors.red.shade50,
+          color: const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.red.shade200),
         ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                  color: Colors.red.shade600, shape: BoxShape.circle)),
-          const SizedBox(width: 5),
-          Text('Cancelled',
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cancel_outlined,
+                size: 12, color: Color(0xFFC62828)),
+            SizedBox(width: 4),
+            Text('Cancelled',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFC62828))),
+          ],
+        ),
+      );
+    }
+    if (order.rescheduled) {
+      return const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.event_repeat_outlined,
+              size: 12, color: Colors.white),
+          SizedBox(width: 4),
+          Text('Rescheduled',
               style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Colors.red.shade700)),
-        ]),
+                  color: Colors.white)),
+        ],
       );
-
-  Widget _confirmedBadge() => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.green.shade200),
-        ),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(
-              width: 6,
-              height: 6,
-              decoration: const BoxDecoration(
-                  color: Color(0xFF43A047), shape: BoxShape.circle)),
-          const SizedBox(width: 5),
-          Text('Confirmed',
-              style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.green.shade700)),
-        ]),
-      );
-
-  Widget _sectionLabel(String label) => Text(
-        label,
-        style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-            color: AdminColors.grey500,
-            letterSpacing: 0.6),
-      );
-
-  Widget _row(IconData icon, String label, String value,
-      {Color? valueColor, bool bold = false}) {
-    return Row(
+    }
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: AdminColors.grey500),
-        const SizedBox(width: 8),
-        SizedBox(
-          width: 90,
-          child: Text(label,
-              style: TextStyle(fontSize: 13, color: AdminColors.grey600)),
-        ),
-        Expanded(
-          child: Text(value.isEmpty ? '—' : value,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: bold ? FontWeight.w600 : FontWeight.w500,
-                color: valueColor ?? const Color(0xFF1A1A2E),
-              )),
-        ),
+        Icon(Icons.check_circle, size: 12, color: Colors.white),
+        SizedBox(width: 4),
+        Text('Confirmed',
+            style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.white)),
       ],
     );
   }
 
-  String _fmt(int amount) {
-    final s = amount.toString();
-    if (s.length <= 3) return s;
-    final last3 = s.substring(s.length - 3);
-    final rest = s.substring(0, s.length - 3);
-    final buf = StringBuffer();
-    for (var i = 0; i < rest.length; i++) {
-      if (i > 0 && (rest.length - i) % 2 == 0) buf.write(',');
-      buf.write(rest[i]);
-    }
-    return '${buf.toString()},$last3';
+  Widget _detailRow(
+    IconData icon,
+    String label,
+    String value, {
+    String? tag,
+    Color? tagColor,
+    bool bold = false,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AdminColors.grey500),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontSize: 13,
+            color: AdminColors.grey700,
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value.isEmpty ? '—' : value,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+              color: Colors.black87,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (tag != null) ...[
+          const SizedBox(width: 6),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+            decoration: BoxDecoration(
+              color: (tagColor ?? AdminColors.primary)
+                  .withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                  color: (tagColor ?? AdminColors.primary)
+                      .withValues(alpha: 0.35)),
+            ),
+            child: Text(
+              tag,
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w600,
+                color: tagColor ?? AdminColors.primary,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
-  String _date(DateTime dt) {
-    const m = [
-      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return '${dt.day} ${m[dt.month]} ${dt.year}';
+  Widget _costRow(String label, String? subtitle, String amount) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 12, color: Color(0xFF6B7280))),
+              if (subtitle != null)
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 11, color: Color(0xFF9CA3AF))),
+            ],
+          ),
+        ),
+        Text(amount,
+            style: const TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w600)),
+      ],
+    );
   }
 }

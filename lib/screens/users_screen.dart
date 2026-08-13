@@ -53,10 +53,17 @@ class UsersScreen extends StatelessWidget {
   }
 
   Widget _buildUserList(List<AdminUser> users) {
+    // Sort by latest registered first
+    final sortedUsers = [...users]..sort((a, b) {
+      final dateA = a.createdAt ?? DateTime(1970);
+      final dateB = b.createdAt ?? DateTime(1970);
+      return dateB.compareTo(dateA); // Descending order (latest first)
+    });
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: users.length,
-      itemBuilder: (context, index) => _UserCard(user: users[index], index: index),
+      itemCount: sortedUsers.length,
+      itemBuilder: (context, index) => _UserCard(user: sortedUsers[index], index: index),
     );
   }
 }

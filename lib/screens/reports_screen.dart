@@ -1,0 +1,912 @@
+import 'package:flutter/material.dart';
+import '../models/admin_models.dart';
+import '../utils/csv_download_stub.dart'
+    if (dart.library.html) '../utils/csv_download_web.dart';
+import '../services/admin_data_service.dart';
+
+// ── Report tab enum ───────────────────────────────────────────────────────────
+
+enum _ReportTab { poojawise, users, revenue }
+
+const _tabMeta = {
+  _ReportTab.poojawise: (
+    label: 'Pooja-wise',
+    icon: Icons.auto_awesome_rounded,
+    gradient: [Color(0xFF6A1B9A), Color(0xFF9C27B0)],
+  ),
+  _ReportTab.users: (
+    label: 'Users',
+    icon: Icons.people_rounded,
+    gradient: [Color(0xFF00695C), Color(0xFF00897B)],
+  ),
+  _ReportTab.revenue: (
+    label: 'Revenue',
+    icon: Icons.currency_rupee_rounded,
+    gradient: [Color(0xFFE65100), Color(0xFFFF6D00)],
+  ),
+};
+
+// ── Screen ────────────────────────────────────────────────────────────────────
+
+class ReportsScreen extends StatefulWidget {
+  const ReportsScreen({super.key});
+
+  @override
+  State<ReportsScreen> createState() => _ReportsScreenState();
+}
+
+class _ReportsScreenState extends State<ReportsScreen> {
+  _ReportTab _tab = _ReportTab.poojawise;
+  DateTime? _from;
+  DateTime? _to;
+  bool _includeCancelled = false;
+
+  // ── Filtered data ───────────────────────────────────────────────────────────
+
+  List<AdminOrder> _filtered(List<AdminOrder> all) {
+    return all.where((o) {
+      if (!_includeCancelled && o.cancelled) return false;
+      if (_from != null &&
+          o.poojaDate.isBefore(DateTime(_from!.year, _from!.month, _from!.day))) {
+        return false;
+      }
+      if (_to != null &&
+          o.poojaDate.isAfter(
+              DateTime(_to!.year, _to!.month, _to!.day, 23, 59, 59))) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  // ── Summary helpers ─────────────────────────────────────────────────────────
+
+  int _totalRevenue(List<AdminOrder> orders) =>
+      orders.where((o) => !o.cancelled).fold(0, (s, o) => s + o.totalAmount);
+
+  int _activeBookings(List<AdminOrder> orders) =>
+      orders.where((o) => !o.cancelled).length;
+
+  // ── CSV download ────────────────────────────────────────────────────────────
+
+  void _downloadCsv(String filename, List<List<String>> rows) {
+    final buffer = StringBuffer();
+    for (final row in rows) {
+      buffer.writeln(row.map((c) => '"${c.replaceAll('"', '""')}"').join(','));
+    }
+    downloadCsv(filename, buffer.toString());
+  }
+
+  void _downloadPoojaReport(List<AdminOrder> filtered) {
+    final grouped = _groupByPooja(filtered);
+    final rows = <List<String>>[
+      ['Pooja Name', 'Total Bookings', 'Active', 'Cancelled', 'Revenue (₹)', 'Avg Value (₹)'],
+      ...grouped.entries.map((e) {
+        final active = e.value.where((o) => !o.cancelled).length;
+        final rev = e.value.where((o) => !o.cancelled).fold(0, (s, o) => s + o.totalAmount);
+        return [
+          e.key,
+          '${e.value.length}',
+          '$active',
+          '${e.value.length - active}',
+          '$rev',
+          active > 0 ? '${(rev / active).round()}' : '0',
+        ];
+      }),
+    ];
+    _downloadCsv('pooja_report.csv', rows);
+  }
+
+  void _downloadUsersReport(List<AdminUser> users, List<AdminOrder> filtered) {
+    final rows = <List<String>>[
+      ['Name', 'Phone', 'Email', 'City', 'Country', 'Bookings', 'Total Spent (₹)'],
+      ...users.map((u) {
+        final userOrders = filtered.where(
+            (o) => o.userPhone == u.phone && !o.cancelled).toList();
+        final spent = userOrders.fold(0, (s, o) => s + o.totalAmount);
+        return [
+          u.fullName, u.phone, u.email, u.city, u.country,
+          '${userOrders.length}', '$spent',
+        ];
+      }),
+    ];
+    _downloadCsv('users_report.csv', rows);
+  }
+
+  void _downloadRevenueReport(List<AdminOrder> filtered) {
+    final byMonth = <String, int>{};
+    for (final o in filtered.where((o) => !o.cancelled)) {
+      final key =
+          '${o.poojaDate.year}-${o.poojaDate.month.toString().padLeft(2, '0')}';
+      byMonth[key] = (byMonth[key] ?? 0) + o.totalAmount;
+    }
+    final sorted = byMonth.entries.toList()..sort((a, b) => a.key.compareTo(b.key));
+    final rows = <List<String>>[
+      ['Month', 'Revenue (₹)', 'Bookings'],
+      ...sorted.map((e) {
+        final count = filtered
+            .where((o) =>
+                !o.cancelled &&
+                '${o.poojaDate.year}-${o.poojaDate.month.toString().padLeft(2, '0')}' ==
+                    e.key)
+            .length;
+        return [e.key, '${e.value}', '$count'];
+      }),
+    ];
+    _downloadCsv('revenue_report.csv', rows);
+  }
+
+  // ── Group helpers ───────────────────────────────────────────────────────────
+
+  Map<String, List<AdminOrder>> _groupByPooja(List<AdminOrder> orders) {
+    final map = <String, List<AdminOrder>>{};
+    for (final o in orders) {
+      (map[o.poojaName] ??= []).add(o);
+    }
+    final sorted = Map.fromEntries(
+        map.entries.toList()..sort((a, b) => b.value.length.compareTo(a.value.length)));
+    return sorted;
+  }
+
+  // ── Date filter picker ──────────────────────────────────────────────────────
+
+  Future<void> _pickDate({required bool isFrom}) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isFrom ? (_from ?? DateTime.now()) : (_to ?? DateTime.now()),
+      firstDate: DateTime(2023),
+      lastDate: DateTime(2030),
+      builder: (ctx, child) => Theme(
+        data: Theme.of(ctx).copyWith(
+          colorScheme: const ColorScheme.light(primary: Color(0xFF6A1B9A)),
+        ),
+        child: child!,
+      ),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isFrom) {
+          _from = picked;
+          if (_to != null && _to!.isBefore(_from!)) _to = null;
+        } else {
+          _to = picked;
+          if (_from != null && _from!.isAfter(_to!)) _from = null;
+        }
+      });
+    }
+  }
+
+  static String _fmtDate(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')} ${_kMonths[d.month - 1]} ${d.year}';
+
+  static const _kMonths = [
+    'Jan','Feb','Mar','Apr','May','Jun',
+    'Jul','Aug','Sep','Oct','Nov','Dec',
+  ];
+
+  // ── Build ───────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AdminData>(
+      valueListenable: AdminDataService.dataNotifier,
+      builder: (_, data, __) {
+        final filtered = _filtered(data.orders);
+        final meta = _tabMeta[_tab]!;
+
+        return Container(
+          color: const Color(0xFFF0F2F8),
+          child: Column(
+            children: [
+              // ── Tab bar + summary cards ──────────────────────────────────
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: meta.gradient,
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Column(
+                    children: [
+                      // Tab selector
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                        child: Row(
+                          children: _ReportTab.values.map((t) {
+                            final m = _tabMeta[t]!;
+                            final selected = _tab == t;
+                            return Expanded(
+                              child: GestureDetector(
+                                onTap: () => setState(() => _tab = t),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 9, horizontal: 4),
+                                  decoration: BoxDecoration(
+                                    color: selected
+                                        ? Colors.white.withValues(alpha: 0.25)
+                                        : Colors.white.withValues(alpha: 0.08),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: selected
+                                        ? Border.all(
+                                            color: Colors.white.withValues(alpha: 0.6),
+                                            width: 1.5)
+                                        : null,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(m.icon,
+                                          size: 18,
+                                          color: Colors.white
+                                              .withValues(alpha: selected ? 1 : 0.65)),
+                                      const SizedBox(height: 4),
+                                      Text(m.label,
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: selected
+                                                  ? FontWeight.w700
+                                                  : FontWeight.w400,
+                                              color: Colors.white.withValues(
+                                                  alpha: selected ? 1 : 0.65))),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // Summary stat cards
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Row(
+                          children: [
+                            _statCard('Total Bookings',
+                                '${filtered.length}',
+                                Icons.receipt_long_rounded),
+                            const SizedBox(width: 10),
+                            _statCard('Active',
+                                '${_activeBookings(filtered)}',
+                                Icons.check_circle_outline_rounded),
+                            const SizedBox(width: 10),
+                            _statCard('Revenue',
+                                '₹${_fmt(_totalRevenue(filtered))}',
+                                Icons.currency_rupee_rounded),
+                            const SizedBox(width: 10),
+                            _statCard('Users',
+                                '${data.users.length}',
+                                Icons.people_outline_rounded),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Filters bar ──────────────────────────────────────────────
+              _buildFiltersBar(filtered, data),
+
+              // ── Report body ──────────────────────────────────────────────
+              Expanded(
+                child: _tab == _ReportTab.poojawise
+                    ? _buildPoojaReport(filtered)
+                    : _tab == _ReportTab.users
+                        ? _buildUsersReport(data.users, filtered)
+                        : _buildRevenueReport(filtered),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _statCard(String label, String value, IconData icon) => Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.18),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, size: 15, color: Colors.white70),
+              const SizedBox(height: 4),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white)),
+              Text(label,
+                  style: const TextStyle(fontSize: 10, color: Colors.white70)),
+            ],
+          ),
+        ),
+      );
+
+  Widget _buildFiltersBar(List<AdminOrder> filtered, AdminData data) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Row(
+        children: [
+          // From date
+          _dateChip(
+            label: _from == null ? 'From' : _fmtDate(_from!),
+            set: _from != null,
+            onTap: () => _pickDate(isFrom: true),
+            onClear: _from == null ? null : () => setState(() => _from = null),
+          ),
+          const SizedBox(width: 8),
+          // To date
+          _dateChip(
+            label: _to == null ? 'To' : _fmtDate(_to!),
+            set: _to != null,
+            onTap: () => _pickDate(isFrom: false),
+            onClear: _to == null ? null : () => setState(() => _to = null),
+          ),
+          const SizedBox(width: 8),
+          // Cancelled toggle
+          GestureDetector(
+            onTap: () => setState(() => _includeCancelled = !_includeCancelled),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: _includeCancelled
+                    ? Colors.red.shade50
+                    : const Color(0xFFF0F2F8),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: _includeCancelled
+                        ? Colors.red.shade300
+                        : Colors.grey.shade300),
+              ),
+              child: Text(
+                'Incl. Cancelled',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: _includeCancelled
+                        ? Colors.red.shade700
+                        : Colors.grey.shade600),
+              ),
+            ),
+          ),
+          const Spacer(),
+          // Download button
+          ElevatedButton.icon(
+            onPressed: () {
+              if (_tab == _ReportTab.poojawise) {
+                _downloadPoojaReport(filtered);
+              } else if (_tab == _ReportTab.users) {
+                _downloadUsersReport(data.users, filtered);
+              } else {
+                _downloadRevenueReport(filtered);
+              }
+            },
+            icon: const Icon(Icons.download_rounded, size: 16),
+            label: const Text('CSV',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1565C0),
+              foregroundColor: Colors.white,
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              elevation: 0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dateChip({
+    required String label,
+    required bool set,
+    required VoidCallback onTap,
+    VoidCallback? onClear,
+  }) =>
+      GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: set
+                ? const Color(0xFF6A1B9A).withValues(alpha: 0.08)
+                : const Color(0xFFF0F2F8),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+                color: set
+                    ? const Color(0xFF6A1B9A).withValues(alpha: 0.4)
+                    : Colors.grey.shade300),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.calendar_today_rounded,
+                  size: 12,
+                  color: set
+                      ? const Color(0xFF6A1B9A)
+                      : Colors.grey.shade500),
+              const SizedBox(width: 5),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: set
+                          ? const Color(0xFF6A1B9A)
+                          : Colors.grey.shade600)),
+              if (onClear != null) ...[
+                const SizedBox(width: 4),
+                GestureDetector(
+                  onTap: onClear,
+                  child: Icon(Icons.close_rounded,
+                      size: 13, color: const Color(0xFF6A1B9A)),
+                ),
+              ]
+            ],
+          ),
+        ),
+      );
+
+  // ── Pooja-wise report ───────────────────────────────────────────────────────
+
+  Widget _buildPoojaReport(List<AdminOrder> filtered) {
+    final grouped = _groupByPooja(filtered);
+    if (grouped.isEmpty) return _empty('No booking data');
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _sectionLabel('POOJA-WISE BREAKDOWN',
+            '${grouped.length} poojas  ·  ${filtered.length} bookings'),
+        const SizedBox(height: 10),
+        ...grouped.entries.map((e) {
+          final all = e.value;
+          final active = all.where((o) => !o.cancelled).toList();
+          final cancelled = all.where((o) => o.cancelled).toList();
+          final rev = active.fold(0, (s, o) => s + o.totalAmount);
+          final avg = active.isNotEmpty ? (rev / active.length).round() : 0;
+
+          // progress of this pooja vs max revenue
+          final maxRev = grouped.values
+              .map((v) => v.where((o) => !o.cancelled).fold(0, (s, o) => s + o.totalAmount))
+              .fold(0, (a, b) => a > b ? a : b);
+          final progress = maxRev > 0 ? rev / maxRev : 0.0;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2))
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 38,
+                        height: 38,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF6A1B9A), Color(0xFF9C27B0)],
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Center(
+                          child: Text('ॐ',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w300)),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(e.key,
+                            style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF1A1A2E))),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF6A1B9A).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text('₹${_fmt(rev)}',
+                            style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF6A1B9A))),
+                      ),
+                    ],
+                  ),
+                ),
+                // Revenue bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 5,
+                      backgroundColor: const Color(0xFFEDE7F6),
+                      valueColor: const AlwaysStoppedAnimation(Color(0xFF6A1B9A)),
+                    ),
+                  ),
+                ),
+                // Stats row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+                  child: Row(
+                    children: [
+                      _miniStat('Total', '${all.length}', Colors.grey.shade700),
+                      _divider(),
+                      _miniStat('Active', '${active.length}', Colors.green.shade700),
+                      _divider(),
+                      _miniStat('Cancelled', '${cancelled.length}', Colors.red.shade400),
+                      _divider(),
+                      _miniStat('Avg', '₹${_fmt(avg)}', const Color(0xFF1565C0)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // ── Users report ────────────────────────────────────────────────────────────
+
+  Widget _buildUsersReport(List<AdminUser> users, List<AdminOrder> filtered) {
+    if (users.isEmpty) return _empty('No registered users');
+
+    final sorted = users.toList()
+      ..sort((a, b) {
+        final aSpent = filtered
+            .where((o) => o.userPhone == a.phone && !o.cancelled)
+            .fold(0, (s, o) => s + o.totalAmount);
+        final bSpent = filtered
+            .where((o) => o.userPhone == b.phone && !o.cancelled)
+            .fold(0, (s, o) => s + o.totalAmount);
+        return bSpent.compareTo(aSpent);
+      });
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _sectionLabel('REGISTERED USERS', '${users.length} total'),
+        const SizedBox(height: 10),
+        ...sorted.asMap().entries.map((entry) {
+          final u = entry.value;
+          final rank = entry.key;
+          final userOrders =
+              filtered.where((o) => o.userPhone == u.phone).toList();
+          final activeOrders =
+              userOrders.where((o) => !o.cancelled).toList();
+          final spent =
+              activeOrders.fold(0, (s, o) => s + o.totalAmount);
+
+          final colors = [
+            const Color(0xFFFFC107),
+            const Color(0xFF9E9E9E),
+            const Color(0xFF8D6E63),
+          ];
+          final rankColor = rank < 3 ? colors[rank] : null;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2))
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  // Avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                          colors: [Color(0xFF00695C), Color(0xFF00897B)]),
+                      shape: BoxShape.circle,
+                      border: rankColor != null
+                          ? Border.all(color: rankColor, width: 2.5)
+                          : null,
+                    ),
+                    child: Center(
+                      child: Text(
+                        u.initials,
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                u.fullName.isNotEmpty ? u.fullName : u.phone,
+                                style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF1A1A2E)),
+                              ),
+                            ),
+                            if (rankColor != null)
+                              Icon(Icons.emoji_events_rounded,
+                                  size: 16, color: rankColor),
+                          ],
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${u.phone}${u.city.isNotEmpty ? '  ·  ${u.city}' : ''}',
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade500),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _miniStat('Bookings', '${userOrders.length}',
+                                Colors.grey.shade700),
+                            _divider(),
+                            _miniStat('Active', '${activeOrders.length}',
+                                Colors.green.shade700),
+                            _divider(),
+                            _miniStat(
+                                'Spent', '₹${_fmt(spent)}', const Color(0xFF1565C0)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // ── Revenue report ──────────────────────────────────────────────────────────
+
+  Widget _buildRevenueReport(List<AdminOrder> filtered) {
+    final activeOrders = filtered.where((o) => !o.cancelled).toList();
+    if (filtered.isEmpty) return _empty('No booking data');
+
+    // Group by month
+    final byMonth = <String, List<AdminOrder>>{};
+    for (final o in activeOrders) {
+      final key =
+          '${_kMonthsFull[o.poojaDate.month - 1]} ${o.poojaDate.year}';
+      (byMonth[key] ??= []).add(o);
+    }
+    final sortedMonths = byMonth.entries.toList()
+      ..sort((a, b) {
+        final ad = a.value.first.poojaDate;
+        final bd = b.value.first.poojaDate;
+        return DateTime(ad.year, ad.month)
+            .compareTo(DateTime(bd.year, bd.month));
+      });
+
+    final totalRev = activeOrders.fold(0, (s, o) => s + o.totalAmount);
+    final maxMonthRev = sortedMonths.isEmpty
+        ? 1
+        : sortedMonths
+            .map((e) => e.value.fold(0, (s, o) => s + o.totalAmount))
+            .fold(0, (a, b) => a > b ? a : b);
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Top summary cards
+        Row(
+          children: [
+            _revSummaryCard('Total Revenue', '₹${_fmt(totalRev)}',
+                Icons.account_balance_wallet_rounded,
+                const [Color(0xFFE65100), Color(0xFFFF6D00)]),
+            const SizedBox(width: 10),
+            _revSummaryCard('Avg per Booking',
+                activeOrders.isEmpty
+                    ? '₹0'
+                    : '₹${_fmt((totalRev / activeOrders.length).round())}',
+                Icons.trending_up_rounded,
+                const [Color(0xFF1565C0), Color(0xFF1E88E5)]),
+          ],
+        ),
+        const SizedBox(height: 16),
+        _sectionLabel('MONTHLY BREAKDOWN', '${sortedMonths.length} months'),
+        const SizedBox(height: 10),
+        ...sortedMonths.map((e) {
+          final monthRev = e.value.fold(0, (s, o) => s + o.totalAmount);
+          final progress = maxMonthRev > 0 ? monthRev / maxMonthRev : 0.0;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2))
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(e.key,
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1A1A2E))),
+                    ),
+                    Text('₹${_fmt(monthRev)}',
+                        style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFFE65100))),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    backgroundColor: const Color(0xFFFBE9E7),
+                    valueColor:
+                        const AlwaysStoppedAnimation(Color(0xFFFF6D00)),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _miniStat('Bookings', '${e.value.length}', Colors.grey.shade700),
+                    _divider(),
+                    _miniStat(
+                        'Share',
+                        '${totalRev > 0 ? (monthRev * 100 ~/ totalRev) : 0}%',
+                        const Color(0xFFE65100)),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _revSummaryCard(String label, String value, IconData icon,
+          List<Color> colors) =>
+      Expanded(
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: colors),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: Colors.white70, size: 20),
+              const SizedBox(height: 8),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white)),
+              Text(label,
+                  style: const TextStyle(fontSize: 11, color: Colors.white70)),
+            ],
+          ),
+        ),
+      );
+
+  // ── Shared widgets ──────────────────────────────────────────────────────────
+
+  Widget _sectionLabel(String title, String sub) => Row(
+        children: [
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.8,
+                  color: Color(0xFF9E9E9E))),
+          const SizedBox(width: 8),
+          Text(sub,
+              style: const TextStyle(fontSize: 11, color: Color(0xFFBDBDBD))),
+        ],
+      );
+
+  Widget _miniStat(String label, String value, Color color) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(value,
+              style: TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w700, color: color)),
+          Text(label,
+              style: const TextStyle(fontSize: 10, color: Color(0xFF9E9E9E))),
+        ],
+      );
+
+  Widget _divider() => Container(
+        width: 1,
+        height: 24,
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        color: const Color(0xFFEEEEEE),
+      );
+
+  Widget _empty(String msg) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_rounded, size: 56, color: Colors.grey.shade300),
+            const SizedBox(height: 12),
+            Text(msg,
+                style: TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+          ],
+        ),
+      );
+
+  static String _fmt(int v) {
+    if (v >= 10000000) return '${(v / 10000000).toStringAsFixed(1)}Cr';
+    if (v >= 100000) return '${(v / 100000).toStringAsFixed(1)}L';
+    if (v >= 1000) return '${(v / 1000).toStringAsFixed(1)}K';
+    return '$v';
+  }
+
+  static const _kMonthsFull = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December',
+  ];
+}

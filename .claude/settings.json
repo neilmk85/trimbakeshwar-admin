@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter analyze:*)",
+      "Bash(curl -s -X PUT http://localhost:8080/api/accommodation -H 'Content-Type: application/json' -d '{\"totalRooms\":10,\"personsPerRoom\":2,\"pricePerRoom\":1500,\"pricePerPerson\":0}')",
+      "Bash(python3 -m json.tool)",
+      "Bash(kill 49684)",
+      "Bash(npm run:*)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(f'Node.js server running — {len\\(d[\\\\\"data\\\\\"]\\)} poojas loaded'\\)\")",
+      "Bash(curl -s http://localhost:8080/api/poojas)",
+      "Bash(ipconfig getifaddr *)",
+      "Bash(curl -s --connect-timeout 5 http://192.168.1.3:8080/api/poojas)",
+      "Bash(/usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -X POST http://192.168.1.43:8080/api/guruji/auth/otp/send -H 'Content-Type: application/json' -d '{\"phone\":\"9022366497\"}')",
+      "Bash(curl -s -X POST http://192.168.1.43:8080/api/guruji/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"trimbaksk10@gmail.com\",\"password\":\"test\"}')",
+      "Bash(curl -s --connect-timeout 3 http://localhost:8080/api/guruji/auth/otp/send -X POST -H \"Content-Type: application/json\" -d '{\"phone\":\"9022366497\"}')",
+      "Bash(sed -i '' 's/Sandeep Kulkarni Guruji/Abhay Sarde Guruji/g' /Users/nilesh/development/trimbakeshwar_server/src/services/emailService.js)",
+      "Bash(sed -i '' 's/Sandeep Kulkarni Guruji/Abhay Sarde Guruji/g' /Users/nilesh/development/trimbakeshwar_server/src/services/ticketService.js)"
+    ],
+    "additionalDirectories": [
+      "/Users/nilesh/development/trimbakeshwar_server/src/main/java/com/trimbakeshwar/server/converter",
+      "/Users/nilesh/development/trimbakeshwar_server/src/models",
+      "/Users/nilesh/development/trimbakeshwar_server/src/services",
+      "/Users/nilesh/development/trimbakeshwar_server/src/routes",
+      "/Users/nilesh/development/flutter_apps/trimbakeshwar_app/android/app/src/main",
+      "/Users/nilesh/development/flutter_apps/trimbakeshwar_app/lib/constants"
+    ]
+  }
+}

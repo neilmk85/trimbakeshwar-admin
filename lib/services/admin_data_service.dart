@@ -9,7 +9,7 @@ import '../models/admin_models.dart';
 class AdminDataService {
   AdminDataService._();
 
-  static const _base = 'http://localhost:8080/api';
+  static const _base = 'https://app.trimbakeshwarpoojavidhi.in/api';
 
   static final ValueNotifier<AdminData> dataNotifier =
       ValueNotifier(AdminData.empty);
@@ -50,7 +50,7 @@ class AdminDataService {
       _knownOrderIds.addAll(data.orders.map((o) => o.orderId));
     } catch (e) {
       errorNotifier.value =
-          'Could not reach server at $_base.\nMake sure the Spring Boot server is running.';
+          'Could not reach server.\nPlease check your internet connection and try again.';
     } finally {
       loadingNotifier.value = false;
     }
@@ -74,11 +74,27 @@ class AdminDataService {
     } catch (_) {}
   }
 
+  /// Fetches a single URL, retrying up to [retries] times on non-200 responses.
+  static Future<http.Response> _getWithRetry(
+    String url, {
+    int retries = 4,
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    for (var attempt = 0; attempt <= retries; attempt++) {
+      final res = await http.get(Uri.parse(url)).timeout(timeout);
+      if (res.statusCode == 200) return res;
+      if (attempt < retries) {
+        await Future.delayed(Duration(milliseconds: 300 * (attempt + 1)));
+      }
+    }
+    throw Exception('Server returned non-200 after $retries retries: $url');
+  }
+
   static Future<AdminData> _fetchData() async {
     final responses = await Future.wait([
-      http.get(Uri.parse('$_base/users')).timeout(const Duration(seconds: 8)),
-      http.get(Uri.parse('$_base/bookings')).timeout(const Duration(seconds: 8)),
-      http.get(Uri.parse('$_base/poojas/all')).timeout(const Duration(seconds: 8)),
+      _getWithRetry('$_base/users'),
+      _getWithRetry('$_base/bookings'),
+      _getWithRetry('$_base/poojas/all'),
     ]);
 
     if (responses[0].statusCode != 200 ||
@@ -198,6 +214,215 @@ class AdminDataService {
     }
   }
 
+  /// Reschedule a booking and patch local state immediately.
+  static Future<String?> rescheduleBooking(
+      String orderId, DateTime newDate) async {
+    try {
+      final dateStr =
+          '${newDate.year.toString().padLeft(4, '0')}-'
+          '${newDate.month.toString().padLeft(2, '0')}-'
+          '${newDate.day.toString().padLeft(2, '0')}';
+      final res = await http
+          .patch(
+            Uri.parse('$_base/bookings/$orderId/reschedule'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'poojaDate': dateStr}),
+          )
+          .timeout(const Duration(seconds: 8));
+      final respBody = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && respBody['success'] == true) {
+        final updated =
+            AdminOrder.fromJson(respBody['data'] as Map<String, dynamic>);
+        final current = dataNotifier.value;
+        dataNotifier.value = AdminData(
+          users: current.users,
+          orders: current.orders
+              .map((o) => o.orderId == orderId ? updated : o)
+              .toList(),
+          poojas: current.poojas,
+          lastUpdated: DateTime.now(),
+        );
+        return null;
+      }
+      return respBody['message'] as String? ?? 'Reschedule failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<AccommodationSettings?> fetchAccommodation() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/accommodation'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        return AccommodationSettings.fromJson(
+            body['data'] as Map<String, dynamic>);
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Future<String?> updateAccommodation({
+    required int totalRooms,
+    required int personsPerRoom,
+    required int pricePerRoom,
+    required int pricePerPerson,
+  }) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/accommodation'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'totalRooms': totalRooms,
+              'personsPerRoom': personsPerRoom,
+              'pricePerRoom': pricePerRoom,
+              'pricePerPerson': pricePerPerson,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Update failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  // ── Rooms ────────────────────────────────────────────────────────────────────
+
+  static Future<({List<AdminRoom> data, String? error})> getRooms() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/rooms'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final list = (body['data'] as List? ?? [])
+            .map((e) => AdminRoom.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (data: list, error: null);
+      }
+      return (data: <AdminRoom>[], error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: <AdminRoom>[], error: 'Could not reach server');
+    }
+  }
+
+  static Future<String?> createRoom({
+    required String name,
+    required String type,
+    required int pricePerNight,
+    required String capacity,
+    required List<String> amenities,
+    required String description,
+    required String imageUrl,
+    required bool available,
+    required int displayOrder,
+    int count = 1,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/rooms'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'type': type,
+              'pricePerNight': pricePerNight,
+              'capacity': capacity,
+              'amenities': amenities,
+              'description': description,
+              'imageUrl': imageUrl,
+              'available': available,
+              'displayOrder': displayOrder,
+              'count': count,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 201 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Create failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> updateRoom(
+    int id, {
+    required String name,
+    required String type,
+    required int pricePerNight,
+    required String capacity,
+    required List<String> amenities,
+    required String description,
+    required String imageUrl,
+    required bool available,
+    required int displayOrder,
+    int count = 1,
+  }) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/rooms/$id'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'type': type,
+              'pricePerNight': pricePerNight,
+              'capacity': capacity,
+              'amenities': amenities,
+              'description': description,
+              'imageUrl': imageUrl,
+              'available': available,
+              'displayOrder': displayOrder,
+              'count': count,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Update failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> deleteRoom(int id) async {
+    try {
+      final res = await http
+          .delete(Uri.parse('$_base/rooms/$id'))
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Delete failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> toggleRoomAvailability(
+      int id, bool available) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/rooms/$id'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'available': available}),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Toggle failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
   /// Update a pooja and patch local state immediately.
   static Future<String?> updatePooja(
     int id, {
@@ -213,6 +438,10 @@ class AdminDataService {
     List<String>? beforeInstructions,
     List<String>? afterInstructions,
     List<String>? thingsToBring,
+    List<DateTime>? muhurtaDates,
+    int? stayRatePerNight,
+    bool? privatePooja,
+    int? privatePoojaRate,
   }) async {
     try {
       final body = <String, dynamic>{};
@@ -225,9 +454,18 @@ class AdminDataService {
       if (duration != null) body['duration'] = duration;
       if (displayOrder != null) body['displayOrder'] = displayOrder;
       if (info != null) body['info'] = info;
+      if (stayRatePerNight != null) body['stayRatePerNight'] = stayRatePerNight;
+      if (privatePooja != null) body['privatePooja'] = privatePooja;
+      if (privatePoojaRate != null) body['privatePoojaRate'] = privatePoojaRate;
       if (beforeInstructions != null) body['beforeInstructions'] = beforeInstructions;
       if (afterInstructions != null) body['afterInstructions'] = afterInstructions;
       if (thingsToBring != null) body['thingsToBring'] = thingsToBring;
+      if (muhurtaDates != null) {
+        body['muhurtaDates'] = muhurtaDates.map((d) =>
+            '${d.year.toString().padLeft(4, '0')}-'
+            '${d.month.toString().padLeft(2, '0')}-'
+            '${d.day.toString().padLeft(2, '0')}').toList();
+      }
 
       final res = await http
           .put(

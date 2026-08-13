@@ -19,7 +19,11 @@ class AdminColors {
   static const Color grey700 = Color(0xFF616161);
   static const Color grey800 = Color(0xFF424242);
 
-  static const List<Color> gradientColors = [primaryDark, primaryMedium];
+  // Blue gradient — dark navy → bright blue
+  static const Color gradientDark = Color(0xFF0D47A1);   // deep navy blue
+  static const Color gradientLight = Color(0xFF1E88E5);  // bright blue
+
+  static const List<Color> gradientColors = [gradientDark, gradientLight];
 
   static const LinearGradient appBarGradient = LinearGradient(
     colors: gradientColors,

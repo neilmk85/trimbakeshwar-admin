@@ -50,17 +50,19 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
       return;
     }
     setState(() => _otpLoading = true);
-    final otp = await GurujiAuthService.sendOtp(phone);
+    final error = await GurujiAuthService.sendOtp(phone);
     if (mounted) {
       setState(() {
-        _otpSent = otp != null;
+        _otpSent = error == null; // null means success
         _otpLoading = false;
       });
     }
-    if (otp != null) {
-      _showSnack('OTP sent! (Demo OTP: $otp)', duration: 6);
+    if (error == null) {
+      _showSnack('OTP sent to WhatsApp!', duration: 4);
+    } else if (error.contains('not authorized')) {
+      _showSnack(error, duration: 4);
     } else {
-      _showSnack('Phone not registered. Please register first.');
+      _showNotRegisteredToast();
     }
   }
 
@@ -87,7 +89,130 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     setState(() => _emailLoading = true);
     final error = await GurujiAuthService.loginWithEmail(email, password);
     if (mounted) setState(() => _emailLoading = false);
-    if (error != null && mounted) _showSnack(error);
+    if (error != null && mounted) {
+      if (error == 'User not registered') {
+        _showNotRegisteredToast();
+      } else {
+        _showSnack(error);
+      }
+    }
+  }
+
+  void _showNotRegisteredToast() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      transitionDuration: const Duration(milliseconds: 300),
+      transitionBuilder: (_, anim, __, child) => SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.15),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
+        child: FadeTransition(opacity: anim, child: child),
+      ),
+      pageBuilder: (ctx, _, __) => Center(
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.15),
+                  blurRadius: 32,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                        color: const Color(0xFFFF9800), width: 2),
+                  ),
+                  child: const Icon(Icons.person_off_rounded,
+                      color: Color(0xFFFF9800), size: 40),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'User Not Registered',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1A1A2E),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'No account found with these credentials.\nPlease register as a Guruji first.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF6B7280),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          side: const BorderSide(color: Color(0xFFD1D5DB)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Close',
+                            style: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(ctx).pop();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const GurujiRegisterScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AdminColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: const Text('Register',
+                            style: TextStyle(fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _showSnack(String msg, {int duration = 3}) {

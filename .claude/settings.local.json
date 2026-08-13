@@ -4,7 +4,12 @@
       "Bash(xcode-select -p)",
       "Bash(mdfind -name Xcode.app)",
       "Bash(flutter devices:*)",
-      "Bash(flutter run:*)"
+      "Bash(flutter run:*)",
+      "Bash(curl -s http://localhost:8080/api/poojas/all)",
+      "Bash(kill -9 51113)",
+      "Bash(npm start:*)",
+      "Bash(curl -s http://localhost:8080/api/accommodation)",
+      "Bash(curl -s -X PUT http://localhost:8080/api/accommodation -H \"Content-Type: application/json\" -d '{\"\"totalRooms\"\":10,\"\"personsPerRoom\"\":3,\"\"pricePerRoom\"\":500,\"\"pricePerPerson\"\":200}')"
     ]
   }
 }

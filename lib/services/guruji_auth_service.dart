@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GurujiAuthService {
   GurujiAuthService._();
 
-  static const _base = 'http://localhost:8080/api/guruji/auth';
+  static const _base = 'https://app.trimbakeshwarpoojavidhi.in/api/guruji/auth';
   static const _keyPhone = 'guruji_phone';
   static const _keyName = 'guruji_name';
   static const _keyEmail = 'guruji_email';
@@ -39,7 +39,7 @@ class GurujiAuthService {
     isLoggedIn.value = true;
   }
 
-  /// Returns null on success, error string on failure.
+  /// Returns null on success (OTP sent), error message on failure.
   static Future<String?> sendOtp(String phone) async {
     try {
       final res = await http
@@ -51,12 +51,14 @@ class GurujiAuthService {
           .timeout(const Duration(seconds: 10));
       final body = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && body['success'] == true) {
-        final otp = (body['data'] as Map<String, dynamic>)['otp'] as String?;
-        return otp; // returns the demo OTP
+        return null; // success
       }
-      return null; // triggers error display
+      if (res.statusCode == 403) {
+        return body['message'] as String? ?? 'You are not authorized to access this app';
+      }
+      return body['message'] as String? ?? 'Could not send OTP';
     } catch (_) {
-      return null;
+      return 'Could not reach server. Make sure the server is running.';
     }
   }
 
@@ -94,6 +96,7 @@ class GurujiAuthService {
         await _saveSession(body['data'] as Map<String, dynamic>);
         return null;
       }
+      if (res.statusCode == 404) return 'User not registered';
       return body['message'] as String? ?? 'Invalid email or password';
     } catch (_) {
       return 'Could not reach server. Make sure the server is running.';

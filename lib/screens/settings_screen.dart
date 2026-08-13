@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import 'admin_rooms_screen.dart';
 import 'poojas_screen.dart';
+import 'reports_screen.dart';
+import 'social_media_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -38,7 +41,41 @@ class SettingsScreen extends StatelessWidget {
             MaterialPageRoute(
               builder: (_) => const _FullScreenPage(
                 title: 'Reports',
-                child: _ReportsPlaceholder(),
+                child: ReportsScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
+          icon: Icons.bed_rounded,
+          color: const Color(0xFF00695C),
+          title: 'Rooms',
+          subtitle: 'Add, edit and manage available room listings',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Rooms',
+                child: AdminRoomsScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
+        _sectionTitle('Customize'),
+        const SizedBox(height: 10),
+        _SettingsCard(
+          icon: Icons.share_rounded,
+          color: const Color(0xFF6366F1),
+          title: 'Social Media',
+          subtitle: 'Add Facebook, Instagram and YouTube links',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Social Media Links',
+                child: SocialMediaSettingsScreen(),
               ),
             ),
           ),
@@ -157,23 +194,3 @@ class _FullScreenPage extends StatelessWidget {
   }
 }
 
-// ── Reports placeholder ───────────────────────────────────────────────────────
-
-class _ReportsPlaceholder extends StatelessWidget {
-  const _ReportsPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.bar_chart_rounded, size: 72, color: AdminColors.grey400),
-          const SizedBox(height: 16),
-          Text('Reports coming soon',
-              style: TextStyle(fontSize: 16, color: AdminColors.grey500)),
-        ],
-      ),
-    );
-  }
-}

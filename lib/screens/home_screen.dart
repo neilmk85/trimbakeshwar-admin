@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import '../services/guruji_auth_service.dart';
 import 'bookings_screen.dart';
 import 'users_screen.dart';
 import 'settings_screen.dart';
@@ -18,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Bookings is default
   int _unreadBookings = 0;
 
-  static const _titles = ['Bookings', 'Users', 'Settings', 'Profile'];
+  static const _titles = ['Bookings', 'Customers', 'Settings', 'Profile'];
 
   static const _pages = [
     BookingsScreen(),
@@ -30,7 +31,24 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAuthorization();
     AdminDataService.newBookingsNotifier.addListener(_onNewBookings);
+  }
+
+  void _checkAuthorization() {
+    // Only 9022366497 is authorized to access this app
+    if (GurujiAuthService.loggedInPhone != '9022366497') {
+      GurujiAuthService.logout();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed('/login');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Your account is not authorized to access this app'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      });
+    }
   }
 
   @override
@@ -200,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.people_outline_rounded),
             selectedIcon:
                 Icon(Icons.people_rounded, color: AdminColors.primary),
-            label: 'Users',
+            label: 'Customers',
           ),
           const NavigationDestination(
             icon: Icon(Icons.settings_outlined),

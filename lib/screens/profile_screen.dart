@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       final res = await http
           .put(
-            Uri.parse('http://localhost:8080/api/guruji/auth/profile/$phone'),
+            Uri.parse('https://app.trimbakeshwarpoojavidhi.in/api/guruji/auth/profile/$phone'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode(body),
           )
