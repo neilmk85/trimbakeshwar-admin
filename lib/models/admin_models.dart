@@ -268,6 +268,68 @@ class AdminRoom {
   }
 }
 
+class RoomBlock {
+  final int id;
+  final int roomId;
+  final String guestName;
+  final String notes;
+  final DateTime checkInDate;
+  final int numberOfNights;
+  final int numberOfRooms;
+
+  const RoomBlock({
+    required this.id,
+    required this.roomId,
+    required this.guestName,
+    required this.notes,
+    required this.checkInDate,
+    required this.numberOfNights,
+    required this.numberOfRooms,
+  });
+
+  factory RoomBlock.fromJson(Map<String, dynamic> json) => RoomBlock(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        roomId: (json['roomId'] as num?)?.toInt() ?? 0,
+        guestName: json['guestName'] as String? ?? '',
+        notes: json['notes'] as String? ?? '',
+        checkInDate: DateTime.tryParse(json['checkInDate'] as String? ?? '') ?? DateTime.now(),
+        numberOfNights: (json['numberOfNights'] as num?)?.toInt() ?? 1,
+        numberOfRooms: (json['numberOfRooms'] as num?)?.toInt() ?? 1,
+      );
+}
+
+class RoomBlockBoard {
+  final int roomId;
+  final int totalCount;
+  final String date;
+  final int onlineBookedCount;
+  final List<RoomBlock> walkInBlocks;
+  final int walkInBlockedCount;
+  final int availableCount;
+
+  const RoomBlockBoard({
+    required this.roomId,
+    required this.totalCount,
+    required this.date,
+    required this.onlineBookedCount,
+    required this.walkInBlocks,
+    required this.walkInBlockedCount,
+    required this.availableCount,
+  });
+
+  factory RoomBlockBoard.fromJson(Map<String, dynamic> json) => RoomBlockBoard(
+        roomId: (json['roomId'] as num?)?.toInt() ?? 0,
+        totalCount: (json['totalCount'] as num?)?.toInt() ?? 0,
+        date: json['date'] as String? ?? '',
+        onlineBookedCount: (json['onlineBookedCount'] as num?)?.toInt() ?? 0,
+        walkInBlocks: (json['walkInBlocks'] as List? ?? [])
+            .map((e) => RoomBlock.fromJson(e as Map<String, dynamic>))
+            .toList(),
+        walkInBlockedCount: (json['walkInBlockedCount'] as num?)?.toInt() ?? 0,
+        availableCount: (json['availableCount'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class AccommodationSettings {
   final int totalRooms;
   final int personsPerRoom;

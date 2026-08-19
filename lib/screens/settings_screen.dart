@@ -3,6 +3,7 @@ import '../constants/app_colors.dart';
 import 'admin_rooms_screen.dart';
 import 'poojas_screen.dart';
 import 'reports_screen.dart';
+import 'room_blocks_screen.dart';
 import 'social_media_settings_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -58,6 +59,22 @@ class SettingsScreen extends StatelessWidget {
               builder: (_) => const _FullScreenPage(
                 title: 'Rooms',
                 child: AdminRoomsScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
+          icon: Icons.meeting_room_rounded,
+          color: const Color(0xFFEF6C00),
+          title: 'Room Availability',
+          subtitle: 'Block rooms for walk-in guests and view live occupancy',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Room Availability',
+                child: RoomBlocksScreen(),
               ),
             ),
           ),

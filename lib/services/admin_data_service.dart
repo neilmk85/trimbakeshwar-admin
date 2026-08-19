@@ -423,6 +423,75 @@ class AdminDataService {
     }
   }
 
+  // ── Room walk-in blocks ─────────────────────────────────────────────────────
+
+  static String _isoDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
+
+  static Future<({RoomBlockBoard? data, String? error})> getRoomBlocks(
+      int roomId, DateTime date) async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/rooms/$roomId/blocks?date=${_isoDate(date)}'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        return (
+          data: RoomBlockBoard.fromJson(body['data'] as Map<String, dynamic>),
+          error: null
+        );
+      }
+      return (data: null, error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: null, error: 'Could not reach server');
+    }
+  }
+
+  static Future<String?> createRoomBlock(
+    int roomId, {
+    required DateTime checkInDate,
+    required int numberOfNights,
+    required int numberOfRooms,
+    String? guestName,
+    String? notes,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/rooms/$roomId/blocks'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'checkInDate': _isoDate(checkInDate),
+              'numberOfNights': numberOfNights,
+              'numberOfRooms': numberOfRooms,
+              if (guestName != null && guestName.isNotEmpty) 'guestName': guestName,
+              if (notes != null && notes.isNotEmpty) 'notes': notes,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 201 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Failed to block room';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> releaseRoomBlock(int blockId) async {
+    try {
+      final res = await http
+          .patch(Uri.parse('$_base/rooms/blocks/$blockId/release'))
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Failed to release block';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
   /// Update a pooja and patch local state immediately.
   static Future<String?> updatePooja(
     int id, {
