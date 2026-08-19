@@ -87,7 +87,16 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     if (_colorIndex < 0) _colorIndex = 0;
     _muhurtaDates = List.from(p.muhurtaDates);
     final now = DateTime.now();
-    _calendarMonth = DateTime(now.year, now.month);
+    if (_muhurtaDates.isNotEmpty) {
+      // Land on the earliest selected date's month instead of today's month —
+      // otherwise a pooja whose dates are all in other months opens showing
+      // an empty grid while the summary count still says "N selected", which
+      // reads as a contradiction.
+      final earliest = _muhurtaDates.reduce((a, b) => a.isBefore(b) ? a : b);
+      _calendarMonth = DateTime(earliest.year, earliest.month);
+    } else {
+      _calendarMonth = DateTime(now.year, now.month);
+    }
     _privatePooja = p.privatePooja;
     _privatePoojaRateCtrl = TextEditingController(
         text: p.privatePoojaRate > 0 ? p.privatePoojaRate.toString() : '');
@@ -667,9 +676,12 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
-                      _muhurtaDates.length == 1
-                          ? '1 muhurta date selected'
-                          : '${_muhurtaDates.length} muhurta dates selected',
+                      monthSelected.length == _muhurtaDates.length
+                          ? (_muhurtaDates.length == 1
+                              ? '1 muhurta date selected'
+                              : '${_muhurtaDates.length} muhurta dates selected')
+                          : '${monthSelected.length} this month · '
+                              '${_muhurtaDates.length} selected across all months',
                       style: TextStyle(
                           fontSize: 12,
                           color: AdminColors.primary,
