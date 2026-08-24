@@ -3,6 +3,7 @@ import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
 import '../services/guruji_auth_service.dart';
+import '../utils/customer_export.dart';
 import 'bookings_screen.dart';
 import 'users_screen.dart';
 import 'settings_screen.dart';
@@ -132,6 +133,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _exportCustomers() async {
+    final users = AdminDataService.dataNotifier.value.users;
+    if (users.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No customers to export yet')),
+      );
+      return;
+    }
+    try {
+      await exportCustomersToExcel(users);
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not export customer list')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,6 +182,12 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          if (_currentIndex == 1)
+            IconButton(
+              icon: const Icon(Icons.download_rounded, color: Colors.white),
+              tooltip: 'Download customer list',
+              onPressed: _exportCustomers,
+            ),
           ValueListenableBuilder<bool>(
             valueListenable: AdminDataService.loadingNotifier,
             builder: (_, loading, __) => loading

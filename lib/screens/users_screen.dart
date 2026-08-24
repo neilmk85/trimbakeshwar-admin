@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
@@ -63,16 +64,25 @@ class UsersScreen extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: sortedUsers.length,
-      itemBuilder: (context, index) => _UserCard(user: sortedUsers[index], index: index),
+      itemBuilder: (context, index) => _UserCard(user: sortedUsers[index]),
     );
   }
 }
 
 class _UserCard extends StatelessWidget {
   final AdminUser user;
-  final int index;
 
-  const _UserCard({required this.user, required this.index});
+  const _UserCard({required this.user});
+
+  Future<void> _call(BuildContext context) async {
+    final uri = Uri(scheme: 'tel', path: user.phone);
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open dialer')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,13 +100,36 @@ class _UserCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _avatar(),
             const SizedBox(width: 14),
-            Expanded(child: _details()),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.fullName.isEmpty ? 'Unknown' : user.fullName,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A2E)),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    user.phone.isEmpty ? 'No phone number' : user.phone,
+                    style: TextStyle(fontSize: 13.5, color: AdminColors.grey600),
+                  ),
+                ],
+              ),
+            ),
+            if (user.phone.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              _callButton(context),
+            ],
           ],
         ),
       ),
@@ -105,8 +138,8 @@ class _UserCard extends StatelessWidget {
 
   Widget _avatar() {
     return Container(
-      width: 52,
-      height: 52,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         gradient: AdminColors.appBarGradient,
         shape: BoxShape.circle,
@@ -116,79 +149,25 @@ class _UserCard extends StatelessWidget {
           user.initials,
           style: const TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  Widget _details() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                user.fullName.isEmpty ? 'Unknown' : user.fullName,
-                style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E)),
-              ),
-            ),
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: AdminColors.primaryLight.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '#${index + 1}',
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AdminColors.primary),
-              ),
-            ),
-          ],
+  Widget _callButton(BuildContext context) {
+    return Material(
+      color: Colors.green.shade600,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => _call(context),
+        child: const Padding(
+          padding: EdgeInsets.all(10),
+          child: Icon(Icons.call_rounded, color: Colors.white, size: 20),
         ),
-        const SizedBox(height: 8),
-        _infoRow(Icons.phone_rounded, user.phone),
-        if (user.email.isNotEmpty) ...[
-          const SizedBox(height: 4),
-          _infoRow(Icons.email_outlined, user.email),
-        ],
-        const SizedBox(height: 4),
-        _infoRow(
-          Icons.location_on_outlined,
-          [
-            if (user.city.isNotEmpty) user.city,
-            if (user.pinCode.isNotEmpty) user.pinCode,
-            if (user.country.isNotEmpty) user.country,
-          ].join(', '),
-        ),
-      ],
-    );
-  }
-
-  Widget _infoRow(IconData icon, String text) {
-    if (text.isEmpty || text == ', ') return const SizedBox.shrink();
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 14, color: AdminColors.grey500),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-                fontSize: 13, color: AdminColors.grey700, height: 1.3),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
