@@ -99,38 +99,46 @@ class _UserCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          children: [
-            _avatar(),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.fullName.isEmpty ? 'Unknown' : user.fullName,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A2E)),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: user.phone.isNotEmpty ? () => _call(context) : null,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              children: [
+                _avatar(),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.fullName.isEmpty ? 'Unknown' : user.fullName,
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1A1A2E)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        user.phone.isEmpty ? 'No phone number' : user.phone,
+                        style: TextStyle(fontSize: 13.5, color: AdminColors.grey600),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    user.phone.isEmpty ? 'No phone number' : user.phone,
-                    style: TextStyle(fontSize: 13.5, color: AdminColors.grey600),
-                  ),
+                ),
+                if (user.phone.isNotEmpty) ...[
+                  const SizedBox(width: 8),
+                  const Icon(Icons.call_rounded, color: Colors.black, size: 22),
                 ],
-              ),
+              ],
             ),
-            if (user.phone.isNotEmpty) ...[
-              const SizedBox(width: 8),
-              _callButton(context),
-            ],
-          ],
+          ),
         ),
       ),
     );
@@ -156,18 +164,4 @@ class _UserCard extends StatelessWidget {
     );
   }
 
-  Widget _callButton(BuildContext context) {
-    return Material(
-      color: Colors.green.shade600,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => _call(context),
-        child: const Padding(
-          padding: EdgeInsets.all(10),
-          child: Icon(Icons.call_rounded, color: Colors.white, size: 20),
-        ),
-      ),
-    );
-  }
 }
