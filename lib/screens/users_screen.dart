@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import 'customer_detail_screen.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
@@ -104,7 +105,11 @@ class _UserCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: user.phone.isNotEmpty ? () => _call(context) : null,
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => CustomerDetailScreen(user: user),
+            ),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(14),
             child: Row(
@@ -134,7 +139,18 @@ class _UserCard extends StatelessWidget {
                 ),
                 if (user.phone.isNotEmpty) ...[
                   const SizedBox(width: 8),
-                  const Icon(Icons.call_rounded, color: Colors.black, size: 22),
+                  Material(
+                    color: Colors.transparent,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: () => _call(context),
+                      child: const Padding(
+                        padding: EdgeInsets.all(6),
+                        child: Icon(Icons.call_rounded, color: Colors.black, size: 22),
+                      ),
+                    ),
+                  ),
                 ],
               ],
             ),
