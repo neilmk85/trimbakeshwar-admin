@@ -29,7 +29,7 @@ class BookingsScreen extends StatefulWidget {
 }
 
 class _BookingsScreenState extends State<BookingsScreen> {
-  String? _selectedPoojaName;
+  Set<String> _selectedPoojaNames = {};
   _DatePreset _datePreset = _DatePreset.upcoming;
   DateTimeRange? _customRange;
   _SortBy _sortBy = _SortBy.poojaDate;
@@ -88,7 +88,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
   List<AdminOrder> _applyFilters(List<AdminOrder> orders) {
     var result = orders.where((o) {
-      if (_selectedPoojaName != null && o.poojaName != _selectedPoojaName) {
+      if (_selectedPoojaNames.isNotEmpty &&
+          !_selectedPoojaNames.contains(o.poojaName)) {
         return false;
       }
       if (!_matchesDatePreset(o)) return false;
@@ -110,12 +111,12 @@ class _BookingsScreenState extends State<BookingsScreen> {
   }
 
   bool get _hasFilter =>
-      _selectedPoojaName != null ||
+      _selectedPoojaNames.isNotEmpty ||
       _datePreset != _DatePreset.upcoming ||
       _searchCtrl.text.isNotEmpty;
 
   void _clearFilters() => setState(() {
-    _selectedPoojaName = null;
+    _selectedPoojaNames = {};
     _datePreset = _DatePreset.upcoming;
     _customRange = null;
     _searchCtrl.clear();
@@ -132,14 +133,18 @@ class _BookingsScreenState extends State<BookingsScreen> {
           valueListenable: AdminDataService.errorNotifier,
           builder: (_, error, __) {
             final filtered = _applyFilters(data.orders);
-            final poojaNames =
-                data.orders.map((o) => o.poojaName).toSet().toList()..sort();
+            final poojaNames = data.orders
+                .map((o) => o.poojaName)
+                .where((n) => n.isNotEmpty)
+                .toSet()
+                .toList()
+              ..sort();
             return Column(
               children: [
                 _FilterPanel(
                   poojaNames: poojaNames,
-                  selectedPoojaName: _selectedPoojaName,
-                  onPoojaChanged: (v) => setState(() => _selectedPoojaName = v),
+                  selectedPoojaNames: _selectedPoojaNames,
+                  onPoojaChanged: (v) => setState(() => _selectedPoojaNames = v),
                   datePreset: _datePreset,
                   customRange: _customRange,
                   onPresetChanged: (p) async {
@@ -238,8 +243,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
 
 class _FilterPanel extends StatelessWidget {
   final List<String> poojaNames;
-  final String? selectedPoojaName;
-  final ValueChanged<String?> onPoojaChanged;
+  final Set<String> selectedPoojaNames;
+  final ValueChanged<Set<String>> onPoojaChanged;
   final _DatePreset datePreset;
   final DateTimeRange? customRange;
   final ValueChanged<_DatePreset> onPresetChanged;
@@ -256,7 +261,7 @@ class _FilterPanel extends StatelessWidget {
 
   const _FilterPanel({
     required this.poojaNames,
-    required this.selectedPoojaName,
+    required this.selectedPoojaNames,
     required this.onPoojaChanged,
     required this.datePreset,
     required this.customRange,
@@ -506,10 +511,15 @@ class _FilterPanel extends StatelessWidget {
   }
 
   Widget _poojaButton(BuildContext context) {
-    final active = selectedPoojaName != null;
+    final active = selectedPoojaNames.isNotEmpty;
+    final label = selectedPoojaNames.isEmpty
+        ? 'Pooja'
+        : selectedPoojaNames.length == 1
+            ? selectedPoojaNames.first
+            : '${selectedPoojaNames.length} Poojas';
     return _IconChipButton(
       icon: Icons.auto_awesome_rounded,
-      label: selectedPoojaName ?? 'Pooja',
+      label: label,
       active: active,
       chipActive: chipActive,
       onTap: () => _showPoojaSheet(context),
@@ -524,11 +534,8 @@ class _FilterPanel extends StatelessWidget {
       ),
       builder: (_) => _PoojaPickerSheet(
         poojaNames: poojaNames,
-        selected: selectedPoojaName,
-        onSelected: (v) {
-          onPoojaChanged(v);
-          Navigator.pop(context);
-        },
+        selected: selectedPoojaNames,
+        onApply: onPoojaChanged,
         chipActive: chipActive,
       ),
     );
@@ -708,18 +715,31 @@ class _IconButton extends StatelessWidget {
 
 // ── Pooja picker bottom sheet ─────────────────────────────────────────────────
 
-class _PoojaPickerSheet extends StatelessWidget {
+class _PoojaPickerSheet extends StatefulWidget {
   final List<String> poojaNames;
-  final String? selected;
-  final ValueChanged<String?> onSelected;
+  final Set<String> selected;
+  final ValueChanged<Set<String>> onApply;
   final Color chipActive;
 
   const _PoojaPickerSheet({
     required this.poojaNames,
     required this.selected,
-    required this.onSelected,
+    required this.onApply,
     required this.chipActive,
   });
+
+  @override
+  State<_PoojaPickerSheet> createState() => _PoojaPickerSheetState();
+}
+
+class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
+  late Set<String> _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = {...widget.selected};
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -744,14 +764,60 @@ class _PoojaPickerSheet extends StatelessWidget {
             'Filter by Pooja',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
-          const SizedBox(height: 16),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          const SizedBox(height: 4),
+          Text(
+            'Select one or more poojas',
+            style: TextStyle(fontSize: 12, color: AdminColors.grey500),
+          ),
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _checkboxRow(
+                    'All Poojas',
+                    _selected.isEmpty,
+                    () => setState(() => _selected.clear()),
+                  ),
+                  const Divider(height: 8),
+                  ...widget.poojaNames.map(
+                    (n) => _checkboxRow(
+                      n,
+                      _selected.contains(n),
+                      () => setState(() {
+                        if (_selected.contains(n)) {
+                          _selected.remove(n);
+                        } else {
+                          _selected.add(n);
+                        }
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
             children: [
-              _chip('All Poojas', selected == null, () => onSelected(null)),
-              ...poojaNames.map(
-                (n) => _chip(n, selected == n, () => onSelected(n)),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => setState(() => _selected.clear()),
+                  child: const Text('Clear'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: widget.chipActive,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    widget.onApply(_selected);
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Apply'),
+                ),
               ),
             ],
           ),
@@ -760,27 +826,20 @@ class _PoojaPickerSheet extends StatelessWidget {
     );
   }
 
-  Widget _chip(String label, bool active, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: active ? chipActive : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: active
-                ? chipActive
-                : AdminColors.primary.withValues(alpha: 0.25),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: active ? FontWeight.w600 : FontWeight.w500,
-            color: active ? Colors.white : AdminColors.grey800,
-          ),
+  Widget _checkboxRow(String label, bool checked, VoidCallback onTap) {
+    return CheckboxListTile(
+      value: checked,
+      onChanged: (_) => onTap(),
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
+      dense: true,
+      activeColor: widget.chipActive,
+      title: Text(
+        label,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: checked ? FontWeight.w600 : FontWeight.w500,
+          color: AdminColors.grey800,
         ),
       ),
     );
