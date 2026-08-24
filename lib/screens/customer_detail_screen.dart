@@ -200,41 +200,18 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget _statsRow(int totalBookings, int totalPaid, int upcomingCount) {
     return Row(
       children: [
-        Expanded(
-          child: _statCard(
-            icon: Icons.receipt_long_rounded,
-            label: 'Bookings',
-            value: '$totalBookings',
-            color: AdminColors.primary,
-          ),
-        ),
+        Expanded(child: _statCard(label: 'Bookings', value: '$totalBookings')),
         const SizedBox(width: 10),
-        Expanded(
-          child: _statCard(
-            icon: Icons.payments_rounded,
-            label: 'Total Paid',
-            value: _formatAmount(totalPaid),
-            color: const Color(0xFF2E7D32),
-          ),
-        ),
+        Expanded(child: _statCard(label: 'Total Paid', value: _formatAmount(totalPaid))),
         const SizedBox(width: 10),
-        Expanded(
-          child: _statCard(
-            icon: Icons.upcoming_rounded,
-            label: 'Upcoming',
-            value: '$upcomingCount',
-            color: const Color(0xFFEF6C00),
-          ),
-        ),
+        Expanded(child: _statCard(label: 'Upcoming', value: '$upcomingCount')),
       ],
     );
   }
 
   Widget _statCard({
-    required IconData icon,
     required String label,
     required String value,
-    required Color color,
   }) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
@@ -251,15 +228,6 @@ class CustomerDetailScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, size: 18, color: color),
-          ),
-          const SizedBox(height: 8),
           Text(
             value,
             style: const TextStyle(
