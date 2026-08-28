@@ -702,4 +702,65 @@ class AdminDataService {
       return 'Could not reach server';
     }
   }
+
+  // ── Guruji Pooja Assignment ledger ──────────────────────────────────────────
+
+  static Future<({List<GurujiPoojaEntry> data, String? error})> getGurujiPoojaEntries(int gurujiId) async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/guruji-directory/$gurujiId/entries'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final list = (body['data'] as List? ?? [])
+            .map((e) => GurujiPoojaEntry.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (data: list, error: null);
+      }
+      return (data: <GurujiPoojaEntry>[], error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: <GurujiPoojaEntry>[], error: 'Could not reach server');
+    }
+  }
+
+  static Future<({GurujiPoojaEntry? data, String? error})> createGurujiPoojaEntry(
+    int gurujiId, {
+    required int poojaId,
+    required DateTime entryDate,
+    required int count,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/guruji-directory/$gurujiId/entries'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'poojaId': poojaId,
+              'entryDate': _isoDate(entryDate),
+              'count': count,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 201 && body['success'] == true) {
+        return (data: GurujiPoojaEntry.fromJson(body['data'] as Map<String, dynamic>), error: null);
+      }
+      return (data: null, error: body['message'] as String? ?? 'Failed to record entry');
+    } catch (_) {
+      return (data: null, error: 'Could not reach server');
+    }
+  }
+
+  static Future<String?> deleteGurujiPoojaEntry(int gurujiId, int entryId) async {
+    try {
+      final res = await http
+          .delete(Uri.parse('$_base/guruji-directory/$gurujiId/entries/$entryId'))
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Failed to delete entry';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
 }

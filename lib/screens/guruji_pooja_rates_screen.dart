@@ -12,28 +12,57 @@ class GurujiPoojaRatesScreen extends StatefulWidget {
   State<GurujiPoojaRatesScreen> createState() => _GurujiPoojaRatesScreenState();
 }
 
-class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen> {
-  bool _loading = true;
-  String? _error;
+class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  bool _ratesLoading = true;
+  String? _ratesError;
   List<GurujiPoojaRate> _rates = [];
+
+  bool _entriesLoading = true;
+  String? _entriesError;
+  List<GurujiPoojaEntry> _entries = [];
 
   @override
   void initState() {
     super.initState();
-    _load();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadRates();
+    _loadEntries();
   }
 
-  Future<void> _load() async {
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadRates() async {
     setState(() {
-      _loading = true;
-      _error = null;
+      _ratesLoading = true;
+      _ratesError = null;
     });
     final result = await AdminDataService.getGurujiPoojaRates(widget.guruji.id);
     if (!mounted) return;
     setState(() {
       _rates = result.data;
-      _error = result.error;
-      _loading = false;
+      _ratesError = result.error;
+      _ratesLoading = false;
+    });
+  }
+
+  Future<void> _loadEntries() async {
+    setState(() {
+      _entriesLoading = true;
+      _entriesError = null;
+    });
+    final result = await AdminDataService.getGurujiPoojaEntries(widget.guruji.id);
+    if (!mounted) return;
+    setState(() {
+      _entries = result.data;
+      _entriesError = result.error;
+      _entriesLoading = false;
     });
   }
 
@@ -52,7 +81,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen> {
     if (!mounted) return;
     if (err == null) {
       _showSnack('Rate updated for ${rate.poojaName}.');
-      await _load();
+      await _loadRates();
     } else {
       _showSnack(err, isError: true);
     }
@@ -63,10 +92,77 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen> {
     if (!mounted) return;
     if (err == null) {
       _showSnack('Reset to default rate.');
-      await _load();
+      await _loadRates();
     } else {
       _showSnack(err, isError: true);
     }
+  }
+
+  Future<void> _openRecordSheet() async {
+    if (_rates.isEmpty) {
+      _showSnack('No poojas available yet.', isError: true);
+      return;
+    }
+    final result = await showModalBottomSheet<_EntryForm>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _RecordEntrySheet(guruji: widget.guruji, rates: _rates),
+    );
+    if (result == null) return;
+
+    final res = await AdminDataService.createGurujiPoojaEntry(
+      widget.guruji.id,
+      poojaId: result.poojaId,
+      entryDate: result.date,
+      count: result.count,
+    );
+    if (!mounted) return;
+    if (res.error == null && res.data != null) {
+      _showSnack(
+        '${res.data!.poojaName} × ${res.data!.count} = ₹${res.data!.totalAmount} recorded.',
+      );
+      await _loadEntries();
+      _tabController.animateTo(1);
+    } else {
+      _showSnack(res.error ?? 'Failed to record entry', isError: true);
+    }
+  }
+
+  Future<void> _deleteEntry(GurujiPoojaEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete this entry?'),
+        content: Text('${entry.poojaName} × ${entry.count} = ₹${entry.totalAmount}\n${_formatDate(entry.entryDate)}'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    final err = await AdminDataService.deleteGurujiPoojaEntry(widget.guruji.id, entry.id);
+    if (!mounted) return;
+    if (err == null) {
+      _showSnack('Entry deleted.');
+      await _loadEntries();
+    } else {
+      _showSnack(err, isError: true);
+    }
+  }
+
+  String _formatDate(DateTime d) {
+    const months = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${d.day} ${months[d.month]} ${d.year}';
   }
 
   @override
@@ -76,49 +172,127 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen> {
       appBar: AppBar(
         flexibleSpace: Container(decoration: const BoxDecoration(gradient: AdminColors.appBarGradient)),
         title: Text(widget.guruji.name),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          tabs: const [
+            Tab(text: 'Rates'),
+            Tab(text: 'Payout History'),
+          ],
+        ),
       ),
-      body: RefreshIndicator(
-        onRefresh: _load,
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _error != null && _rates.isEmpty
-                ? _buildError(_error!)
-                : ListView(
-                    padding: const EdgeInsets.all(16),
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AdminColors.primary.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.info_outline_rounded, size: 18, color: AdminColors.primary),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'These are internal payout rates for ${widget.guruji.name} — they don\'t affect customer prices.',
-                                style: TextStyle(fontSize: 12.5, color: AdminColors.grey700, height: 1.4),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      for (final rate in _rates)
-                        _RateRow(
-                          rate: rate,
-                          onSave: (v) => _saveRate(rate, v),
-                          onResetToDefault: () => _resetToDefault(rate),
-                        ),
-                    ],
-                  ),
+      floatingActionButton: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AdminColors.appBarGradient,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(color: AdminColors.primary.withValues(alpha: 0.4), blurRadius: 12, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: FloatingActionButton(
+          onPressed: _openRecordSheet,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          highlightElevation: 0,
+          tooltip: 'Record Pooja Assignment',
+          child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildRatesTab(),
+          _buildHistoryTab(),
+        ],
       ),
     );
   }
 
-  Widget _buildError(String message) => Center(
+  Widget _buildRatesTab() {
+    return RefreshIndicator(
+      onRefresh: _loadRates,
+      child: _ratesLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _ratesError != null && _rates.isEmpty
+              ? _buildError(_ratesError!, _loadRates)
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: AdminColors.primary.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, size: 18, color: AdminColors.primary),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'These are internal payout rates for ${widget.guruji.name} — they don\'t affect customer prices.',
+                              style: TextStyle(fontSize: 12.5, color: AdminColors.grey700, height: 1.4),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    for (final rate in _rates)
+                      _RateRow(
+                        rate: rate,
+                        onSave: (v) => _saveRate(rate, v),
+                        onResetToDefault: () => _resetToDefault(rate),
+                      ),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildHistoryTab() {
+    final total = _entries.fold<int>(0, (sum, e) => sum + e.totalAmount);
+    return RefreshIndicator(
+      onRefresh: _loadEntries,
+      child: _entriesLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _entriesError != null && _entries.isEmpty
+              ? _buildError(_entriesError!, _loadEntries)
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 88),
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+                      decoration: BoxDecoration(
+                        gradient: AdminColors.appBarGradient,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Total Payout', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600)),
+                          Text('₹$total', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    if (_entries.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 32),
+                        child: Center(
+                          child: Text('No entries yet. Tap + to record one.', style: TextStyle(color: AdminColors.grey500)),
+                        ),
+                      )
+                    else
+                      for (final entry in _entries)
+                        _EntryRow(entry: entry, onDelete: () => _deleteEntry(entry)),
+                  ],
+                ),
+    );
+  }
+
+  Widget _buildError(String message, Future<void> Function() onRetry) => Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -128,7 +302,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen> {
               const SizedBox(height: 12),
               Text(message, textAlign: TextAlign.center, style: TextStyle(color: AdminColors.grey600)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _load, child: const Text('Retry')),
+              ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
             ],
           ),
         ),
@@ -241,6 +415,224 @@ class _RateRowState extends State<_RateRow> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _EntryRow extends StatelessWidget {
+  final GurujiPoojaEntry entry;
+  final VoidCallback onDelete;
+
+  const _EntryRow({required this.entry, required this.onDelete});
+
+  String _formatDate(DateTime d) {
+    const months = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${d.day} ${months[d.month]} ${d.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(entry.poojaName,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)),
+                    maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 3),
+                Text(
+                  '${_formatDate(entry.entryDate)} · ${entry.count} × ₹${entry.rateUsed}',
+                  style: TextStyle(fontSize: 12, color: AdminColors.grey600),
+                ),
+              ],
+            ),
+          ),
+          Text('₹${entry.totalAmount}',
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2E7D32))),
+          const SizedBox(width: 4),
+          IconButton(
+            icon: Icon(Icons.delete_outline_rounded, color: Colors.red.shade400, size: 20),
+            onPressed: onDelete,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EntryForm {
+  final int poojaId;
+  final DateTime date;
+  final int count;
+  const _EntryForm({required this.poojaId, required this.date, required this.count});
+}
+
+class _RecordEntrySheet extends StatefulWidget {
+  final GurujiDirectoryEntry guruji;
+  final List<GurujiPoojaRate> rates;
+
+  const _RecordEntrySheet({required this.guruji, required this.rates});
+
+  @override
+  State<_RecordEntrySheet> createState() => _RecordEntrySheetState();
+}
+
+class _RecordEntrySheetState extends State<_RecordEntrySheet> {
+  late int _selectedPoojaId;
+  DateTime _date = DateTime.now();
+  late final TextEditingController _countCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPoojaId = widget.rates.first.poojaId;
+    _countCtrl = TextEditingController(text: '1');
+  }
+
+  @override
+  void dispose() {
+    _countCtrl.dispose();
+    super.dispose();
+  }
+
+  GurujiPoojaRate get _selectedRate => widget.rates.firstWhere((r) => r.poojaId == _selectedPoojaId);
+
+  Future<void> _pickDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _date = picked);
+  }
+
+  String _formatDate(DateTime d) {
+    const months = [
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return '${d.day} ${months[d.month]} ${d.year}';
+  }
+
+  void _submit() {
+    final count = int.tryParse(_countCtrl.text.trim()) ?? 0;
+    if (count <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter a valid number of poojas')),
+      );
+      return;
+    }
+    Navigator.pop(context, _EntryForm(poojaId: _selectedPoojaId, date: _date, count: count));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final count = int.tryParse(_countCtrl.text.trim()) ?? 0;
+    final total = _selectedRate.rate * count;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.white, borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(color: AdminColors.grey300, borderRadius: BorderRadius.circular(2)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('Record Pooja Assignment',
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))),
+            const SizedBox(height: 4),
+            Text('For ${widget.guruji.name}', style: TextStyle(fontSize: 12.5, color: AdminColors.grey600)),
+            const SizedBox(height: 18),
+            DropdownButtonFormField<int>(
+              initialValue: _selectedPoojaId,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: 'Pooja',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              items: widget.rates
+                  .map((r) => DropdownMenuItem(value: r.poojaId, child: Text(r.poojaName, overflow: TextOverflow.ellipsis)))
+                  .toList(),
+              onChanged: (v) => setState(() => _selectedPoojaId = v ?? _selectedPoojaId),
+            ),
+            const SizedBox(height: 14),
+            InkWell(
+              onTap: _pickDate,
+              borderRadius: BorderRadius.circular(12),
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Date',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(_formatDate(_date)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _countCtrl,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                labelText: 'Number of Poojas',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AdminColors.primary.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Rate: ₹${_selectedRate.rate} × $count', style: TextStyle(fontSize: 13, color: AdminColors.grey700)),
+                  Text('₹$total', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AdminColors.primary)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AdminColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: _submit,
+                child: const Text('Record Assignment', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

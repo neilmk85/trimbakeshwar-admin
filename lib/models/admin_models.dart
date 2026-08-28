@@ -271,6 +271,39 @@ class GurujiPoojaRate {
       );
 }
 
+class GurujiPoojaEntry {
+  final int id;
+  final int gurujiId;
+  final int poojaId;
+  final String poojaName;
+  final DateTime entryDate;
+  final int count;
+  final int rateUsed;
+  final int totalAmount;
+
+  const GurujiPoojaEntry({
+    required this.id,
+    required this.gurujiId,
+    required this.poojaId,
+    required this.poojaName,
+    required this.entryDate,
+    required this.count,
+    required this.rateUsed,
+    required this.totalAmount,
+  });
+
+  factory GurujiPoojaEntry.fromJson(Map<String, dynamic> json) => GurujiPoojaEntry(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        gurujiId: (json['gurujiId'] as num?)?.toInt() ?? 0,
+        poojaId: (json['poojaId'] as num?)?.toInt() ?? 0,
+        poojaName: json['poojaName'] as String? ?? '',
+        entryDate: DateTime.tryParse(json['entryDate'] as String? ?? '') ?? DateTime.now(),
+        count: (json['count'] as num?)?.toInt() ?? 1,
+        rateUsed: (json['rateUsed'] as num?)?.toInt() ?? 0,
+        totalAmount: (json['totalAmount'] as num?)?.toInt() ?? 0,
+      );
+}
+
 class AdminRoom {
   final int id;
   final String name;
