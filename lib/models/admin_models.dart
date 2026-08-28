@@ -274,6 +274,7 @@ class GurujiPoojaRate {
 class GurujiPoojaEntry {
   final int id;
   final int gurujiId;
+  final String gurujiName;
   final int poojaId;
   final String poojaName;
   final DateTime entryDate;
@@ -284,6 +285,7 @@ class GurujiPoojaEntry {
   const GurujiPoojaEntry({
     required this.id,
     required this.gurujiId,
+    this.gurujiName = '',
     required this.poojaId,
     required this.poojaName,
     required this.entryDate,
@@ -295,6 +297,7 @@ class GurujiPoojaEntry {
   factory GurujiPoojaEntry.fromJson(Map<String, dynamic> json) => GurujiPoojaEntry(
         id: (json['id'] as num?)?.toInt() ?? 0,
         gurujiId: (json['gurujiId'] as num?)?.toInt() ?? 0,
+        gurujiName: json['gurujiName'] as String? ?? '',
         poojaId: (json['poojaId'] as num?)?.toInt() ?? 0,
         poojaName: json['poojaName'] as String? ?? '',
         entryDate: DateTime.tryParse(json['entryDate'] as String? ?? '') ?? DateTime.now(),

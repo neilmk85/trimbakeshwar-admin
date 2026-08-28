@@ -6,7 +6,7 @@ import '../services/admin_data_service.dart';
 
 // ── Report tab enum ───────────────────────────────────────────────────────────
 
-enum _ReportTab { poojawise, users, revenue }
+enum _ReportTab { poojawise, users, revenue, guruji }
 
 const _tabMeta = {
   _ReportTab.poojawise: (
@@ -24,6 +24,11 @@ const _tabMeta = {
     icon: Icons.currency_rupee_rounded,
     gradient: [Color(0xFFE65100), Color(0xFFFF6D00)],
   ),
+  _ReportTab.guruji: (
+    label: 'Guruji Payouts',
+    icon: Icons.groups_rounded,
+    gradient: [Color(0xFF4527A0), Color(0xFF7B1FA2)],
+  ),
 };
 
 // ── Screen ────────────────────────────────────────────────────────────────────
@@ -40,6 +45,46 @@ class _ReportsScreenState extends State<ReportsScreen> {
   DateTime? _from;
   DateTime? _to;
   bool _includeCancelled = false;
+
+  // ── Guruji payout report state ──────────────────────────────────────────────
+  List<GurujiDirectoryEntry> _gurujis = [];
+  int? _selectedGurujiId;
+  int? _selectedPoojaId;
+  List<GurujiPoojaEntry> _gurujiEntries = [];
+  bool _gurujiEntriesLoading = true;
+  String? _gurujiEntriesError;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGurujis();
+    _loadGurujiEntries();
+  }
+
+  Future<void> _loadGurujis() async {
+    final result = await AdminDataService.getGurujiDirectory();
+    if (!mounted) return;
+    setState(() => _gurujis = result.data);
+  }
+
+  Future<void> _loadGurujiEntries() async {
+    setState(() {
+      _gurujiEntriesLoading = true;
+      _gurujiEntriesError = null;
+    });
+    final result = await AdminDataService.getAllGurujiPoojaEntries(
+      gurujiId: _selectedGurujiId,
+      poojaId: _selectedPoojaId,
+      dateFrom: _from,
+      dateTo: _to,
+    );
+    if (!mounted) return;
+    setState(() {
+      _gurujiEntries = result.data;
+      _gurujiEntriesError = result.error;
+      _gurujiEntriesLoading = false;
+    });
+  }
 
   // ── Filtered data ───────────────────────────────────────────────────────────
 
@@ -173,6 +218,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           if (_from != null && _from!.isAfter(_to!)) _from = null;
         }
       });
+      _loadGurujiEntries();
     }
   }
 
@@ -267,23 +313,37 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       Padding(
                         padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                         child: Row(
-                          children: [
-                            _statCard('Total Bookings',
-                                '${filtered.length}',
-                                Icons.receipt_long_rounded),
-                            const SizedBox(width: 10),
-                            _statCard('Active',
-                                '${_activeBookings(filtered)}',
-                                Icons.check_circle_outline_rounded),
-                            const SizedBox(width: 10),
-                            _statCard('Revenue',
-                                '₹${_fmt(_totalRevenue(filtered))}',
-                                Icons.currency_rupee_rounded),
-                            const SizedBox(width: 10),
-                            _statCard('Users',
-                                '${data.users.length}',
-                                Icons.people_outline_rounded),
-                          ],
+                          children: _tab == _ReportTab.guruji
+                              ? [
+                                  _statCard('Total Poojas',
+                                      '${_gurujiEntries.fold<int>(0, (s, e) => s + e.count)}',
+                                      Icons.auto_awesome_rounded),
+                                  const SizedBox(width: 10),
+                                  _statCard('Total Payable',
+                                      '₹${_fmt(_gurujiEntries.fold<int>(0, (s, e) => s + e.totalAmount))}',
+                                      Icons.currency_rupee_rounded),
+                                  const SizedBox(width: 10),
+                                  _statCard('Gurujis',
+                                      '${_gurujiEntries.map((e) => e.gurujiId).toSet().length}',
+                                      Icons.groups_rounded),
+                                ]
+                              : [
+                                  _statCard('Total Bookings',
+                                      '${filtered.length}',
+                                      Icons.receipt_long_rounded),
+                                  const SizedBox(width: 10),
+                                  _statCard('Active',
+                                      '${_activeBookings(filtered)}',
+                                      Icons.check_circle_outline_rounded),
+                                  const SizedBox(width: 10),
+                                  _statCard('Revenue',
+                                      '₹${_fmt(_totalRevenue(filtered))}',
+                                      Icons.currency_rupee_rounded),
+                                  const SizedBox(width: 10),
+                                  _statCard('Users',
+                                      '${data.users.length}',
+                                      Icons.people_outline_rounded),
+                                ],
                         ),
                       ),
                     ],
@@ -292,7 +352,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
 
               // ── Filters bar ──────────────────────────────────────────────
-              _buildFiltersBar(filtered, data),
+              _tab == _ReportTab.guruji
+                  ? _buildGurujiFiltersBar(data)
+                  : _buildFiltersBar(filtered, data),
 
               // ── Report body ──────────────────────────────────────────────
               Expanded(
@@ -300,7 +362,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     ? _buildPoojaReport(filtered)
                     : _tab == _ReportTab.users
                         ? _buildUsersReport(data.users, filtered)
-                        : _buildRevenueReport(filtered),
+                        : _tab == _ReportTab.revenue
+                            ? _buildRevenueReport(filtered)
+                            : _buildGurujiPayoutReport(),
               ),
             ],
           ),
@@ -461,6 +525,245 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ),
         ),
       );
+
+  // ── Guruji payout report ─────────────────────────────────────────────────────
+
+  Widget _buildGurujiFiltersBar(AdminData data) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _dateChip(
+                label: _from == null ? 'From' : _fmtDate(_from!),
+                set: _from != null,
+                onTap: () => _pickDate(isFrom: true),
+                onClear: _from == null
+                    ? null
+                    : () {
+                        setState(() => _from = null);
+                        _loadGurujiEntries();
+                      },
+              ),
+              const SizedBox(width: 8),
+              _dateChip(
+                label: _to == null ? 'To' : _fmtDate(_to!),
+                set: _to != null,
+                onTap: () => _pickDate(isFrom: false),
+                onClear: _to == null
+                    ? null
+                    : () {
+                        setState(() => _to = null);
+                        _loadGurujiEntries();
+                      },
+              ),
+              const Spacer(),
+              ElevatedButton.icon(
+                onPressed: _gurujiEntries.isEmpty ? null : _downloadGurujiPayoutReport,
+                icon: const Icon(Icons.download_rounded, size: 16),
+                label: const Text('CSV', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4527A0),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 0,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<int?>(
+                  initialValue: _selectedGurujiId,
+                  isExpanded: true,
+                  isDense: true,
+                  decoration: InputDecoration(
+                    labelText: 'Guruji',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('All Gurujis')),
+                    ..._gurujis.map((g) => DropdownMenuItem(value: g.id, child: Text(g.name, overflow: TextOverflow.ellipsis))),
+                  ],
+                  onChanged: (v) {
+                    setState(() => _selectedGurujiId = v);
+                    _loadGurujiEntries();
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: DropdownButtonFormField<int?>(
+                  initialValue: _selectedPoojaId,
+                  isExpanded: true,
+                  isDense: true,
+                  decoration: InputDecoration(
+                    labelText: 'Pooja',
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  items: [
+                    const DropdownMenuItem(value: null, child: Text('All Poojas')),
+                    ...data.poojas.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name, overflow: TextOverflow.ellipsis))),
+                  ],
+                  onChanged: (v) {
+                    setState(() => _selectedPoojaId = v);
+                    _loadGurujiEntries();
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGurujiPayoutReport() {
+    if (_gurujiEntriesLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_gurujiEntriesError != null && _gurujiEntries.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, size: 56, color: Colors.grey.shade400),
+              const SizedBox(height: 12),
+              Text(_gurujiEntriesError!, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
+              const SizedBox(height: 16),
+              ElevatedButton(onPressed: _loadGurujiEntries, child: const Text('Retry')),
+            ],
+          ),
+        ),
+      );
+    }
+    if (_gurujiEntries.isEmpty) {
+      return Center(
+        child: Text('No pooja assignments match these filters.', style: TextStyle(color: Colors.grey.shade600)),
+      );
+    }
+
+    // Group entries by guruji, preserving the backend's guruji-name ordering.
+    final grouped = <int, List<GurujiPoojaEntry>>{};
+    final namesById = <int, String>{};
+    for (final e in _gurujiEntries) {
+      (grouped[e.gurujiId] ??= []).add(e);
+      namesById[e.gurujiId] = e.gurujiName;
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        for (final gurujiId in grouped.keys) ...[
+          _gurujiGroupCard(namesById[gurujiId] ?? 'Unknown', grouped[gurujiId]!),
+          const SizedBox(height: 14),
+        ],
+      ],
+    );
+  }
+
+  Widget _gurujiGroupCard(String gurujiName, List<GurujiPoojaEntry> entries) {
+    final totalPoojas = entries.fold<int>(0, (s, e) => s + e.count);
+    final totalAmount = entries.fold<int>(0, (s, e) => s + e.totalAmount);
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, 3)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: const BoxDecoration(
+              color: Color(0xFF4527A0),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(gurujiName,
+                      style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
+                      maxLines: 1, overflow: TextOverflow.ellipsis),
+                ),
+                Text('$totalPoojas pooja${totalPoojas == 1 ? '' : 's'}',
+                    style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                const SizedBox(width: 10),
+                Text('₹$totalAmount', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white)),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                for (final e in entries)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Text(e.poojaName,
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)),
+                              maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(_fmtDate(e.entryDate), style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text('${e.count} × ₹${e.rateUsed}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600), textAlign: TextAlign.right),
+                        ),
+                        SizedBox(
+                          width: 64,
+                          child: Text('₹${e.totalAmount}',
+                              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF2E7D32)),
+                              textAlign: TextAlign.right),
+                        ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+        ],
+      ),
+    );
+  }
+
+  void _downloadGurujiPayoutReport() {
+    final rows = <List<String>>[
+      ['Guruji', 'Pooja', 'Date', 'Count', 'Rate', 'Amount'],
+      ..._gurujiEntries.map((e) => [
+            e.gurujiName,
+            e.poojaName,
+            _fmtDate(e.entryDate),
+            '${e.count}',
+            '${e.rateUsed}',
+            '${e.totalAmount}',
+          ]),
+    ];
+    _downloadCsv('guruji_payout_report.csv', rows);
+  }
 
   // ── Pooja-wise report ───────────────────────────────────────────────────────
 

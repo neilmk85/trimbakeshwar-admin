@@ -723,6 +723,35 @@ class AdminDataService {
     }
   }
 
+  /// Cross-guruji payout report — every entry, optionally filtered.
+  static Future<({List<GurujiPoojaEntry> data, String? error})> getAllGurujiPoojaEntries({
+    int? gurujiId,
+    int? poojaId,
+    DateTime? dateFrom,
+    DateTime? dateTo,
+  }) async {
+    try {
+      final params = <String, String>{
+        if (gurujiId != null) 'gurujiId': '$gurujiId',
+        if (poojaId != null) 'poojaId': '$poojaId',
+        if (dateFrom != null) 'dateFrom': _isoDate(dateFrom),
+        if (dateTo != null) 'dateTo': _isoDate(dateTo),
+      };
+      final uri = Uri.parse('$_base/guruji-pooja-entries').replace(queryParameters: params.isEmpty ? null : params);
+      final res = await http.get(uri).timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final list = (body['data'] as List? ?? [])
+            .map((e) => GurujiPoojaEntry.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (data: list, error: null);
+      }
+      return (data: <GurujiPoojaEntry>[], error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: <GurujiPoojaEntry>[], error: 'Could not reach server');
+    }
+  }
+
   static Future<({GurujiPoojaEntry? data, String? error})> createGurujiPoojaEntry(
     int gurujiId, {
     required int poojaId,
