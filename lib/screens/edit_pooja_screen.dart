@@ -63,6 +63,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
   late DateTime _calendarMonth;
   late bool _privatePooja;
   late TextEditingController _privatePoojaRateCtrl;
+  late TextEditingController _gurujiDefaultRateCtrl;
   bool _saving = false;
 
   @override
@@ -100,6 +101,8 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     _privatePooja = p.privatePooja;
     _privatePoojaRateCtrl = TextEditingController(
         text: p.privatePoojaRate > 0 ? p.privatePoojaRate.toString() : '');
+    _gurujiDefaultRateCtrl = TextEditingController(
+        text: p.gurujiDefaultRate > 0 ? p.gurujiDefaultRate.toString() : '');
   }
 
   List<TextEditingController> _initList(List<String> items) {
@@ -112,6 +115,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     for (final c in [
       _nameCtrl, _descCtrl, _priceCtrl, _stayRateCtrl, _iconCtrl,
       _durationCtrl, _displayOrderCtrl, _infoCtrl, _privatePoojaRateCtrl,
+      _gurujiDefaultRateCtrl,
       ..._beforeCtrls, ..._afterCtrls, ..._bringCtrls,
     ]) {
       c.dispose();
@@ -147,6 +151,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
       muhurtaDates: _muhurtaDates,
       privatePooja: _privatePooja,
       privatePoojaRate: int.tryParse(_privatePoojaRateCtrl.text.trim()) ?? 0,
+      gurujiDefaultRate: int.tryParse(_gurujiDefaultRateCtrl.text.trim()) ?? 0,
     );
     if (mounted) {
       setState(() => _saving = false);
@@ -268,6 +273,21 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
           _sectionHeader('Private / Separate Pooja'),
           const SizedBox(height: 12),
           _privatePoojaToggle(),
+          const SizedBox(height: 24),
+
+          _sectionHeader('Guruji Rate'),
+          const SizedBox(height: 4),
+          Text(
+            'Default payout for this pooja, shown against every Guruji unless overridden individually.',
+            style: TextStyle(fontSize: 12, color: AdminColors.grey600),
+          ),
+          const SizedBox(height: 12),
+          _field(
+            _gurujiDefaultRateCtrl,
+            'Default Guruji Rate (₹)',
+            Icons.currency_rupee_rounded,
+            numeric: true,
+          ),
           const SizedBox(height: 24),
 
           _sectionHeader('Muhurta Dates'),

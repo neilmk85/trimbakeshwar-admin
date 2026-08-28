@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'admin_rooms_screen.dart';
+import 'gurujis_screen.dart';
 import 'poojas_screen.dart';
 import 'reports_screen.dart';
 import 'room_blocks_screen.dart';
@@ -27,6 +28,22 @@ class SettingsScreen extends StatelessWidget {
               builder: (_) => const _FullScreenPage(
                 title: 'Poojas',
                 child: PoojasScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
+          icon: Icons.groups_rounded,
+          color: const Color(0xFF6A1B9A),
+          title: 'Gurujis',
+          subtitle: 'Manage Gurujis and set per-Guruji pooja rates',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Gurujis',
+                child: GurujisScreen(),
               ),
             ),
           ),

@@ -511,6 +511,7 @@ class AdminDataService {
     int? stayRatePerNight,
     bool? privatePooja,
     int? privatePoojaRate,
+    int? gurujiDefaultRate,
   }) async {
     try {
       final body = <String, dynamic>{};
@@ -526,6 +527,7 @@ class AdminDataService {
       if (stayRatePerNight != null) body['stayRatePerNight'] = stayRatePerNight;
       if (privatePooja != null) body['privatePooja'] = privatePooja;
       if (privatePoojaRate != null) body['privatePoojaRate'] = privatePoojaRate;
+      if (gurujiDefaultRate != null) body['gurujiDefaultRate'] = gurujiDefaultRate;
       if (beforeInstructions != null) body['beforeInstructions'] = beforeInstructions;
       if (afterInstructions != null) body['afterInstructions'] = afterInstructions;
       if (thingsToBring != null) body['thingsToBring'] = thingsToBring;
@@ -560,6 +562,142 @@ class AdminDataService {
         return null;
       }
       return respBody['message'] as String? ?? 'Update failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  // ── Guruji directory (roster + per-guruji pooja rates) ──────────────────────
+
+  static Future<({List<GurujiDirectoryEntry> data, String? error})> getGurujiDirectory() async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/guruji-directory'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final list = (body['data'] as List? ?? [])
+            .map((e) => GurujiDirectoryEntry.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (data: list, error: null);
+      }
+      return (data: <GurujiDirectoryEntry>[], error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: <GurujiDirectoryEntry>[], error: 'Could not reach server');
+    }
+  }
+
+  static Future<String?> createGurujiDirectoryEntry({
+    required String name,
+    required String phone,
+    String? email,
+  }) async {
+    try {
+      final res = await http
+          .post(
+            Uri.parse('$_base/guruji-directory'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'phone': phone,
+              if (email != null) 'email': email,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 201 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Create failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> updateGurujiDirectoryEntry(
+    int id, {
+    required String name,
+    required String phone,
+    String? email,
+  }) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/guruji-directory/$id'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'name': name,
+              'phone': phone,
+              if (email != null) 'email': email,
+            }),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Update failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> deleteGurujiDirectoryEntry(int id) async {
+    try {
+      final res = await http
+          .delete(Uri.parse('$_base/guruji-directory/$id'))
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Delete failed';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<({List<GurujiPoojaRate> data, String? error})> getGurujiPoojaRates(int gurujiId) async {
+    try {
+      final res = await http
+          .get(Uri.parse('$_base/guruji-directory/$gurujiId/pooja-rates'))
+          .timeout(const Duration(seconds: 8));
+      if (res.statusCode == 200) {
+        final body = jsonDecode(res.body) as Map<String, dynamic>;
+        final list = (body['data'] as List? ?? [])
+            .map((e) => GurujiPoojaRate.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return (data: list, error: null);
+      }
+      return (data: <GurujiPoojaRate>[], error: 'Server error (${res.statusCode})');
+    } catch (_) {
+      return (data: <GurujiPoojaRate>[], error: 'Could not reach server');
+    }
+  }
+
+  static Future<String?> setGurujiPoojaRate(int gurujiId, int poojaId, int rate) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/guruji-directory/$gurujiId/pooja-rates/$poojaId'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'rate': rate}),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Failed to set rate';
+    } catch (_) {
+      return 'Could not reach server';
+    }
+  }
+
+  static Future<String?> clearGurujiPoojaRate(int gurujiId, int poojaId) async {
+    try {
+      final res = await http
+          .put(
+            Uri.parse('$_base/guruji-directory/$gurujiId/pooja-rates/$poojaId'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'clearToDefault': true}),
+          )
+          .timeout(const Duration(seconds: 8));
+      final body = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode == 200 && body['success'] == true) return null;
+      return body['message'] as String? ?? 'Failed to reset rate';
     } catch (_) {
       return 'Could not reach server';
     }

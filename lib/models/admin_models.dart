@@ -159,6 +159,7 @@ class AdminPooja {
   final int stayRatePerNight;
   final bool privatePooja;
   final int privatePoojaRate;
+  final int gurujiDefaultRate;
 
   const AdminPooja({
     required this.id,
@@ -178,6 +179,7 @@ class AdminPooja {
     this.stayRatePerNight = 0,
     this.privatePooja = false,
     this.privatePoojaRate = 0,
+    this.gurujiDefaultRate = 0,
   });
 
   factory AdminPooja.fromJson(Map<String, dynamic> json) => AdminPooja(
@@ -211,12 +213,62 @@ class AdminPooja {
             [],
         privatePooja: json['privatePooja'] as bool? ?? false,
         privatePoojaRate: (json['privatePoojaRate'] as num?)?.toInt() ?? 0,
+        gurujiDefaultRate: (json['gurujiDefaultRate'] as num?)?.toInt() ?? 0,
       );
 
   Color get color {
     final hex = colorHex.replaceFirst('#', '');
     return Color(int.parse('FF$hex', radix: 16));
   }
+}
+
+class GurujiDirectoryEntry {
+  final int id;
+  final String name;
+  final String phone;
+  final String email;
+
+  const GurujiDirectoryEntry({
+    required this.id,
+    required this.name,
+    required this.phone,
+    this.email = '',
+  });
+
+  factory GurujiDirectoryEntry.fromJson(Map<String, dynamic> json) => GurujiDirectoryEntry(
+        id: (json['id'] as num?)?.toInt() ?? 0,
+        name: json['name'] as String? ?? '',
+        phone: json['phone'] as String? ?? '',
+        email: json['email'] as String? ?? '',
+      );
+
+  String get initials {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    if (name.isNotEmpty) return name[0].toUpperCase();
+    return 'G';
+  }
+}
+
+class GurujiPoojaRate {
+  final int poojaId;
+  final String poojaName;
+  final int rate;
+  final bool isOverridden;
+
+  const GurujiPoojaRate({
+    required this.poojaId,
+    required this.poojaName,
+    required this.rate,
+    required this.isOverridden,
+  });
+
+  factory GurujiPoojaRate.fromJson(Map<String, dynamic> json) => GurujiPoojaRate(
+        poojaId: (json['poojaId'] as num?)?.toInt() ?? 0,
+        poojaName: json['poojaName'] as String? ?? '',
+        rate: (json['rate'] as num?)?.toInt() ?? 0,
+        isOverridden: json['isOverridden'] as bool? ?? false,
+      );
 }
 
 class AdminRoom {
