@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import '../l10n/tr.dart';
 import 'guruji_pooja_rates_screen.dart';
 
 class GurujisScreen extends StatefulWidget {
@@ -63,7 +64,9 @@ class _GurujisScreenState extends State<GurujisScreen> {
 
     if (!mounted) return;
     if (err == null) {
-      _showSnack(existing == null ? 'Guruji added.' : 'Guruji updated.');
+      _showSnack(existing == null
+          ? tr('Guruji added.', 'गुरुजी जोड़े गए।')
+          : tr('Guruji updated.', 'गुरुजी अपडेट किए गए।'));
       await _load();
     } else {
       _showSnack(err, isError: true);
@@ -75,14 +78,16 @@ class _GurujisScreenState extends State<GurujisScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Remove this Guruji?'),
-        content: Text('${g.name} · ${g.phone}\n\nThis only removes them from your roster — it does not affect app login.'),
+        title: Text(tr('Remove this Guruji?', 'इस गुरुजी को हटाएं?')),
+        content: Text(tr(
+            '${g.name} · ${g.phone}\n\nThis only removes them from your roster — it does not affect app login.',
+            '${g.name} · ${g.phone}\n\nयह उन्हें केवल आपकी सूची से हटाता है — इससे ऐप लॉगिन पर कोई असर नहीं पड़ता।')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel', 'रद्द करें'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Remove'),
+            child: Text(tr('Remove', 'हटाएं')),
           ),
         ],
       ),
@@ -91,7 +96,7 @@ class _GurujisScreenState extends State<GurujisScreen> {
     final err = await AdminDataService.deleteGurujiDirectoryEntry(g.id);
     if (!mounted) return;
     if (err == null) {
-      _showSnack('Guruji removed.');
+      _showSnack(tr('Guruji removed.', 'गुरुजी हटाए गए।'));
       await _load();
     } else {
       _showSnack(err, isError: true);
@@ -153,7 +158,7 @@ class _GurujisScreenState extends State<GurujisScreen> {
               const SizedBox(height: 12),
               Text(message, textAlign: TextAlign.center, style: TextStyle(color: AdminColors.grey600)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _load, child: const Text('Retry')),
+              ElevatedButton(onPressed: _load, child: Text(tr('Retry', 'फिर से कोशिश करें'))),
             ],
           ),
         ),
@@ -167,9 +172,9 @@ class _GurujisScreenState extends State<GurujisScreen> {
             children: [
               Icon(Icons.groups_outlined, size: 56, color: AdminColors.grey400),
               const SizedBox(height: 12),
-              Text('No Gurujis added yet.', style: TextStyle(color: AdminColors.grey600)),
+              Text(tr('No Gurujis added yet.', 'अभी तक कोई गुरुजी नहीं जोड़े गए हैं।'), style: TextStyle(color: AdminColors.grey600)),
               const SizedBox(height: 4),
-              Text('Tap + to add one.', style: TextStyle(color: AdminColors.grey500, fontSize: 12)),
+              Text(tr('Tap + to add one.', 'जोड़ने के लिए + पर टैप करें।'), style: TextStyle(color: AdminColors.grey500, fontSize: 12)),
             ],
           ),
         ),
@@ -233,9 +238,9 @@ class _GurujiCard extends StatelessWidget {
                 PopupMenuButton<String>(
                   icon: Icon(Icons.more_vert_rounded, color: AdminColors.grey500),
                   onSelected: (v) => v == 'edit' ? onEdit() : onDelete(),
-                  itemBuilder: (_) => const [
-                    PopupMenuItem(value: 'edit', child: Text('Edit')),
-                    PopupMenuItem(value: 'delete', child: Text('Remove')),
+                  itemBuilder: (_) => [
+                    PopupMenuItem(value: 'edit', child: Text(tr('Edit', 'संपादित करें'))),
+                    PopupMenuItem(value: 'delete', child: Text(tr('Remove', 'हटाएं'))),
                   ],
                 ),
               ],
@@ -288,7 +293,7 @@ class _GurujiFormSheetState extends State<_GurujiFormSheet> {
     final phone = _phoneCtrl.text.trim();
     if (name.isEmpty || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Name and phone are required')),
+        SnackBar(content: Text(tr('Name and phone are required', 'नाम और फ़ोन नंबर आवश्यक हैं'))),
       );
       return;
     }
@@ -314,14 +319,14 @@ class _GurujiFormSheetState extends State<_GurujiFormSheet> {
               ),
             ),
             const SizedBox(height: 16),
-            Text(isEdit ? 'Edit Guruji' : 'Add Guruji',
+            Text(isEdit ? tr('Edit Guruji', 'गुरुजी संपादित करें') : tr('Add Guruji', 'गुरुजी जोड़ें'),
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))),
             const SizedBox(height: 18),
             TextField(
               controller: _nameCtrl,
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: tr('Name', 'नाम'),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -330,7 +335,7 @@ class _GurujiFormSheetState extends State<_GurujiFormSheet> {
               controller: _phoneCtrl,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                labelText: 'Phone Number',
+                labelText: tr('Phone Number', 'फ़ोन नंबर'),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -339,7 +344,7 @@ class _GurujiFormSheetState extends State<_GurujiFormSheet> {
               controller: _emailCtrl,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                labelText: 'Email (optional)',
+                labelText: tr('Email (optional)', 'ईमेल (वैकल्पिक)'),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -354,7 +359,7 @@ class _GurujiFormSheetState extends State<_GurujiFormSheet> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 onPressed: _submit,
-                child: Text(isEdit ? 'Save Changes' : 'Add Guruji',
+                child: Text(isEdit ? tr('Save Changes', 'बदलाव सेव करें') : tr('Add Guruji', 'गुरुजी जोड़ें'),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ),
