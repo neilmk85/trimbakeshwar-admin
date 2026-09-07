@@ -4,6 +4,7 @@ import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
 import 'customer_detail_screen.dart';
+import '../l10n/tr.dart';
 
 class UsersScreen extends StatelessWidget {
   const UsersScreen({super.key});
@@ -21,7 +22,7 @@ class UsersScreen extends StatelessWidget {
               return _buildEmptyState(error);
             }
             if (data.users.isEmpty) {
-              return _buildEmptyState('No registered users yet.');
+              return _buildEmptyState(tr('No registered users yet.', 'अभी तक कोई पंजीकृत ग्राहक नहीं है।'));
             }
             return _buildUserList(data.users);
           },
@@ -80,7 +81,7 @@ class _UserCard extends StatelessWidget {
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open dialer')),
+        SnackBar(content: Text(tr('Could not open dialer', 'डायलर नहीं खुल सका'))),
       );
     }
   }
@@ -121,7 +122,7 @@ class _UserCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.fullName.isEmpty ? 'Unknown' : user.fullName,
+                        user.fullName.isEmpty ? tr('Unknown', 'अज्ञात') : user.fullName,
                         style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -131,7 +132,7 @@ class _UserCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        user.phone.isEmpty ? 'No phone number' : user.phone,
+                        user.phone.isEmpty ? tr('No phone number', 'फ़ोन नंबर नहीं है') : user.phone,
                         style: TextStyle(fontSize: 13.5, color: AdminColors.grey600),
                       ),
                     ],

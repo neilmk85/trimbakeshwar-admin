@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/guruji_auth_service.dart';
+import '../l10n/tr.dart';
 
 /// Shared secret for the admin-app-secret gated call-logs endpoints. This app
 /// is already gated to a single authorized phone number (see
@@ -48,10 +49,10 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
             .toList();
         if (mounted) setState(() => _callers = list);
       } else if (mounted) {
-        setState(() => _error = 'Failed to load unknown callers');
+        setState(() => _error = tr('Failed to load unknown callers', 'अज्ञात कॉलर लोड करने में विफल'));
       }
     } catch (_) {
-      if (mounted) setState(() => _error = 'Could not reach server');
+      if (mounted) setState(() => _error = tr('Could not reach server', 'सर्वर तक नहीं पहुंच सके'));
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -60,7 +61,7 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
     final uri = Uri(scheme: 'tel', path: phone);
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && mounted) {
-      _showSnack('Could not open dialer');
+      _showSnack(tr('Could not open dialer', 'डायलर नहीं खुल सका'));
     }
   }
 
@@ -69,7 +70,7 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
     final name = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Save as Customer'),
+        title: Text(tr('Save as Customer', 'ग्राहक के रूप में सेव करें')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -79,15 +80,15 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
             TextField(
               controller: controller,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
+              decoration: InputDecoration(labelText: tr('Name', 'नाम'), border: const OutlineInputBorder()),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: Text(tr('Cancel', 'रद्द करें'))),
           ElevatedButton(
             onPressed: () => Navigator.pop(dialogContext, controller.text.trim()),
-            child: const Text('Save'),
+            child: Text(tr('Save', 'सेव करें')),
           ),
         ],
       ),
@@ -109,13 +110,13 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
       if (!mounted) return;
       if (res.statusCode == 201) {
         setState(() => _callers.removeWhere((c) => c.callerPhone == caller.callerPhone));
-        _showSnack('$name saved as a customer');
+        _showSnack(tr('$name saved as a customer', '$name को ग्राहक के रूप में सेव किया गया'));
       } else {
         final body = jsonDecode(res.body) as Map<String, dynamic>;
-        _showSnack(body['message'] as String? ?? 'Could not save customer');
+        _showSnack(body['message'] as String? ?? tr('Could not save customer', 'ग्राहक सेव नहीं हो सका'));
       }
     } catch (_) {
-      if (mounted) _showSnack('Could not reach server');
+      if (mounted) _showSnack(tr('Could not reach server', 'सर्वर तक नहीं पहुंच सके'));
     }
   }
 
@@ -138,7 +139,13 @@ class _UnknownCallersScreenState extends State<UnknownCallersScreen> {
       return _emptyState(Icons.wifi_off_rounded, _error!);
     }
     if (_callers.isEmpty) {
-      return _emptyState(Icons.phone_disabled_rounded, 'No unknown callers yet.\nCalls from numbers not in your customer list will show up here.');
+      return _emptyState(
+        Icons.phone_disabled_rounded,
+        tr(
+          'No unknown callers yet.\nCalls from numbers not in your customer list will show up here.',
+          'अभी तक कोई अज्ञात कॉलर नहीं है।\nजो नंबर आपकी ग्राहक सूची में नहीं हैं, उनकी कॉल यहां दिखेंगी।',
+        ),
+      );
     }
     return RefreshIndicator(
       onRefresh: _load,
@@ -199,10 +206,10 @@ class _CallerCard extends StatelessWidget {
   String _relativeTime(DateTime? time) {
     if (time == null) return '';
     final diff = DateTime.now().difference(time);
-    if (diff.inMinutes < 1) return 'just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
+    if (diff.inMinutes < 1) return tr('just now', 'अभी अभी');
+    if (diff.inMinutes < 60) return tr('${diff.inMinutes}m ago', '${diff.inMinutes} मिनट पहले');
+    if (diff.inHours < 24) return tr('${diff.inHours}h ago', '${diff.inHours} घंटे पहले');
+    if (diff.inDays < 7) return tr('${diff.inDays}d ago', '${diff.inDays} दिन पहले');
     return '${time.day}/${time.month}/${time.year}';
   }
 
@@ -236,7 +243,7 @@ class _CallerCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      caller.callerName.isEmpty ? 'Unknown caller' : caller.callerName,
+                      caller.callerName.isEmpty ? tr('Unknown caller', 'अज्ञात कॉलर') : caller.callerName,
                       style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600, color: Color(0xFF1A1A2E)),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -256,14 +263,17 @@ class _CallerCard extends StatelessWidget {
           const SizedBox(height: 10),
           Row(
             children: [
-              _badge('${caller.callCount} call${caller.callCount == 1 ? '' : 's'}'),
+              _badge(tr(
+                '${caller.callCount} call${caller.callCount == 1 ? '' : 's'}',
+                '${caller.callCount} कॉल',
+              )),
               const SizedBox(width: 8),
               _badge(_relativeTime(caller.lastCallAt)),
               const Spacer(),
               TextButton.icon(
                 onPressed: onSave,
                 icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                label: const Text('Save as Customer'),
+                label: Text(tr('Save as Customer', 'ग्राहक के रूप में सेव करें')),
               ),
             ],
           ),
