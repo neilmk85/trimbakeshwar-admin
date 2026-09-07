@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final email = _emailCtrl.text.trim();
     if (name.isEmpty || email.isEmpty) {
       _showSnack(tr('Name and email cannot be empty',
-          'नाम और ईमेल खाली नहीं हो सकते'));
+          'नाम और ईमेल खाली नहीं हो सकते', 'नाव आणि ईमेल रिकामे असू शकत नाही'));
       return;
     }
     setState(() => _saving = true);
@@ -63,7 +63,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         GurujiAuthService.loggedInEmail = email;
         setState(() => _editing = false);
         _passwordCtrl.clear();
-        _showSnack(tr('Profile updated successfully', 'प्रोफ़ाइल सफलतापूर्वक अपडेट हुई'));
+        _showSnack(tr('Profile updated successfully', 'प्रोफ़ाइल सफलतापूर्वक अपडेट हुई', 'प्रोफाइल यशस्वीरित्या अपडेट झाले'));
       }
     }
   }
@@ -88,9 +88,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final respBody = jsonDecode(res.body) as Map<String, dynamic>;
       if (res.statusCode == 200 && respBody['success'] == true) return null;
       return respBody['message'] as String? ??
-          tr('Update failed', 'अपडेट विफल रहा');
+          tr('Update failed', 'अपडेट विफल रहा', 'अपडेट अयशस्वी झाले');
     } catch (_) {
-      return tr('Could not reach server', 'सर्वर से संपर्क नहीं हो सका');
+      return tr('Could not reach server', 'सर्वर से संपर्क नहीं हो सका', 'सर्व्हरशी संपर्क होऊ शकला नाही');
     }
   }
 
@@ -116,14 +116,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           if (_editing) ...[
             _actionButton(
-              label: tr('Save Changes', 'बदलाव सेव करें'),
+              label: tr('Save Changes', 'बदलाव सेव करें', 'बदल जतन करा'),
               loading: _saving,
               onTap: _save,
               color: AdminColors.primary,
             ),
             const SizedBox(height: 10),
             _actionButton(
-              label: tr('Cancel', 'रद्द करें'),
+              label: tr('Cancel', 'रद्द करें', 'रद्द करा'),
               onTap: () {
                 setState(() {
                   _editing = false;
@@ -136,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ] else
             _actionButton(
-              label: tr('Edit Profile', 'प्रोफ़ाइल संपादित करें'),
+              label: tr('Edit Profile', 'प्रोफ़ाइल संपादित करें', 'प्रोफाइल संपादित करा'),
               onTap: () => setState(() => _editing = true),
               color: AdminColors.primary,
               outlined: true,
@@ -197,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            tr('Guruji', 'गुरुजी'),
+            tr('Guruji', 'गुरुजी', 'गुरुजी'),
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tr('Profile Information', 'प्रोफ़ाइल जानकारी'),
+          Text(tr('Profile Information', 'प्रोफ़ाइल जानकारी', 'प्रोफाइल माहिती'),
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -232,14 +232,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 16),
           _field(
             controller: _nameCtrl,
-            label: tr('Full Name', 'पूरा नाम'),
+            label: tr('Full Name', 'पूरा नाम', 'पूर्ण नाव'),
             icon: Icons.person_outline_rounded,
             enabled: _editing,
           ),
           const SizedBox(height: 14),
           _field(
             controller: _emailCtrl,
-            label: tr('Email', 'ईमेल'),
+            label: tr('Email', 'ईमेल', 'ईमेल'),
             icon: Icons.email_outlined,
             enabled: _editing,
             keyboardType: TextInputType.emailAddress,
@@ -248,7 +248,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _field(
             controller: TextEditingController(
                 text: GurujiAuthService.loggedInPhone ?? ''),
-            label: tr('Phone', 'फ़ोन नंबर'),
+            label: tr('Phone', 'फ़ोन नंबर', 'फोन नंबर'),
             icon: Icons.phone_outlined,
             enabled: false,
           ),
@@ -256,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 14),
             _field(
               controller: _passwordCtrl,
-              label: tr('New Password (optional)', 'नया पासवर्ड (वैकल्पिक)'),
+              label: tr('New Password (optional)', 'नया पासवर्ड (वैकल्पिक)', 'नवीन पासवर्ड (ऐच्छिक)'),
               icon: Icons.lock_outlined,
               enabled: true,
               obscureText: _obscure,
@@ -368,7 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: OutlinedButton.icon(
         onPressed: GurujiAuthService.logout,
         icon: const Icon(Icons.logout_rounded, size: 18),
-        label: Text(tr('Logout', 'लॉगआउट'),
+        label: Text(tr('Logout', 'लॉगआउट', 'लॉगआउट'),
             style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red.shade600,

@@ -33,13 +33,13 @@ const _tabMeta = {
 String _tabLabel(_ReportTab t) {
   switch (t) {
     case _ReportTab.poojawise:
-      return tr('Pooja-wise', 'पूजा अनुसार');
+      return tr('Pooja-wise', 'पूजा अनुसार', 'पूजानुसार');
     case _ReportTab.users:
-      return tr('Users', 'ग्राहक');
+      return tr('Users', 'ग्राहक', 'ग्राहक');
     case _ReportTab.revenue:
-      return tr('Revenue', 'आय');
+      return tr('Revenue', 'आय', 'उत्पन्न');
     case _ReportTab.guruji:
-      return tr('Guruji Payouts', 'गुरुजी भुगतान');
+      return tr('Guruji Payouts', 'गुरुजी भुगतान', 'गुरुजी मानधन');
   }
 }
 
@@ -247,7 +247,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'जुल', 'अग', 'सित', 'अक्टू', 'नव', 'दिस',
   ];
 
-  static String _monthAbbr(int i) => tr(_kMonths[i], _kMonthsHi[i]);
+  static const _kMonthsMr = [
+    'जाने', 'फेब्रु', 'मार्च', 'एप्रि', 'मे', 'जून',
+    'जुलै', 'ऑग', 'सप्टें', 'ऑक्टो', 'नोव्हें', 'डिसें',
+  ];
+
+  static String _monthAbbr(int i) => tr(_kMonths[i], _kMonthsHi[i], _kMonthsMr[i]);
 
   // ── Build ───────────────────────────────────────────────────────────────────
 
@@ -334,32 +339,32 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         child: Row(
                           children: _tab == _ReportTab.guruji
                               ? [
-                                  _statCard(tr('Total Poojas', 'कुल पूजाएं'),
+                                  _statCard(tr('Total Poojas', 'कुल पूजाएं', 'एकूण पूजा'),
                                       '${_gurujiEntries.fold<int>(0, (s, e) => s + e.count)}',
                                       Icons.auto_awesome_rounded),
                                   const SizedBox(width: 10),
-                                  _statCard(tr('Total Payable', 'कुल देय राशि'),
+                                  _statCard(tr('Total Payable', 'कुल देय राशि', 'एकूण देय रक्कम'),
                                       '₹${_fmt(_gurujiEntries.fold<int>(0, (s, e) => s + e.totalAmount))}',
                                       Icons.currency_rupee_rounded),
                                   const SizedBox(width: 10),
-                                  _statCard(tr('Gurujis', 'गुरुजी'),
+                                  _statCard(tr('Gurujis', 'गुरुजी', 'गुरुजी'),
                                       '${_gurujiEntries.map((e) => e.gurujiId).toSet().length}',
                                       Icons.groups_rounded),
                                 ]
                               : [
-                                  _statCard(tr('Total Bookings', 'कुल बुकिंग'),
+                                  _statCard(tr('Total Bookings', 'कुल बुकिंग', 'एकूण बुकिंग'),
                                       '${filtered.length}',
                                       Icons.receipt_long_rounded),
                                   const SizedBox(width: 10),
-                                  _statCard(tr('Active', 'सक्रिय'),
+                                  _statCard(tr('Active', 'सक्रिय', 'सक्रिय'),
                                       '${_activeBookings(filtered)}',
                                       Icons.check_circle_outline_rounded),
                                   const SizedBox(width: 10),
-                                  _statCard(tr('Revenue', 'आय'),
+                                  _statCard(tr('Revenue', 'आय', 'उत्पन्न'),
                                       '₹${_fmt(_totalRevenue(filtered))}',
                                       Icons.currency_rupee_rounded),
                                   const SizedBox(width: 10),
-                                  _statCard(tr('Users', 'ग्राहक'),
+                                  _statCard(tr('Users', 'ग्राहक', 'ग्राहक'),
                                       '${data.users.length}',
                                       Icons.people_outline_rounded),
                                 ],
@@ -424,7 +429,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         children: [
           // From date
           _dateChip(
-            label: _from == null ? tr('From', 'से') : _fmtDate(_from!),
+            label: _from == null ? tr('From', 'से', 'पासून') : _fmtDate(_from!),
             set: _from != null,
             onTap: () => _pickDate(isFrom: true),
             onClear: _from == null ? null : () => setState(() => _from = null),
@@ -432,7 +437,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           const SizedBox(width: 8),
           // To date
           _dateChip(
-            label: _to == null ? tr('To', 'तक') : _fmtDate(_to!),
+            label: _to == null ? tr('To', 'तक', 'पर्यंत') : _fmtDate(_to!),
             set: _to != null,
             onTap: () => _pickDate(isFrom: false),
             onClear: _to == null ? null : () => setState(() => _to = null),
@@ -456,7 +461,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         : Colors.grey.shade300),
               ),
               child: Text(
-                tr('Incl. Cancelled', 'रद्द सहित'),
+                tr('Incl. Cancelled', 'रद्द सहित', 'रद्द केलेल्यांसह'),
                 style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -479,7 +484,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               }
             },
             icon: const Icon(Icons.download_rounded, size: 16),
-            label: Text(tr('CSV', 'CSV'),
+            label: Text(tr('CSV', 'CSV', 'CSV'),
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1565C0),
@@ -557,7 +562,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           Row(
             children: [
               _dateChip(
-                label: _from == null ? tr('From', 'से') : _fmtDate(_from!),
+                label: _from == null ? tr('From', 'से', 'पासून') : _fmtDate(_from!),
                 set: _from != null,
                 onTap: () => _pickDate(isFrom: true),
                 onClear: _from == null
@@ -569,7 +574,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ),
               const SizedBox(width: 8),
               _dateChip(
-                label: _to == null ? tr('To', 'तक') : _fmtDate(_to!),
+                label: _to == null ? tr('To', 'तक', 'पर्यंत') : _fmtDate(_to!),
                 set: _to != null,
                 onTap: () => _pickDate(isFrom: false),
                 onClear: _to == null
@@ -583,7 +588,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               ElevatedButton.icon(
                 onPressed: _gurujiEntries.isEmpty ? null : _downloadGurujiPayoutReport,
                 icon: const Icon(Icons.download_rounded, size: 16),
-                label: Text(tr('CSV', 'CSV'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                label: Text(tr('CSV', 'CSV', 'CSV'), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4527A0),
                   foregroundColor: Colors.white,
@@ -603,13 +608,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   isExpanded: true,
                   isDense: true,
                   decoration: InputDecoration(
-                    labelText: tr('Guruji', 'गुरुजी'),
+                    labelText: tr('Guruji', 'गुरुजी', 'गुरुजी'),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   items: [
-                    DropdownMenuItem(value: null, child: Text(tr('All Gurujis', 'सभी गुरुजी'))),
+                    DropdownMenuItem(value: null, child: Text(tr('All Gurujis', 'सभी गुरुजी', 'सर्व गुरुजी'))),
                     ..._gurujis.map((g) => DropdownMenuItem(value: g.id, child: Text(g.name, overflow: TextOverflow.ellipsis))),
                   ],
                   onChanged: (v) {
@@ -625,13 +630,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   isExpanded: true,
                   isDense: true,
                   decoration: InputDecoration(
-                    labelText: tr('Pooja', 'पूजा'),
+                    labelText: tr('Pooja', 'पूजा', 'पूजा'),
                     isDense: true,
                     contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
                   ),
                   items: [
-                    DropdownMenuItem(value: null, child: Text(tr('All Poojas', 'सभी पूजाएं'))),
+                    DropdownMenuItem(value: null, child: Text(tr('All Poojas', 'सभी पूजाएं', 'सर्व पूजा'))),
                     ...data.poojas.map((p) => DropdownMenuItem(value: p.id, child: Text(p.name, overflow: TextOverflow.ellipsis))),
                   ],
                   onChanged: (v) {
@@ -662,7 +667,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               const SizedBox(height: 12),
               Text(_gurujiEntriesError!, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade600)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _loadGurujiEntries, child: Text(tr('Retry', 'फिर कोशिश करें'))),
+              ElevatedButton(onPressed: _loadGurujiEntries, child: Text(tr('Retry', 'फिर कोशिश करें', 'पुन्हा प्रयत्न करा'))),
             ],
           ),
         ),
@@ -670,7 +675,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     }
     if (_gurujiEntries.isEmpty) {
       return Center(
-        child: Text(tr('No pooja assignments match these filters.', 'इन फ़िल्टर के लिए कोई पूजा नहीं मिली।'), style: TextStyle(color: Colors.grey.shade600)),
+        child: Text(tr('No pooja assignments match these filters.', 'इन फ़िल्टर के लिए कोई पूजा नहीं मिली।', 'या फिल्टरसाठी कोणतीही पूजा सापडली नाही.'), style: TextStyle(color: Colors.grey.shade600)),
       );
     }
 
@@ -686,7 +691,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
       padding: const EdgeInsets.all(16),
       children: [
         for (final gurujiId in grouped.keys) ...[
-          _gurujiGroupCard(namesById[gurujiId] ?? tr('Unknown', 'अज्ञात'), grouped[gurujiId]!),
+          _gurujiGroupCard(namesById[gurujiId] ?? tr('Unknown', 'अज्ञात', 'अज्ञात'), grouped[gurujiId]!),
           const SizedBox(height: 14),
         ],
       ],
@@ -722,6 +727,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ),
                 Text(
                     tr('$totalPoojas pooja${totalPoojas == 1 ? '' : 's'}',
+                        '$totalPoojas पूजा',
                         '$totalPoojas पूजा'),
                     style: const TextStyle(fontSize: 12, color: Colors.white70)),
                 const SizedBox(width: 10),
@@ -790,15 +796,16 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Widget _buildPoojaReport(List<AdminOrder> filtered) {
     final grouped = _groupByPooja(filtered);
-    if (grouped.isEmpty) return _empty(tr('No booking data', 'कोई बुकिंग डेटा नहीं'));
+    if (grouped.isEmpty) return _empty(tr('No booking data', 'कोई बुकिंग डेटा नहीं', 'बुकिंग डेटा नाही'));
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _sectionLabel(
-            tr('POOJA-WISE BREAKDOWN', 'पूजा अनुसार विवरण'),
+            tr('POOJA-WISE BREAKDOWN', 'पूजा अनुसार विवरण', 'पूजानुसार विवरण'),
             tr('${grouped.length} poojas  ·  ${filtered.length} bookings',
-                '${grouped.length} पूजाएं  ·  ${filtered.length} बुकिंग')),
+                '${grouped.length} पूजाएं  ·  ${filtered.length} बुकिंग',
+                '${grouped.length} पूजा  ·  ${filtered.length} बुकिंग')),
         const SizedBox(height: 10),
         ...grouped.entries.map((e) {
           final all = e.value;
@@ -892,13 +899,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
                   child: Row(
                     children: [
-                      _miniStat(tr('Total', 'कुल'), '${all.length}', Colors.grey.shade700),
+                      _miniStat(tr('Total', 'कुल', 'एकूण'), '${all.length}', Colors.grey.shade700),
                       _divider(),
-                      _miniStat(tr('Active', 'सक्रिय'), '${active.length}', Colors.green.shade700),
+                      _miniStat(tr('Active', 'सक्रिय', 'सक्रिय'), '${active.length}', Colors.green.shade700),
                       _divider(),
-                      _miniStat(tr('Cancelled', 'रद्द'), '${cancelled.length}', Colors.red.shade400),
+                      _miniStat(tr('Cancelled', 'रद्द', 'रद्द'), '${cancelled.length}', Colors.red.shade400),
                       _divider(),
-                      _miniStat(tr('Avg', 'औसत'), '₹${_fmt(avg)}', const Color(0xFF1565C0)),
+                      _miniStat(tr('Avg', 'औसत', 'सरासरी'), '₹${_fmt(avg)}', const Color(0xFF1565C0)),
                     ],
                   ),
                 ),
@@ -913,7 +920,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   // ── Users report ────────────────────────────────────────────────────────────
 
   Widget _buildUsersReport(List<AdminUser> users, List<AdminOrder> filtered) {
-    if (users.isEmpty) return _empty(tr('No registered users', 'कोई पंजीकृत ग्राहक नहीं'));
+    if (users.isEmpty) return _empty(tr('No registered users', 'कोई पंजीकृत ग्राहक नहीं', 'नोंदणीकृत ग्राहक नाहीत'));
 
     final sorted = users.toList()
       ..sort((a, b) {
@@ -929,8 +936,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _sectionLabel(tr('REGISTERED USERS', 'पंजीकृत ग्राहक'),
-            tr('${users.length} total', '${users.length} कुल')),
+        _sectionLabel(tr('REGISTERED USERS', 'पंजीकृत ग्राहक', 'नोंदणीकृत ग्राहक'),
+            tr('${users.length} total', '${users.length} कुल', '${users.length} एकूण')),
         const SizedBox(height: 10),
         ...sorted.asMap().entries.map((entry) {
           final u = entry.value;
@@ -1017,14 +1024,14 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            _miniStat(tr('Bookings', 'बुकिंग'), '${userOrders.length}',
+                            _miniStat(tr('Bookings', 'बुकिंग', 'बुकिंग'), '${userOrders.length}',
                                 Colors.grey.shade700),
                             _divider(),
-                            _miniStat(tr('Active', 'सक्रिय'), '${activeOrders.length}',
+                            _miniStat(tr('Active', 'सक्रिय', 'सक्रिय'), '${activeOrders.length}',
                                 Colors.green.shade700),
                             _divider(),
                             _miniStat(
-                                tr('Spent', 'खर्च'), '₹${_fmt(spent)}', const Color(0xFF1565C0)),
+                                tr('Spent', 'खर्च', 'खर्च'), '₹${_fmt(spent)}', const Color(0xFF1565C0)),
                           ],
                         ),
                       ],
@@ -1043,7 +1050,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Widget _buildRevenueReport(List<AdminOrder> filtered) {
     final activeOrders = filtered.where((o) => !o.cancelled).toList();
-    if (filtered.isEmpty) return _empty(tr('No booking data', 'कोई बुकिंग डेटा नहीं'));
+    if (filtered.isEmpty) return _empty(tr('No booking data', 'कोई बुकिंग डेटा नहीं', 'बुकिंग डेटा नाही'));
 
     // Group by month
     final byMonth = <String, List<AdminOrder>>{};
@@ -1073,11 +1080,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         // Top summary cards
         Row(
           children: [
-            _revSummaryCard(tr('Total Revenue', 'कुल आय'), '₹${_fmt(totalRev)}',
+            _revSummaryCard(tr('Total Revenue', 'कुल आय', 'एकूण उत्पन्न'), '₹${_fmt(totalRev)}',
                 Icons.account_balance_wallet_rounded,
                 const [Color(0xFFE65100), Color(0xFFFF6D00)]),
             const SizedBox(width: 10),
-            _revSummaryCard(tr('Avg per Booking', 'प्रति बुकिंग औसत'),
+            _revSummaryCard(tr('Avg per Booking', 'प्रति बुकिंग औसत', 'प्रति बुकिंग सरासरी'),
                 activeOrders.isEmpty
                     ? '₹0'
                     : '₹${_fmt((totalRev / activeOrders.length).round())}',
@@ -1086,8 +1093,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
           ],
         ),
         const SizedBox(height: 16),
-        _sectionLabel(tr('MONTHLY BREAKDOWN', 'माह अनुसार विवरण'),
-            tr('${sortedMonths.length} months', '${sortedMonths.length} महीने')),
+        _sectionLabel(tr('MONTHLY BREAKDOWN', 'माह अनुसार विवरण', 'महिन्यानुसार विवरण'),
+            tr('${sortedMonths.length} months', '${sortedMonths.length} महीने', '${sortedMonths.length} महिने')),
         const SizedBox(height: 10),
         ...sortedMonths.map((e) {
           final monthRev = e.value.fold(0, (s, o) => s + o.totalAmount);
@@ -1138,10 +1145,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _miniStat(tr('Bookings', 'बुकिंग'), '${e.value.length}', Colors.grey.shade700),
+                    _miniStat(tr('Bookings', 'बुकिंग', 'बुकिंग'), '${e.value.length}', Colors.grey.shade700),
                     _divider(),
                     _miniStat(
-                        tr('Share', 'हिस्सा'),
+                        tr('Share', 'हिस्सा', 'वाटा'),
                         '${totalRev > 0 ? (monthRev * 100 ~/ totalRev) : 0}%',
                         const Color(0xFFE65100)),
                   ],
@@ -1243,5 +1250,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
     'जुलाई', 'अगस्त', 'सितंबर', 'अक्टूबर', 'नवंबर', 'दिसंबर',
   ];
 
-  static String _monthFull(int i) => tr(_kMonthsFull[i], _kMonthsFullHi[i]);
+  static const _kMonthsFullMr = [
+    'जानेवारी', 'फेब्रुवारी', 'मार्च', 'एप्रिल', 'मे', 'जून',
+    'जुलै', 'ऑगस्ट', 'सप्टेंबर', 'ऑक्टोबर', 'नोव्हेंबर', 'डिसेंबर',
+  ];
+
+  static String _monthFull(int i) => tr(_kMonthsFull[i], _kMonthsFullHi[i], _kMonthsFullMr[i]);
 }
