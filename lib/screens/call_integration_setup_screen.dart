@@ -107,6 +107,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
       _showSnack(tr(
         'Some permissions were denied. Call detection needs Phone, Contacts and SMS permissions to work.',
         'कुछ अनुमतियां अस्वीकार कर दी गईं। कॉल डिटेक्शन के लिए फ़ोन, संपर्क और SMS अनुमतियां आवश्यक हैं।',
+        'काही परवानग्या नाकारल्या गेल्या. कॉल डिटेक्शन काम करण्यासाठी फोन, कॉन्टॅक्ट्स आणि SMS परवानग्या आवश्यक आहेत.',
       ));
     }
   }
@@ -115,13 +116,13 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
     try {
       await _channel.invokeMethod('openBatteryOptimizationSettings');
     } catch (_) {
-      _showSnack(tr('Could not open battery settings on this device', 'इस डिवाइस पर बैटरी सेटिंग्स नहीं खोली जा सकीं'));
+      _showSnack(tr('Could not open battery settings on this device', 'इस डिवाइस पर बैटरी सेटिंग्स नहीं खोली जा सकीं', 'या डिव्हाइसवर बॅटरी सेटिंग्ज उघडता आल्या नाहीत'));
     }
   }
 
   Future<void> _save() async {
     if (_enabled && !_permissionsGranted) {
-      _showSnack(tr('Please grant Phone, Contacts and SMS permissions first', 'कृपया पहले फ़ोन, संपर्क और SMS अनुमतियां दें'));
+      _showSnack(tr('Please grant Phone, Contacts and SMS permissions first', 'कृपया पहले फ़ोन, संपर्क और SMS अनुमतियां दें', 'कृपया आधी फोन, कॉन्टॅक्ट्स आणि SMS परवानगी द्या'));
       return;
     }
     try {
@@ -137,9 +138,9 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
         'waRejected': _waRejected,
         'sendDelaySeconds': _sendDelaySeconds,
       });
-      if (mounted) _showSnack(tr('Call integration settings saved', 'कॉल इंटीग्रेशन सेटिंग्स सेव हो गईं'));
+      if (mounted) _showSnack(tr('Call integration settings saved', 'कॉल इंटीग्रेशन सेटिंग्स सेव हो गईं', 'कॉल इंटिग्रेशन सेटिंग्ज जतन झाल्या'));
     } catch (_) {
-      if (mounted) _showSnack(tr('Could not save settings on this device', 'इस डिवाइस पर सेटिंग्स सेव नहीं हो सकीं'));
+      if (mounted) _showSnack(tr('Could not save settings on this device', 'इस डिवाइस पर सेटिंग्स सेव नहीं हो सकीं', 'या डिव्हाइसवर सेटिंग्ज जतन करता आल्या नाहीत'));
     }
   }
 
@@ -167,6 +168,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
             tr(
               'Send an automatic SMS or WhatsApp message when a call to your number ends, based on how it ended.',
               'आपके नंबर पर आने वाली कॉल खत्म होने पर, कॉल कैसे खत्म हुई उसके अनुसार अपने आप SMS या WhatsApp संदेश भेजें।',
+              'तुमच्या नंबरवरील कॉल संपल्यावर, कॉल कसा संपला त्यानुसार आपोआप SMS किंवा WhatsApp मेसेज पाठवा.',
             ),
             style: TextStyle(fontSize: 14, color: AdminColors.grey600),
           ),
@@ -174,9 +176,9 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
           _card(
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(tr('Enable call detection', 'कॉल डिटेक्शन चालू करें'),
+              title: Text(tr('Enable call detection', 'कॉल डिटेक्शन चालू करें', 'कॉल डिटेक्शन सुरू करा'),
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-              subtitle: Text(tr('Master switch for this feature', 'इस सुविधा के लिए मुख्य स्विच')),
+              subtitle: Text(tr('Master switch for this feature', 'इस सुविधा के लिए मुख्य स्विच', 'या सुविधेसाठी मुख्य स्विच')),
               activeThumbColor: AdminColors.primary,
               value: _enabled,
               onChanged: (v) => setState(() => _enabled = v),
@@ -187,10 +189,10 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tr('Send delay', 'भेजने में देरी'),
+                Text(tr('Send delay', 'भेजने में देरी', 'पाठवण्यास विलंब'),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(tr('When to send the SMS/WhatsApp after the call ends', 'कॉल खत्म होने के बाद SMS/WhatsApp कब भेजें'),
+                Text(tr('When to send the SMS/WhatsApp after the call ends', 'कॉल खत्म होने के बाद SMS/WhatsApp कब भेजें', 'कॉल संपल्यानंतर SMS/WhatsApp कधी पाठवायचा'),
                     style: TextStyle(fontSize: 12, color: AdminColors.grey600)),
                 const SizedBox(height: 12),
                 _delayPicker(),
@@ -204,14 +206,14 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tr('Auto SMS', 'ऑटो SMS'),
+                Text(tr('Auto SMS', 'ऑटो SMS', 'ऑटो SMS'),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(tr('Sent directly from this device', 'सीधे इस डिवाइस से भेजा जाता है'),
+                Text(tr('Sent directly from this device', 'सीधे इस डिवाइस से भेजा जाता है', 'थेट या डिव्हाइसवरून पाठवला जातो'),
                     style: TextStyle(fontSize: 12, color: AdminColors.grey600)),
-                _checkbox(tr('Missed calls', 'मिस्ड कॉल'), _smsMissed, (v) => setState(() => _smsMissed = v)),
-                _checkbox(tr('Received calls', 'रिसीव्ड कॉल'), _smsReceived, (v) => setState(() => _smsReceived = v)),
-                _checkbox(tr('Rejected calls', 'रिजेक्टेड कॉल'), _smsRejected, (v) => setState(() => _smsRejected = v)),
+                _checkbox(tr('Missed calls', 'मिस्ड कॉल', 'मिस्ड कॉल'), _smsMissed, (v) => setState(() => _smsMissed = v)),
+                _checkbox(tr('Received calls', 'रिसीव्ड कॉल', 'रिसीव्ह्ड कॉल'), _smsReceived, (v) => setState(() => _smsReceived = v)),
+                _checkbox(tr('Rejected calls', 'रिजेक्टेड कॉल', 'नाकारलेले कॉल'), _smsRejected, (v) => setState(() => _smsRejected = v)),
               ],
             ),
           ),
@@ -220,14 +222,14 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(tr('Auto WhatsApp', 'ऑटो WhatsApp'),
+                Text(tr('Auto WhatsApp', 'ऑटो WhatsApp', 'ऑटो WhatsApp'),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 4),
-                Text(tr('Sent via the Trimbakeshwar server', 'Trimbakeshwar सर्वर के ज़रिए भेजा जाता है'),
+                Text(tr('Sent via the Trimbakeshwar server', 'Trimbakeshwar सर्वर के ज़रिए भेजा जाता है', 'Trimbakeshwar सर्व्हरमार्फत पाठवला जातो'),
                     style: TextStyle(fontSize: 12, color: AdminColors.grey600)),
-                _checkbox(tr('Missed calls', 'मिस्ड कॉल'), _waMissed, (v) => setState(() => _waMissed = v)),
-                _checkbox(tr('Received calls', 'रिसीव्ड कॉल'), _waReceived, (v) => setState(() => _waReceived = v)),
-                _checkbox(tr('Rejected calls', 'रिजेक्टेड कॉल'), _waRejected, (v) => setState(() => _waRejected = v)),
+                _checkbox(tr('Missed calls', 'मिस्ड कॉल', 'मिस्ड कॉल'), _waMissed, (v) => setState(() => _waMissed = v)),
+                _checkbox(tr('Received calls', 'रिसीव्ड कॉल', 'रिसीव्ह्ड कॉल'), _waReceived, (v) => setState(() => _waReceived = v)),
+                _checkbox(tr('Rejected calls', 'रिजेक्टेड कॉल', 'नाकारलेले कॉल'), _waRejected, (v) => setState(() => _waRejected = v)),
               ],
             ),
           ),
@@ -242,7 +244,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 elevation: 2,
               ),
-              child: Text(tr('Save Changes', 'बदलाव सेव करें'),
+              child: Text(tr('Save Changes', 'बदलाव सेव करें', 'बदल जतन करा'),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
             ),
           ),
@@ -256,20 +258,21 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(tr('Setup needed', 'सेटअप आवश्यक'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+          Text(tr('Setup needed', 'सेटअप आवश्यक', 'सेटअप आवश्यक'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           if (!_permissionsGranted)
             _setupRow(
-              tr('Grant Phone, Contacts & SMS permissions', 'फ़ोन, संपर्क और SMS अनुमतियां दें'),
-              tr('Required to detect and respond to calls', 'कॉल का पता लगाने और जवाब देने के लिए आवश्यक'),
+              tr('Grant Phone, Contacts & SMS permissions', 'फ़ोन, संपर्क और SMS अनुमतियां दें', 'फोन, कॉन्टॅक्ट्स आणि SMS परवानगी द्या'),
+              tr('Required to detect and respond to calls', 'कॉल का पता लगाने और जवाब देने के लिए आवश्यक', 'कॉल ओळखण्यासाठी आणि प्रतिसाद देण्यासाठी आवश्यक'),
               _requestPermissions,
             ),
           if (!_batteryOptimizationIgnored)
             _setupRow(
-              tr('Disable battery optimization for this app', 'इस ऐप के लिए बैटरी ऑप्टिमाइज़ेशन बंद करें'),
+              tr('Disable battery optimization for this app', 'इस ऐप के लिए बैटरी ऑप्टिमाइज़ेशन बंद करें', 'या अ‍ॅपसाठी बॅटरी ऑप्टिमायझेशन बंद करा'),
               tr(
                 'Prevents the device from stopping call detection in the background',
                 'यह डिवाइस को बैकग्राउंड में कॉल डिटेक्शन रोकने से बचाता है',
+                'यामुळे डिव्हाइस बॅकग्राउंडमध्ये कॉल डिटेक्शन थांबवत नाही',
               ),
               _openBatteryOptimizationSettings,
             ),
@@ -294,7 +297,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
               ],
             ),
           ),
-          TextButton(onPressed: onTap, child: Text(tr('Fix', 'ठीक करें'))),
+          TextButton(onPressed: onTap, child: Text(tr('Fix', 'ठीक करें', 'ठीक करा'))),
         ],
       ),
     );
@@ -317,8 +320,8 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
             ),
             Text(
               minutes == 0
-                  ? tr('Immediately', 'तुरंत')
-                  : tr('$minutes minute${minutes == 1 ? '' : 's'}', '$minutes मिनट'),
+                  ? tr('Immediately', 'तुरंत', 'लगेच')
+                  : tr('$minutes minute${minutes == 1 ? '' : 's'}', '$minutes मिनट', '$minutes मिनिटे'),
               style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E)),
             ),
             IconButton(
@@ -334,7 +337,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
           max: 60,
           divisions: 60,
           activeColor: AdminColors.primary,
-          label: minutes == 0 ? tr('Immediately', 'तुरंत') : tr('$minutes min', '$minutes मिनट'),
+          label: minutes == 0 ? tr('Immediately', 'तुरंत', 'लगेच') : tr('$minutes min', '$minutes मिनट', '$minutes मिनिटे'),
           onChanged: (v) => setMinutes(v.round()),
         ),
       ],

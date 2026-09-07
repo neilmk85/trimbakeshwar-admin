@@ -194,8 +194,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       : filtered.isEmpty
                       ? _buildEmpty(
                           data.orders.isEmpty
-                              ? tr('No bookings yet.', 'अभी तक कोई बुकिंग नहीं है।')
-                              : tr('No bookings match the filters.', 'फ़िल्टर से कोई बुकिंग नहीं मिली।'),
+                              ? tr('No bookings yet.', 'अभी तक कोई बुकिंग नहीं है।', 'अजून कोणतीही बुकिंग नाही.')
+                              : tr('No bookings match the filters.', 'फ़िल्टर से कोई बुकिंग नहीं मिली।', 'फिल्टरनुसार कोणतीही बुकिंग सापडली नाही.'),
                         )
                       : _buildList(filtered),
                 ),
@@ -280,18 +280,18 @@ class _FilterPanel extends StatelessWidget {
   });
 
   static Map<_DatePreset, String> get _dateLabels => {
-    _DatePreset.upcoming: tr('Upcoming', 'आगामी'),
-    _DatePreset.today: tr('Today', 'आज'),
-    _DatePreset.tomorrow: tr('Tomorrow', 'कल (आने वाला)'),
-    _DatePreset.yesterday: tr('Yesterday', 'कल (बीता हुआ)'),
-    _DatePreset.thisWeek: tr('This Week', 'इस सप्ताह'),
-    _DatePreset.thisMonth: tr('This Month', 'इस महीने'),
-    _DatePreset.all: tr('All Dates', 'सभी तारीखें'),
-    _DatePreset.custom: tr('Custom', 'कस्टम'),
+    _DatePreset.upcoming: tr('Upcoming', 'आगामी', 'आगामी'),
+    _DatePreset.today: tr('Today', 'आज', 'आज'),
+    _DatePreset.tomorrow: tr('Tomorrow', 'कल (आने वाला)', 'उद्या'),
+    _DatePreset.yesterday: tr('Yesterday', 'कल (बीता हुआ)', 'काल'),
+    _DatePreset.thisWeek: tr('This Week', 'इस सप्ताह', 'हा आठवडा'),
+    _DatePreset.thisMonth: tr('This Month', 'इस महीने', 'हा महिना'),
+    _DatePreset.all: tr('All Dates', 'सभी तारीखें', 'सर्व तारखा'),
+    _DatePreset.custom: tr('Custom', 'कस्टम', 'कस्टम'),
   };
 
   String _customLabel() {
-    if (customRange == null) return tr('Custom', 'कस्टम');
+    if (customRange == null) return tr('Custom', 'कस्टम', 'कस्टम');
     final s = customRange!.start;
     final e = customRange!.end;
     const m = [
@@ -353,6 +353,7 @@ class _FilterPanel extends StatelessWidget {
                   tr(
                     '$resultCount booking${resultCount == 1 ? '' : 's'}',
                     '$resultCount बुकिंग',
+                    '$resultCount बुकिंग',
                   ),
                   style: TextStyle(
                     fontSize: 11,
@@ -374,7 +375,7 @@ class _FilterPanel extends StatelessWidget {
                         ),
                         const SizedBox(width: 3),
                         Text(
-                          tr('Clear', 'साफ़ करें'),
+                          tr('Clear', 'साफ़ करें', 'साफ करा'),
                           style: TextStyle(
                             fontSize: 11,
                             color: AdminColors.primary.withValues(alpha: 0.7),
@@ -412,7 +413,7 @@ class _FilterPanel extends StatelessWidget {
         onChanged: (_) => onSearchChanged(),
         style: const TextStyle(fontSize: 13),
         decoration: InputDecoration(
-          hintText: tr('Name or mobile...', 'नाम या मोबाइल...'),
+          hintText: tr('Name or mobile...', 'नाम या मोबाइल...', 'नाव किंवा मोबाईल...'),
           hintStyle: TextStyle(fontSize: 13, color: AdminColors.grey400),
           prefixIcon: Icon(
             Icons.search_rounded,
@@ -503,8 +504,8 @@ class _FilterPanel extends StatelessWidget {
     return _IconChipButton(
       icon: Icons.sort_rounded,
       label: sortBy == _SortBy.poojaDate
-          ? tr('Pooja Date', 'पूजा तारीख')
-          : tr('Booking Date', 'बुकिंग तारीख'),
+          ? tr('Pooja Date', 'पूजा तारीख', 'पूजा तारीख')
+          : tr('Booking Date', 'बुकिंग तारीख', 'बुकिंग तारीख'),
       active: active,
       chipActive: chipActive,
       onTap: () {
@@ -519,10 +520,10 @@ class _FilterPanel extends StatelessWidget {
   Widget _poojaButton(BuildContext context) {
     final active = selectedPoojaNames.isNotEmpty;
     final label = selectedPoojaNames.isEmpty
-        ? tr('Pooja', 'पूजा')
+        ? tr('Pooja', 'पूजा', 'पूजा')
         : selectedPoojaNames.length == 1
             ? selectedPoojaNames.first
-            : tr('${selectedPoojaNames.length} Poojas', '${selectedPoojaNames.length} पूजाएं');
+            : tr('${selectedPoojaNames.length} Poojas', '${selectedPoojaNames.length} पूजाएं', '${selectedPoojaNames.length} पूजा');
     return _IconChipButton(
       icon: Icons.auto_awesome_rounded,
       label: label,
@@ -767,12 +768,12 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            tr('Filter by Pooja', 'पूजा के अनुसार फ़िल्टर करें'),
+            tr('Filter by Pooja', 'पूजा के अनुसार फ़िल्टर करें', 'पूजेनुसार फिल्टर करा'),
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
-            tr('Select one or more poojas', 'एक या अधिक पूजाएं चुनें'),
+            tr('Select one or more poojas', 'एक या अधिक पूजाएं चुनें', 'एक किंवा अधिक पूजा निवडा'),
             style: TextStyle(fontSize: 12, color: AdminColors.grey500),
           ),
           Flexible(
@@ -780,7 +781,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
               child: Column(
                 children: [
                   _checkboxRow(
-                    tr('All Poojas', 'सभी पूजाएं'),
+                    tr('All Poojas', 'सभी पूजाएं', 'सर्व पूजा'),
                     _selected.isEmpty,
                     () => setState(() => _selected.clear()),
                   ),
@@ -808,7 +809,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => setState(() => _selected.clear()),
-                  child: Text(tr('Clear', 'साफ़ करें')),
+                  child: Text(tr('Clear', 'साफ़ करें', 'साफ करा')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -822,7 +823,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
                     widget.onApply(_selected);
                     Navigator.pop(context);
                   },
-                  child: Text(tr('Apply', 'लागू करें')),
+                  child: Text(tr('Apply', 'लागू करें', 'लागू करा')),
                 ),
               ),
             ],
@@ -978,7 +979,7 @@ class _BookingCard extends StatelessWidget {
                                 const Icon(Icons.lock_person_outlined,
                                     size: 10, color: Colors.white),
                                 const SizedBox(width: 3),
-                                Text(tr('Private Pooja', 'निजी पूजा'),
+                                Text(tr('Private Pooja', 'निजी पूजा', 'खाजगी पूजा'),
                                     style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
@@ -1005,30 +1006,31 @@ class _BookingCard extends StatelessWidget {
                         ? Icons.hotel_rounded
                         : Icons.calendar_today_outlined,
                     order.isRoomOnly
-                        ? tr('Check-in Date', 'चेक-इन तारीख')
-                        : tr('Pooja Date', 'पूजा तारीख'),
+                        ? tr('Check-in Date', 'चेक-इन तारीख', 'चेक-इन तारीख')
+                        : tr('Pooja Date', 'पूजा तारीख', 'पूजा तारीख'),
                     _formatDate(order.eventDate),
-                    tag: order.rescheduled ? tr('Rescheduled', 'पुनर्निर्धारित') : null,
+                    tag: order.rescheduled ? tr('Rescheduled', 'पुनर्निर्धारित', 'पुनर्नियोजित') : null,
                     tagColor: const Color(0xFF6A1B9A),
                     bold: true,
                   ),
                   if (!order.isRoomOnly) ...[
                     const SizedBox(height: 8),
-                    _detailRow(Icons.people_outline, tr('Persons', 'व्यक्ति'),
+                    _detailRow(Icons.people_outline, tr('Persons', 'व्यक्ति', 'व्यक्ती'),
                         '${order.numberOfPeople}'),
                     const SizedBox(height: 8),
-                    _detailRow(Icons.family_restroom_outlined, tr('Gotra', 'गोत्र'),
+                    _detailRow(Icons.family_restroom_outlined, tr('Gotra', 'गोत्र', 'गोत्र'),
                         order.gotra),
                   ],
                   if (order.numberOfRooms > 0) ...[
                     const SizedBox(height: 8),
                     _detailRow(
                       Icons.hotel_rounded,
-                      tr('Stay', 'ठहराव'),
+                      tr('Stay', 'ठहराव', 'मुक्काम'),
                       tr(
                         '${order.numberOfRooms} room${order.numberOfRooms > 1 ? 's' : ''}'
                             ' × ${order.numberOfNights} night${order.numberOfNights > 1 ? 's' : ''}',
                         '${order.numberOfRooms} कमरे × ${order.numberOfNights} रातें',
+                        '${order.numberOfRooms} खोल्या × ${order.numberOfNights} रात्री',
                       ),
                     ),
                   ],
@@ -1036,20 +1038,21 @@ class _BookingCard extends StatelessWidget {
                   if (!order.isRoomOnly)
                     _costRow(
                       order.isPrivatePooja
-                          ? tr('Private Pooja Cost', 'निजी पूजा शुल्क')
-                          : tr('Pooja Cost', 'पूजा शुल्क'),
+                          ? tr('Private Pooja Cost', 'निजी पूजा शुल्क', 'खाजगी पूजा शुल्क')
+                          : tr('Pooja Cost', 'पूजा शुल्क', 'पूजा शुल्क'),
                       null,
                       _formatAmount(order.poojaAmount),
                     ),
                   if (order.numberOfRooms > 0) ...[
                     const SizedBox(height: 4),
                     _costRow(
-                      tr('Stay', 'ठहराव'),
+                      tr('Stay', 'ठहराव', 'मुक्काम'),
                       tr(
                         '${order.numberOfRooms} rm'
                             ' × ${order.numberOfNights} nights'
                             ' × ${_formatAmount(order.stayRatePerRoom)}',
                         '${order.numberOfRooms} कमरे × ${order.numberOfNights} रातें × ${_formatAmount(order.stayRatePerRoom)}',
+                        '${order.numberOfRooms} खोल्या × ${order.numberOfNights} रात्री × ${_formatAmount(order.stayRatePerRoom)}',
                       ),
                       _formatAmount(order.stayAmount),
                     ),
@@ -1060,8 +1063,8 @@ class _BookingCard extends StatelessWidget {
                     children: [
                       Text(
                         order.cancelled
-                            ? tr('Amount', 'राशि')
-                            : tr('Amount Paid', 'भुगतान की गई राशि'),
+                            ? tr('Amount', 'राशि', 'रक्कम')
+                            : tr('Amount Paid', 'भुगतान की गई राशि', 'भरलेली रक्कम'),
                         style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -1090,6 +1093,7 @@ class _BookingCard extends StatelessWidget {
                       tr(
                         'Booked on ${_formatDate(order.bookedOn)}',
                         '${_formatDate(order.bookedOn)} को बुक किया गया',
+                        '${_formatDate(order.bookedOn)} रोजी बुक केले',
                       ),
                       style: const TextStyle(
                           fontSize: 11, color: Color(0xFF9CA3AF)),
@@ -1119,7 +1123,7 @@ class _BookingCard extends StatelessWidget {
             const Icon(Icons.cancel_outlined,
                 size: 12, color: Color(0xFFC62828)),
             const SizedBox(width: 4),
-            Text(tr('Cancelled', 'रद्द'),
+            Text(tr('Cancelled', 'रद्द', 'रद्द'),
                 style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -1135,7 +1139,7 @@ class _BookingCard extends StatelessWidget {
           const Icon(Icons.event_repeat_outlined,
               size: 12, color: Colors.white),
           const SizedBox(width: 4),
-          Text(tr('Rescheduled', 'पुनर्निर्धारित'),
+          Text(tr('Rescheduled', 'पुनर्निर्धारित', 'पुनर्नियोजित'),
               style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
@@ -1148,7 +1152,7 @@ class _BookingCard extends StatelessWidget {
       children: [
         const Icon(Icons.check_circle, size: 12, color: Colors.white),
         const SizedBox(width: 4),
-        Text(tr('Confirmed', 'पुष्टि'),
+        Text(tr('Confirmed', 'पुष्टि', 'कन्फर्म्ड'),
             style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
