@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 import 'admin_rooms_screen.dart';
+import 'call_integration_setup_screen.dart';
 import 'gurujis_screen.dart';
 import 'poojas_screen.dart';
 import 'reports_screen.dart';
@@ -92,6 +93,22 @@ class SettingsScreen extends StatelessWidget {
               builder: (_) => const _FullScreenPage(
                 title: 'Room Availability',
                 child: RoomBlocksScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
+          icon: Icons.call_rounded,
+          color: const Color(0xFF2E7D32),
+          title: 'Call Auto-Reply',
+          subtitle: 'Auto SMS and WhatsApp for missed, received and rejected calls',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Call Auto-Reply',
+                child: CallIntegrationSetupScreen(),
               ),
             ),
           ),
