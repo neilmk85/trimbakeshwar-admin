@@ -7,6 +7,7 @@ import 'poojas_screen.dart';
 import 'reports_screen.dart';
 import 'room_blocks_screen.dart';
 import 'social_media_settings_screen.dart';
+import 'unknown_callers_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -109,6 +110,22 @@ class SettingsScreen extends StatelessWidget {
               builder: (_) => const _FullScreenPage(
                 title: 'Call Auto-Reply',
                 child: CallIntegrationSetupScreen(),
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
+          icon: Icons.person_search_rounded,
+          color: const Color(0xFF6A1B9A),
+          title: 'Unknown Callers',
+          subtitle: 'Callers not in your customer list — save them as customers',
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const _FullScreenPage(
+                title: 'Unknown Callers',
+                child: UnknownCallersScreen(),
               ),
             ),
           ),

@@ -37,6 +37,30 @@ class AdminUser {
   }
 }
 
+class UnknownCaller {
+  final String callerPhone;
+  final String callerName;
+  final int callCount;
+  final DateTime? lastCallAt;
+  final String lastCallType;
+
+  const UnknownCaller({
+    required this.callerPhone,
+    required this.callerName,
+    required this.callCount,
+    required this.lastCallAt,
+    required this.lastCallType,
+  });
+
+  factory UnknownCaller.fromJson(Map<String, dynamic> json) => UnknownCaller(
+        callerPhone: json['callerPhone'] as String? ?? '',
+        callerName: json['callerName'] as String? ?? '',
+        callCount: json['callCount'] as int? ?? 0,
+        lastCallAt: json['lastCallAt'] != null ? DateTime.tryParse(json['lastCallAt'] as String) : null,
+        lastCallType: json['lastCallType'] as String? ?? '',
+      );
+}
+
 class AdminOrder {
   final String orderId;
   final String poojaName;
