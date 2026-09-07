@@ -75,8 +75,14 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
   }
 
   Future<void> _refreshPermissionStatus() async {
-    final statuses = await [Permission.phone, Permission.contacts, Permission.sms].request();
-    final granted = statuses.values.every((s) => s.isGranted);
+    bool granted = false;
+    try {
+      final statuses = await [Permission.phone, Permission.contacts, Permission.sms].request();
+      granted = statuses.values.every((s) => s.isGranted);
+    } catch (_) {
+      // permission_handler has no implementation for these permissions
+      // outside Android (e.g. when previewing on web) — nothing to do.
+    }
     bool batteryOk = false;
     try {
       batteryOk = await _channel.invokeMethod<bool>('isIgnoringBatteryOptimizations') ?? false;
@@ -90,7 +96,9 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
   }
 
   Future<void> _requestPermissions() async {
-    await [Permission.phone, Permission.contacts, Permission.sms].request();
+    try {
+      await [Permission.phone, Permission.contacts, Permission.sms].request();
+    } catch (_) {}
     await _refreshPermissionStatus();
     if (!_permissionsGranted && mounted) {
       _showSnack('Some permissions were denied. Call detection needs Phone, Contacts and SMS permissions to work.');
