@@ -61,7 +61,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
     } catch (_) {
       if (mounted) {
         setState(() => _loading = false);
-        _showSnack(tr('Failed to load social media links', 'सोशल मीडिया लिंक लोड करने में विफल'));
+        _showSnack(tr('Failed to load social media links', 'सोशल मीडिया लिंक लोड करने में विफल', 'सोशल मीडिया लिंक लोड करण्यात अयशस्वी'));
       }
     }
   }
@@ -87,18 +87,18 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
       }
       if (res.statusCode == 200) {
         if (mounted) {
-          _showSnack(tr('Links updated successfully', 'लिंक सफलतापूर्वक अपडेट किए गए'));
+          _showSnack(tr('Links updated successfully', 'लिंक सफलतापूर्वक अपडेट किए गए', 'लिंक यशस्वीरित्या अपडेट झाल्या'));
         }
       } else {
         if (mounted) {
           final body = jsonDecode(res.body) as Map<String, dynamic>;
-          _showSnack(body['message'] ?? tr('Failed to update links', 'लिंक अपडेट करने में विफल'));
+          _showSnack(body['message'] ?? tr('Failed to update links', 'लिंक अपडेट करने में विफल', 'लिंक अपडेट करण्यात अयशस्वी'));
         }
       }
     } catch (_) {
       if (mounted) {
         setState(() => _saving = false);
-        _showSnack(tr('Error saving social media links', 'सोशल मीडिया लिंक सेव करने में त्रुटि'));
+        _showSnack(tr('Error saving social media links', 'सोशल मीडिया लिंक सेव करने में त्रुटि', 'सोशल मीडिया लिंक जतन करताना त्रुटी आली'));
       }
     }
   }
@@ -125,7 +125,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    tr('Social Media Links', 'सोशल मीडिया लिंक'),
+                    tr('Social Media Links', 'सोशल मीडिया लिंक', 'सोशल मीडिया लिंक'),
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                           color: const Color(0xFF1A1A2E),
@@ -136,6 +136,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                     tr(
                       'Add your social media profile links to help users connect with you',
                       'लोगों को आपसे जुड़ने में मदद के लिए अपने सोशल मीडिया प्रोफाइल लिंक जोड़ें',
+                      'लोकांना तुमच्याशी जोडले जाण्यासाठी तुमच्या सोशल मीडिया प्रोफाइल लिंक जोडा',
                     ),
                     style: TextStyle(
                       fontSize: 14,
@@ -145,7 +146,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                   const SizedBox(height: 32),
                   _buildSocialField(
                     controller: _websiteCtrl,
-                    label: tr('Website', 'वेबसाइट'),
+                    label: tr('Website', 'वेबसाइट', 'वेबसाइट'),
                     icon: Icons.language_rounded,
                     hint: 'https://yourwebsite.com',
                     color: const Color(0xFF4285F4),
@@ -153,7 +154,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                   const SizedBox(height: 20),
                   _buildSocialField(
                     controller: _facebookCtrl,
-                    label: tr('Facebook', 'Facebook'),
+                    label: tr('Facebook', 'Facebook', 'Facebook'),
                     icon: Icons.facebook_rounded,
                     hint: 'https://facebook.com/yourpage',
                     color: const Color(0xFF1877F2),
@@ -161,7 +162,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                   const SizedBox(height: 20),
                   _buildSocialField(
                     controller: _instagramCtrl,
-                    label: tr('Instagram', 'Instagram'),
+                    label: tr('Instagram', 'Instagram', 'Instagram'),
                     icon: Icons.camera_alt_rounded,
                     hint: 'https://instagram.com/yourprofile',
                     color: const Color(0xFFE1306C),
@@ -169,7 +170,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                   const SizedBox(height: 20),
                   _buildSocialField(
                     controller: _youtubeCtrl,
-                    label: tr('YouTube', 'YouTube'),
+                    label: tr('YouTube', 'YouTube', 'YouTube'),
                     icon: Icons.play_circle_rounded,
                     hint: 'https://youtube.com/@yourchannel',
                     color: const Color(0xFFFF0000),
@@ -197,7 +198,7 @@ class _SocialMediaSettingsScreenState extends State<SocialMediaSettingsScreen> {
                               ),
                             )
                           : Text(
-                              tr('Save Changes', 'बदलाव सेव करें'),
+                              tr('Save Changes', 'बदलाव सेव करें', 'बदल जतन करा'),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,

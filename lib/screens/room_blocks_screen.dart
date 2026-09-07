@@ -87,7 +87,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
 
   Future<void> _openCreateBlockSheet(AdminRoom room, int maxAvailable) async {
     if (maxAvailable <= 0) {
-      _showSnack(tr('No rooms available on this date to block.', 'इस तारीख पर ब्लॉक करने के लिए कोई कमरा उपलब्ध नहीं है।'), isError: true);
+      _showSnack(tr('No rooms available on this date to block.', 'इस तारीख पर ब्लॉक करने के लिए कोई कमरा उपलब्ध नहीं है।', 'या तारखेला ब्लॉक करण्यासाठी कोणतीही खोली उपलब्ध नाही.'), isError: true);
       return;
     }
     final result = await showModalBottomSheet<_WalkInBlockForm>(
@@ -108,7 +108,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
     );
     if (!mounted) return;
     if (err == null) {
-      _showSnack(tr('Room blocked for walk-in guest.', 'वॉक-इन अतिथि के लिए कमरा ब्लॉक किया गया।'));
+      _showSnack(tr('Room blocked for walk-in guest.', 'वॉक-इन अतिथि के लिए कमरा ब्लॉक किया गया।', 'वॉक-इन पाहुण्यासाठी खोली ब्लॉक केली आहे.'));
       await _loadBoard(room.id);
     } else {
       _showSnack(err, isError: true);
@@ -120,7 +120,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('Release this room?', 'यह कमरा रिलीज़ करें?')),
+        title: Text(tr('Release this room?', 'यह कमरा रिलीज़ करें?', 'ही खोली रिलीज करायची का?')),
         content: Text(
           tr(
             '${block.guestName.isEmpty ? 'Walk-in guest' : block.guestName} '
@@ -129,14 +129,17 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
             '${block.guestName.isEmpty ? 'वॉक-इन अतिथि' : block.guestName} '
             '· ${block.numberOfRooms} कमरे · ${block.numberOfNights} रातें'
             '${block.notes.isNotEmpty ? '\n\n${block.notes}' : ''}',
+            '${block.guestName.isEmpty ? 'वॉक-इन पाहुणे' : block.guestName} '
+            '· ${block.numberOfRooms} खोल्या · ${block.numberOfNights} रात्री'
+            '${block.notes.isNotEmpty ? '\n\n${block.notes}' : ''}',
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel', 'रद्द करें'))),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr('Cancel', 'रद्द करें', 'रद्द करा'))),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr('Release', 'रिलीज़ करें')),
+            child: Text(tr('Release', 'रिलीज़ करें', 'रिलीज करा')),
           ),
         ],
       ),
@@ -145,7 +148,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
     final err = await AdminDataService.releaseRoomBlock(block.id);
     if (!mounted) return;
     if (err == null) {
-      _showSnack(tr('Room released.', 'कमरा रिलीज़ किया गया।'));
+      _showSnack(tr('Room released.', 'कमरा रिलीज़ किया गया।', 'खोली रिलीज केली आहे.'));
       await _loadBoard(roomId);
     } else {
       _showSnack(err, isError: true);
@@ -189,7 +192,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
               const SizedBox(height: 12),
               Text(message, textAlign: TextAlign.center, style: TextStyle(color: AdminColors.grey600)),
               const SizedBox(height: 16),
-              ElevatedButton(onPressed: _load, child: Text(tr('Retry', 'फिर से कोशिश करें'))),
+              ElevatedButton(onPressed: _load, child: Text(tr('Retry', 'फिर से कोशिश करें', 'पुन्हा प्रयत्न करा'))),
             ],
           ),
         ),
@@ -203,7 +206,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
             children: [
               Icon(Icons.meeting_room_outlined, size: 56, color: AdminColors.grey400),
               const SizedBox(height: 12),
-              Text(tr('No room listings yet.', 'अभी तक कोई कमरा सूचीबद्ध नहीं है।'), style: TextStyle(color: AdminColors.grey600)),
+              Text(tr('No room listings yet.', 'अभी तक कोई कमरा सूचीबद्ध नहीं है।', 'अजून कोणतीही खोली नोंदवलेली नाही.'), style: TextStyle(color: AdminColors.grey600)),
             ],
           ),
         ),
@@ -231,7 +234,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  isToday ? '${tr('Today', 'आज')} · ${_formatDate(_selectedDate)}' : _formatDate(_selectedDate),
+                  isToday ? '${tr('Today', 'आज', 'आज')} · ${_formatDate(_selectedDate)}' : _formatDate(_selectedDate),
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E)),
                 ),
               ),
@@ -254,18 +257,18 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
 
   String _formatDate(DateTime d) {
     final months = [
-      tr('Jan', 'जन'),
-      tr('Feb', 'फ़र'),
-      tr('Mar', 'मार्च'),
-      tr('Apr', 'अप्रैल'),
-      tr('May', 'मई'),
-      tr('Jun', 'जून'),
-      tr('Jul', 'जुलाई'),
-      tr('Aug', 'अग'),
-      tr('Sep', 'सित'),
-      tr('Oct', 'अक्टू'),
-      tr('Nov', 'नव'),
-      tr('Dec', 'दिस'),
+      tr('Jan', 'जन', 'जाने'),
+      tr('Feb', 'फ़र', 'फेब्रु'),
+      tr('Mar', 'मार्च', 'मार्च'),
+      tr('Apr', 'अप्रैल', 'एप्रि'),
+      tr('May', 'मई', 'मे'),
+      tr('Jun', 'जून', 'जून'),
+      tr('Jul', 'जुलाई', 'जुलै'),
+      tr('Aug', 'अग', 'ऑग'),
+      tr('Sep', 'सित', 'सप्टें'),
+      tr('Oct', 'अक्टू', 'ऑक्टो'),
+      tr('Nov', 'नव', 'नोव्हें'),
+      tr('Dec', 'दिस', 'डिसें'),
     ];
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
@@ -310,7 +313,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
               if (loading)
                 const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
               else
-                Text(tr('$availableCount/$totalCount available', '$availableCount/$totalCount उपलब्ध'),
+                Text(tr('$availableCount/$totalCount available', '$availableCount/$totalCount उपलब्ध', '$availableCount/$totalCount उपलब्ध'),
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AdminColors.grey600)),
             ],
           ),
@@ -320,6 +323,7 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
                 tr(
                   '⚠ $overflow room(s) over capacity for this date — reduce blocks or check bookings.',
                   '⚠ इस तारीख के लिए $overflow कमरे क्षमता से अधिक हैं — ब्लॉक कम करें या बुकिंग जांचें।',
+                  '⚠ या तारखेसाठी $overflow खोल्या क्षमतेपेक्षा जास्त आहेत — ब्लॉक कमी करा किंवा बुकिंग तपासा.',
                 ),
                 style: TextStyle(fontSize: 11.5, color: Colors.red.shade700, fontWeight: FontWeight.w600)),
           ],
@@ -349,9 +353,9 @@ class _RoomBlocksScreenState extends State<RoomBlocksScreen> {
             spacing: 14,
             runSpacing: 4,
             children: [
-              _legend(const Color(0xFF1565C0), tr('Booked Online', 'ऑनलाइन बुक्ड')),
-              _legend(const Color(0xFFEF6C00), tr('Walk-in', 'वॉक-इन')),
-              _legend(Colors.green.shade600, tr('Available', 'उपलब्ध')),
+              _legend(const Color(0xFF1565C0), tr('Booked Online', 'ऑनलाइन बुक्ड', 'ऑनलाइन बुक केलेली')),
+              _legend(const Color(0xFFEF6C00), tr('Walk-in', 'वॉक-इन', 'वॉक-इन')),
+              _legend(Colors.green.shade600, tr('Available', 'उपलब्ध', 'उपलब्ध')),
             ],
           ),
         ],
@@ -452,6 +456,7 @@ class _WalkInBlockSheetState extends State<_WalkInBlockSheet> {
                 tr(
                   'Block ${widget.room.name} for Walk-in',
                   '${widget.room.name} को वॉक-इन के लिए ब्लॉक करें',
+                  '${widget.room.name} वॉक-इनसाठी ब्लॉक करा',
                 ),
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E))),
             const SizedBox(height: 4),
@@ -459,13 +464,14 @@ class _WalkInBlockSheetState extends State<_WalkInBlockSheet> {
                 tr(
                   'Reduces this room\'s online availability from the selected date.',
                   'चुनी गई तारीख से इस कमरे की ऑनलाइन उपलब्धता कम हो जाती है।',
+                  'निवडलेल्या तारखेपासून या खोलीची ऑनलाइन उपलब्धता कमी होते.',
                 ),
                 style: TextStyle(fontSize: 12.5, color: AdminColors.grey600)),
             const SizedBox(height: 18),
             TextField(
               controller: _guestController,
               decoration: InputDecoration(
-                labelText: tr('Guest name (optional)', 'अतिथि का नाम (वैकल्पिक)'),
+                labelText: tr('Guest name (optional)', 'अतिथि का नाम (वैकल्पिक)', 'पाहुण्याचे नाव (ऐच्छिक)'),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
@@ -473,16 +479,16 @@ class _WalkInBlockSheetState extends State<_WalkInBlockSheet> {
             TextField(
               controller: _notesController,
               decoration: InputDecoration(
-                labelText: tr('Notes (optional)', 'नोट्स (वैकल्पिक)'),
+                labelText: tr('Notes (optional)', 'नोट्स (वैकल्पिक)', 'नोंदी (ऐच्छिक)'),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
             ),
             const SizedBox(height: 18),
-            _stepperRow(tr('Rooms', 'कमरे'), _rooms, 1, widget.maxAvailable,
+            _stepperRow(tr('Rooms', 'कमरे', 'खोल्या'), _rooms, 1, widget.maxAvailable,
                 onDec: () => setState(() => _rooms = (_rooms - 1).clamp(1, widget.maxAvailable)),
                 onInc: () => setState(() => _rooms = (_rooms + 1).clamp(1, widget.maxAvailable))),
             const SizedBox(height: 10),
-            _stepperRow(tr('Nights', 'रातें'), _nights, 1, 30,
+            _stepperRow(tr('Nights', 'रातें', 'रात्री'), _nights, 1, 30,
                 onDec: () => setState(() => _nights = (_nights - 1).clamp(1, 30)),
                 onInc: () => setState(() => _nights = (_nights + 1).clamp(1, 30))),
             const SizedBox(height: 22),
@@ -504,7 +510,7 @@ class _WalkInBlockSheetState extends State<_WalkInBlockSheet> {
                     numberOfRooms: _rooms,
                   ),
                 ),
-                child: Text(tr('Block Room', 'कमरा ब्लॉक करें'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                child: Text(tr('Block Room', 'कमरा ब्लॉक करें', 'खोली ब्लॉक करा'), style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ),
           ],

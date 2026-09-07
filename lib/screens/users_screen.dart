@@ -22,7 +22,7 @@ class UsersScreen extends StatelessWidget {
               return _buildEmptyState(error);
             }
             if (data.users.isEmpty) {
-              return _buildEmptyState(tr('No registered users yet.', 'अभी तक कोई पंजीकृत ग्राहक नहीं है।'));
+              return _buildEmptyState(tr('No registered users yet.', 'अभी तक कोई पंजीकृत ग्राहक नहीं है।', 'अजून कोणताही नोंदणीकृत ग्राहक नाही.'));
             }
             return _buildUserList(data.users);
           },
@@ -81,7 +81,7 @@ class _UserCard extends StatelessWidget {
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('Could not open dialer', 'डायलर नहीं खुल सका'))),
+        SnackBar(content: Text(tr('Could not open dialer', 'डायलर नहीं खुल सका', 'डायलर उघडता आला नाही'))),
       );
     }
   }
@@ -122,7 +122,7 @@ class _UserCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        user.fullName.isEmpty ? tr('Unknown', 'अज्ञात') : user.fullName,
+                        user.fullName.isEmpty ? tr('Unknown', 'अज्ञात', 'अज्ञात') : user.fullName,
                         style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -132,7 +132,7 @@ class _UserCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        user.phone.isEmpty ? tr('No phone number', 'फ़ोन नंबर नहीं है') : user.phone,
+                        user.phone.isEmpty ? tr('No phone number', 'फ़ोन नंबर नहीं है', 'फोन नंबर नाही') : user.phone,
                         style: TextStyle(fontSize: 13.5, color: AdminColors.grey600),
                       ),
                     ],
