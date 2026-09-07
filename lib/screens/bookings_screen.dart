@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../l10n/tr.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
 import 'admin_booking_detail_screen.dart';
@@ -193,8 +194,8 @@ class _BookingsScreenState extends State<BookingsScreen> {
                       : filtered.isEmpty
                       ? _buildEmpty(
                           data.orders.isEmpty
-                              ? 'No bookings yet.'
-                              : 'No bookings match the filters.',
+                              ? tr('No bookings yet.', 'अभी तक कोई बुकिंग नहीं है।')
+                              : tr('No bookings match the filters.', 'फ़िल्टर से कोई बुकिंग नहीं मिली।'),
                         )
                       : _buildList(filtered),
                 ),
@@ -278,19 +279,19 @@ class _FilterPanel extends StatelessWidget {
     required this.resultCount,
   });
 
-  static const _dateLabels = {
-    _DatePreset.upcoming: 'Upcoming',
-    _DatePreset.today: 'Today',
-    _DatePreset.tomorrow: 'Tomorrow',
-    _DatePreset.yesterday: 'Yesterday',
-    _DatePreset.thisWeek: 'This Week',
-    _DatePreset.thisMonth: 'This Month',
-    _DatePreset.all: 'All Dates',
-    _DatePreset.custom: 'Custom',
+  static Map<_DatePreset, String> get _dateLabels => {
+    _DatePreset.upcoming: tr('Upcoming', 'आगामी'),
+    _DatePreset.today: tr('Today', 'आज'),
+    _DatePreset.tomorrow: tr('Tomorrow', 'कल (आने वाला)'),
+    _DatePreset.yesterday: tr('Yesterday', 'कल (बीता हुआ)'),
+    _DatePreset.thisWeek: tr('This Week', 'इस सप्ताह'),
+    _DatePreset.thisMonth: tr('This Month', 'इस महीने'),
+    _DatePreset.all: tr('All Dates', 'सभी तारीखें'),
+    _DatePreset.custom: tr('Custom', 'कस्टम'),
   };
 
   String _customLabel() {
-    if (customRange == null) return 'Custom';
+    if (customRange == null) return tr('Custom', 'कस्टम');
     final s = customRange!.start;
     final e = customRange!.end;
     const m = [
@@ -349,7 +350,10 @@ class _FilterPanel extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  '$resultCount booking${resultCount == 1 ? '' : 's'}',
+                  tr(
+                    '$resultCount booking${resultCount == 1 ? '' : 's'}',
+                    '$resultCount बुकिंग',
+                  ),
                   style: TextStyle(
                     fontSize: 11,
                     color: AdminColors.primary.withValues(alpha: 0.7),
@@ -370,7 +374,7 @@ class _FilterPanel extends StatelessWidget {
                         ),
                         const SizedBox(width: 3),
                         Text(
-                          'Clear',
+                          tr('Clear', 'साफ़ करें'),
                           style: TextStyle(
                             fontSize: 11,
                             color: AdminColors.primary.withValues(alpha: 0.7),
@@ -408,7 +412,7 @@ class _FilterPanel extends StatelessWidget {
         onChanged: (_) => onSearchChanged(),
         style: const TextStyle(fontSize: 13),
         decoration: InputDecoration(
-          hintText: 'Name or mobile...',
+          hintText: tr('Name or mobile...', 'नाम या मोबाइल...'),
           hintStyle: TextStyle(fontSize: 13, color: AdminColors.grey400),
           prefixIcon: Icon(
             Icons.search_rounded,
@@ -498,7 +502,9 @@ class _FilterPanel extends StatelessWidget {
     final active = sortBy != _SortBy.poojaDate;
     return _IconChipButton(
       icon: Icons.sort_rounded,
-      label: sortBy == _SortBy.poojaDate ? 'Pooja Date' : 'Booking Date',
+      label: sortBy == _SortBy.poojaDate
+          ? tr('Pooja Date', 'पूजा तारीख')
+          : tr('Booking Date', 'बुकिंग तारीख'),
       active: active,
       chipActive: chipActive,
       onTap: () {
@@ -513,10 +519,10 @@ class _FilterPanel extends StatelessWidget {
   Widget _poojaButton(BuildContext context) {
     final active = selectedPoojaNames.isNotEmpty;
     final label = selectedPoojaNames.isEmpty
-        ? 'Pooja'
+        ? tr('Pooja', 'पूजा')
         : selectedPoojaNames.length == 1
             ? selectedPoojaNames.first
-            : '${selectedPoojaNames.length} Poojas';
+            : tr('${selectedPoojaNames.length} Poojas', '${selectedPoojaNames.length} पूजाएं');
     return _IconChipButton(
       icon: Icons.auto_awesome_rounded,
       label: label,
@@ -760,13 +766,13 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Filter by Pooja',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          Text(
+            tr('Filter by Pooja', 'पूजा के अनुसार फ़िल्टर करें'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
           Text(
-            'Select one or more poojas',
+            tr('Select one or more poojas', 'एक या अधिक पूजाएं चुनें'),
             style: TextStyle(fontSize: 12, color: AdminColors.grey500),
           ),
           Flexible(
@@ -774,7 +780,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
               child: Column(
                 children: [
                   _checkboxRow(
-                    'All Poojas',
+                    tr('All Poojas', 'सभी पूजाएं'),
                     _selected.isEmpty,
                     () => setState(() => _selected.clear()),
                   ),
@@ -802,7 +808,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => setState(() => _selected.clear()),
-                  child: const Text('Clear'),
+                  child: Text(tr('Clear', 'साफ़ करें')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -816,7 +822,7 @@ class _PoojaPickerSheetState extends State<_PoojaPickerSheet> {
                     widget.onApply(_selected);
                     Navigator.pop(context);
                   },
-                  child: const Text('Apply'),
+                  child: Text(tr('Apply', 'लागू करें')),
                 ),
               ),
             ],
@@ -966,14 +972,14 @@ class _BookingCard extends StatelessWidget {
                               color: Colors.white.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.lock_person_outlined,
+                                const Icon(Icons.lock_person_outlined,
                                     size: 10, color: Colors.white),
-                                SizedBox(width: 3),
-                                Text('Private Pooja',
-                                    style: TextStyle(
+                                const SizedBox(width: 3),
+                                Text(tr('Private Pooja', 'निजी पूजा'),
+                                    style: const TextStyle(
                                         fontSize: 10,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white)),
@@ -998,45 +1004,53 @@ class _BookingCard extends StatelessWidget {
                     order.isRoomOnly
                         ? Icons.hotel_rounded
                         : Icons.calendar_today_outlined,
-                    order.isRoomOnly ? 'Check-in Date' : 'Pooja Date',
+                    order.isRoomOnly
+                        ? tr('Check-in Date', 'चेक-इन तारीख')
+                        : tr('Pooja Date', 'पूजा तारीख'),
                     _formatDate(order.eventDate),
-                    tag: order.rescheduled ? 'Rescheduled' : null,
+                    tag: order.rescheduled ? tr('Rescheduled', 'पुनर्निर्धारित') : null,
                     tagColor: const Color(0xFF6A1B9A),
                     bold: true,
                   ),
                   if (!order.isRoomOnly) ...[
                     const SizedBox(height: 8),
-                    _detailRow(Icons.people_outline, 'Persons',
+                    _detailRow(Icons.people_outline, tr('Persons', 'व्यक्ति'),
                         '${order.numberOfPeople}'),
                     const SizedBox(height: 8),
-                    _detailRow(Icons.family_restroom_outlined, 'Gotra',
+                    _detailRow(Icons.family_restroom_outlined, tr('Gotra', 'गोत्र'),
                         order.gotra),
                   ],
                   if (order.numberOfRooms > 0) ...[
                     const SizedBox(height: 8),
                     _detailRow(
                       Icons.hotel_rounded,
-                      'Stay',
-                      '${order.numberOfRooms} room${order.numberOfRooms > 1 ? 's' : ''}'
-                          ' × ${order.numberOfNights} night${order.numberOfNights > 1 ? 's' : ''}',
+                      tr('Stay', 'ठहराव'),
+                      tr(
+                        '${order.numberOfRooms} room${order.numberOfRooms > 1 ? 's' : ''}'
+                            ' × ${order.numberOfNights} night${order.numberOfNights > 1 ? 's' : ''}',
+                        '${order.numberOfRooms} कमरे × ${order.numberOfNights} रातें',
+                      ),
                     ),
                   ],
                   const Divider(height: 20, color: Color(0xFFE0E0E0)),
                   if (!order.isRoomOnly)
                     _costRow(
                       order.isPrivatePooja
-                          ? 'Private Pooja Cost'
-                          : 'Pooja Cost',
+                          ? tr('Private Pooja Cost', 'निजी पूजा शुल्क')
+                          : tr('Pooja Cost', 'पूजा शुल्क'),
                       null,
                       _formatAmount(order.poojaAmount),
                     ),
                   if (order.numberOfRooms > 0) ...[
                     const SizedBox(height: 4),
                     _costRow(
-                      'Stay',
-                      '${order.numberOfRooms} rm'
-                          ' × ${order.numberOfNights} nights'
-                          ' × ${_formatAmount(order.stayRatePerRoom)}',
+                      tr('Stay', 'ठहराव'),
+                      tr(
+                        '${order.numberOfRooms} rm'
+                            ' × ${order.numberOfNights} nights'
+                            ' × ${_formatAmount(order.stayRatePerRoom)}',
+                        '${order.numberOfRooms} कमरे × ${order.numberOfNights} रातें × ${_formatAmount(order.stayRatePerRoom)}',
+                      ),
                       _formatAmount(order.stayAmount),
                     ),
                   ],
@@ -1045,7 +1059,9 @@ class _BookingCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        order.cancelled ? 'Amount' : 'Amount Paid',
+                        order.cancelled
+                            ? tr('Amount', 'राशि')
+                            : tr('Amount Paid', 'भुगतान की गई राशि'),
                         style: const TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
@@ -1071,7 +1087,10 @@ class _BookingCard extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: Text(
-                      'Booked on ${_formatDate(order.bookedOn)}',
+                      tr(
+                        'Booked on ${_formatDate(order.bookedOn)}',
+                        '${_formatDate(order.bookedOn)} को बुक किया गया',
+                      ),
                       style: const TextStyle(
                           fontSize: 11, color: Color(0xFF9CA3AF)),
                     ),
@@ -1094,14 +1113,14 @@ class _BookingCard extends StatelessWidget {
           color: const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.cancel_outlined,
+            const Icon(Icons.cancel_outlined,
                 size: 12, color: Color(0xFFC62828)),
-            SizedBox(width: 4),
-            Text('Cancelled',
-                style: TextStyle(
+            const SizedBox(width: 4),
+            Text(tr('Cancelled', 'रद्द'),
+                style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFFC62828))),
@@ -1110,27 +1129,27 @@ class _BookingCard extends StatelessWidget {
       );
     }
     if (order.rescheduled) {
-      return const Row(
+      return Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.event_repeat_outlined,
+          const Icon(Icons.event_repeat_outlined,
               size: 12, color: Colors.white),
-          SizedBox(width: 4),
-          Text('Rescheduled',
-              style: TextStyle(
+          const SizedBox(width: 4),
+          Text(tr('Rescheduled', 'पुनर्निर्धारित'),
+              style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                   color: Colors.white)),
         ],
       );
     }
-    return const Row(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.check_circle, size: 12, color: Colors.white),
-        SizedBox(width: 4),
-        Text('Confirmed',
-            style: TextStyle(
+        const Icon(Icons.check_circle, size: 12, color: Colors.white),
+        const SizedBox(width: 4),
+        Text(tr('Confirmed', 'पुष्टि'),
+            style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Colors.white)),

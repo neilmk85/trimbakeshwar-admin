@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../constants/app_colors.dart';
+import '../l10n/tr.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
 import 'admin_booking_detail_screen.dart';
@@ -14,7 +15,7 @@ class CustomerDetailScreen extends StatelessWidget {
     final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open dialer')),
+        SnackBar(content: Text(tr('Could not open dialer', 'डायलर नहीं खोला जा सका'))),
       );
     }
   }
@@ -27,12 +28,12 @@ class CustomerDetailScreen extends StatelessWidget {
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: AdminColors.appBarGradient),
         ),
-        title: Text(user.fullName.isEmpty ? 'Customer' : user.fullName),
+        title: Text(user.fullName.isEmpty ? tr('Customer', 'ग्राहक') : user.fullName),
         actions: [
           if (user.phone.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.call_rounded),
-              tooltip: 'Call',
+              tooltip: tr('Call', 'कॉल करें'),
               onPressed: () => _call(context),
             ),
         ],
@@ -68,17 +69,17 @@ class CustomerDetailScreen extends StatelessWidget {
               const SizedBox(height: 14),
               _statsRow(bookings.length, totalPaid, upcoming.length),
               const SizedBox(height: 22),
-              _sectionHeader('Upcoming Poojas', Icons.upcoming_rounded),
+              _sectionHeader(tr('Upcoming Poojas', 'आगामी पूजाएं'), Icons.upcoming_rounded),
               const SizedBox(height: 10),
               if (upcoming.isEmpty)
-                _emptyNote('No upcoming poojas or bookings.')
+                _emptyNote(tr('No upcoming poojas or bookings.', 'कोई आगामी पूजा या बुकिंग नहीं है।'))
               else
                 ...upcoming.map((o) => _BookingRow(order: o)),
               const SizedBox(height: 22),
-              _sectionHeader('Pooja History', Icons.history_rounded),
+              _sectionHeader(tr('Pooja History', 'पूजा इतिहास'), Icons.history_rounded),
               const SizedBox(height: 10),
               if (history.isEmpty)
-                _emptyNote('No past bookings yet.')
+                _emptyNote(tr('No past bookings yet.', 'अभी तक कोई पिछली बुकिंग नहीं है।'))
               else
                 ...history.map((o) => _BookingRow(order: o)),
             ],
@@ -129,7 +130,7 @@ class CustomerDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user.fullName.isEmpty ? 'Unknown' : user.fullName,
+                      user.fullName.isEmpty ? tr('Unknown', 'अज्ञात') : user.fullName,
                       style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -137,7 +138,7 @@ class CustomerDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      user.phone.isEmpty ? 'No phone number' : user.phone,
+                      user.phone.isEmpty ? tr('No phone number', 'फ़ोन नंबर नहीं है') : user.phone,
                       style: TextStyle(fontSize: 14, color: AdminColors.grey600),
                     ),
                   ],
@@ -170,8 +171,13 @@ class CustomerDetailScreen extends StatelessWidget {
                 ],
                 if (user.createdAt != null) ...[
                   const SizedBox(height: 8),
-                  _infoLine(Icons.event_available_outlined,
-                      'Registered on ${_formatDate(user.createdAt!)}'),
+                  _infoLine(
+                    Icons.event_available_outlined,
+                    tr(
+                      'Registered on ${_formatDate(user.createdAt!)}',
+                      '${_formatDate(user.createdAt!)} को पंजीकृत',
+                    ),
+                  ),
                 ],
               ],
             ),
@@ -200,11 +206,11 @@ class CustomerDetailScreen extends StatelessWidget {
   Widget _statsRow(int totalBookings, int totalPaid, int upcomingCount) {
     return Row(
       children: [
-        Expanded(child: _statCard(label: 'Bookings', value: '$totalBookings')),
+        Expanded(child: _statCard(label: tr('Bookings', 'बुकिंग'), value: '$totalBookings')),
         const SizedBox(width: 10),
-        Expanded(child: _statCard(label: 'Total Paid', value: _formatAmount(totalPaid))),
+        Expanded(child: _statCard(label: tr('Total Paid', 'कुल भुगतान'), value: _formatAmount(totalPaid))),
         const SizedBox(width: 10),
-        Expanded(child: _statCard(label: 'Upcoming', value: '$upcomingCount')),
+        Expanded(child: _statCard(label: tr('Upcoming', 'आगामी'), value: '$upcomingCount')),
       ],
     );
   }
@@ -378,10 +384,10 @@ class _BookingRow extends StatelessWidget {
                           ),
                           if (order.cancelled) ...[
                             const SizedBox(width: 6),
-                            _tag('Cancelled', const Color(0xFFC62828)),
+                            _tag(tr('Cancelled', 'रद्द'), const Color(0xFFC62828)),
                           ] else if (order.rescheduled) ...[
                             const SizedBox(width: 6),
-                            _tag('Rescheduled', const Color(0xFF6A1B9A)),
+                            _tag(tr('Rescheduled', 'पुनर्निर्धारित'), const Color(0xFF6A1B9A)),
                           ],
                         ],
                       ),
