@@ -141,7 +141,11 @@ class SettingsScreen extends StatelessWidget {
           icon: Icons.language_rounded,
           color: const Color(0xFF00838F),
           title: tr('Language', 'भाषा'),
-          subtitle: LocaleService.isHindi ? 'हिंदी (Hindi)' : 'English',
+          subtitle: LocaleService.isHindi
+              ? 'हिंदी (Hindi)'
+              : LocaleService.isMarathi
+                  ? 'मराठी (Marathi)'
+                  : 'English',
           onTap: () => _showLanguagePicker(context),
         ),
         const SizedBox(height: 12),
@@ -182,25 +186,21 @@ class SettingsScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
             ),
-            ListTile(
-              title: const Text('English'),
-              trailing: !LocaleService.isHindi
-                  ? const Icon(Icons.check_rounded, color: AdminColors.primary)
-                  : null,
-              onTap: () {
-                LocaleService.setLanguage('en');
-                Navigator.pop(sheetContext);
-              },
-            ),
-            ListTile(
-              title: const Text('हिंदी (Hindi)'),
-              trailing: LocaleService.isHindi
-                  ? const Icon(Icons.check_rounded, color: AdminColors.primary)
-                  : null,
-              onTap: () {
-                LocaleService.setLanguage('hi');
-                Navigator.pop(sheetContext);
-              },
+            ...[
+              ('en', 'English'),
+              ('hi', 'हिंदी (Hindi)'),
+              ('mr', 'मराठी (Marathi)'),
+            ].map(
+              (lang) => ListTile(
+                title: Text(lang.$2),
+                trailing: LocaleService.languageCode == lang.$1
+                    ? const Icon(Icons.check_rounded, color: AdminColors.primary)
+                    : null,
+                onTap: () {
+                  LocaleService.setLanguage(lang.$1);
+                  Navigator.pop(sheetContext);
+                },
+              ),
             ),
             const SizedBox(height: 8),
           ],

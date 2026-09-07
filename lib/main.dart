@@ -34,7 +34,7 @@ class AdminApp extends StatelessWidget {
       title: 'Trimbakeshwar Guruji',
       debugShowCheckedModeBanner: false,
       locale: locale,
-      supportedLocales: const [Locale('en'), Locale('hi')],
+      supportedLocales: const [Locale('en'), Locale('hi'), Locale('mr')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
