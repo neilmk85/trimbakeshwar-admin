@@ -669,22 +669,30 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     });
   }
 
-  static const _weekLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  static const _monthNames = [
-    '',
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
+  static List<String> get _weekLabels => [
+        tr('Su', 'रवि'),
+        tr('Mo', 'सोम'),
+        tr('Tu', 'मंगल'),
+        tr('We', 'बुध'),
+        tr('Th', 'गुरु'),
+        tr('Fr', 'शुक्र'),
+        tr('Sa', 'शनि'),
+      ];
+  static List<String> get _monthNames => [
+        '',
+        tr('January', 'जनवरी'),
+        tr('February', 'फ़रवरी'),
+        tr('March', 'मार्च'),
+        tr('April', 'अप्रैल'),
+        tr('May', 'मई'),
+        tr('June', 'जून'),
+        tr('July', 'जुलाई'),
+        tr('August', 'अगस्त'),
+        tr('September', 'सितंबर'),
+        tr('October', 'अक्टूबर'),
+        tr('November', 'नवंबर'),
+        tr('December', 'दिसंबर'),
+      ];
 
   Widget _muhurtaCalendar() {
     final year = _calendarMonth.year;

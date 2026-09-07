@@ -192,20 +192,20 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
   }
 
   String _formatDate(DateTime d) {
-    const months = [
+    final months = [
       '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      tr('Jan', 'जन'),
+      tr('Feb', 'फ़र'),
+      tr('Mar', 'मार्च'),
+      tr('Apr', 'अप्रैल'),
+      tr('May', 'मई'),
+      tr('Jun', 'जून'),
+      tr('Jul', 'जुलाई'),
+      tr('Aug', 'अग'),
+      tr('Sep', 'सित'),
+      tr('Oct', 'अक्टू'),
+      tr('Nov', 'नव'),
+      tr('Dec', 'दिस'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
@@ -566,20 +566,20 @@ class _EntryRow extends StatelessWidget {
   const _EntryRow({required this.entry, required this.onDelete});
 
   String _formatDate(DateTime d) {
-    const months = [
+    final months = [
       '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      tr('Jan', 'जन'),
+      tr('Feb', 'फ़र'),
+      tr('Mar', 'मार्च'),
+      tr('Apr', 'अप्रैल'),
+      tr('May', 'मई'),
+      tr('Jun', 'जून'),
+      tr('Jul', 'जुलाई'),
+      tr('Aug', 'अग'),
+      tr('Sep', 'सित'),
+      tr('Oct', 'अक्टू'),
+      tr('Nov', 'नव'),
+      tr('Dec', 'दिस'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
@@ -700,20 +700,20 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
   }
 
   String _formatDate(DateTime d) {
-    const months = [
+    final months = [
       '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      tr('Jan', 'जन'),
+      tr('Feb', 'फ़र'),
+      tr('Mar', 'मार्च'),
+      tr('Apr', 'अप्रैल'),
+      tr('May', 'मई'),
+      tr('Jun', 'जून'),
+      tr('Jul', 'जुलाई'),
+      tr('Aug', 'अग'),
+      tr('Sep', 'सित'),
+      tr('Oct', 'अक्टू'),
+      tr('Nov', 'नव'),
+      tr('Dec', 'दिस'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
