@@ -51,6 +51,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
         tr(
           'Please enter a valid 10-digit phone number',
           'कृपया सही 10 अंकों का फ़ोन नंबर डालें',
+          'कृपया योग्य 10 अंकी फोन नंबर टाका',
         ),
       );
       return;
@@ -65,7 +66,11 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     }
     if (error == null) {
       _showSnack(
-        tr('OTP sent to WhatsApp!', 'OTP WhatsApp पर भेजा गया!'),
+        tr(
+          'OTP sent to WhatsApp!',
+          'OTP WhatsApp पर भेजा गया!',
+          'OTP WhatsApp वर पाठवला गेला!',
+        ),
         duration: 4,
       );
     } else if (error.contains('not authorized')) {
@@ -80,7 +85,11 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     final otp = _otpCtrl.text.trim();
     if (otp.length != 4) {
       _showSnack(
-        tr('Please enter the 4-digit OTP', 'कृपया 4 अंकों का OTP डालें'),
+        tr(
+          'Please enter the 4-digit OTP',
+          'कृपया 4 अंकों का OTP डालें',
+          'कृपया 4 अंकी OTP टाका',
+        ),
       );
       return;
     }
@@ -95,7 +104,11 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     final password = _passwordCtrl.text;
     if (email.isEmpty || password.isEmpty) {
       _showSnack(
-        tr('Please enter email and password', 'कृपया ईमेल और पासवर्ड डालें'),
+        tr(
+          'Please enter email and password',
+          'कृपया ईमेल और पासवर्ड डालें',
+          'कृपया ईमेल आणि पासवर्ड टाका',
+        ),
       );
       return;
     }
@@ -164,7 +177,11 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  tr('User Not Registered', 'यूज़र रजिस्टर्ड नहीं है'),
+                  tr(
+                    'User Not Registered',
+                    'यूज़र रजिस्टर्ड नहीं है',
+                    'वापरकर्ता नोंदणीकृत नाही',
+                  ),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 22,
@@ -177,6 +194,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                   tr(
                     'No account found with these credentials.\nPlease register as a Guruji first.',
                     'इन जानकारियों से कोई खाता नहीं मिला।\nकृपया पहले गुरुजी के रूप में रजिस्टर करें।',
+                    'या माहितीने कोणतेही खाते सापडले नाही.\nकृपया आधी गुरुजी म्हणून नोंदणी करा.',
                   ),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
@@ -199,7 +217,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                           ),
                         ),
                         child: Text(
-                          tr('Close', 'बंद करें'),
+                          tr('Close', 'बंद करें', 'बंद करा'),
                           style: const TextStyle(
                             color: Color(0xFF6B7280),
                             fontWeight: FontWeight.w600,
@@ -229,7 +247,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                           ),
                         ),
                         child: Text(
-                          tr('Register', 'रजिस्टर करें'),
+                          tr('Register', 'रजिस्टर करें', 'नोंदणी करा'),
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -284,7 +302,11 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
             ),
             const SizedBox(width: 8),
             Text(
-              tr('Trimbakeshwar Guruji', 'Trimbakeshwar गुरुजी'),
+              tr(
+                'Trimbakeshwar Guruji',
+                'Trimbakeshwar गुरुजी',
+                'Trimbakeshwar गुरुजी',
+              ),
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -315,8 +337,8 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
             fontSize: 14,
           ),
           tabs: [
-            Tab(text: tr('OTP Login', 'OTP लॉगिन')),
-            Tab(text: tr('Email Login', 'ईमेल लॉगिन')),
+            Tab(text: tr('OTP Login', 'OTP लॉगिन', 'OTP लॉगिन')),
+            Tab(text: tr('Email Login', 'ईमेल लॉगिन', 'ईमेल लॉगिन')),
           ],
         ),
       ),
@@ -338,8 +360,12 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 24),
           _inputField(
             controller: _otpPhoneCtrl,
-            label: tr('Phone Number', 'फ़ोन नंबर'),
-            hint: tr('10-digit mobile number', '10 अंकों का मोबाइल नंबर'),
+            label: tr('Phone Number', 'फ़ोन नंबर', 'फोन नंबर'),
+            hint: tr(
+              '10-digit mobile number',
+              '10 अंकों का मोबाइल नंबर',
+              '10 अंकी मोबाइल नंबर',
+            ),
             icon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
             inputFormatters: [
@@ -351,15 +377,15 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 16),
           if (!_otpSent)
             _primaryButton(
-              label: tr('Get OTP', 'OTP प्राप्त करें'),
+              label: tr('Get OTP', 'OTP प्राप्त करें', 'OTP मिळवा'),
               loading: _otpLoading,
               onTap: _sendOtp,
             )
           else ...[
             _inputField(
               controller: _otpCtrl,
-              label: tr('Enter OTP', 'OTP डालें'),
-              hint: tr('4-digit OTP', '4 अंकों का OTP'),
+              label: tr('Enter OTP', 'OTP डालें', 'OTP टाका'),
+              hint: tr('4-digit OTP', '4 अंकों का OTP', '4 अंकी OTP'),
               icon: Icons.lock_outlined,
               keyboardType: TextInputType.number,
               inputFormatters: [
@@ -374,13 +400,21 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                 _otpCtrl.clear();
               }),
               child: Text(
-                tr('Change Number / Resend OTP', 'नंबर बदलें / OTP फिर भेजें'),
+                tr(
+                  'Change Number / Resend OTP',
+                  'नंबर बदलें / OTP फिर भेजें',
+                  'नंबर बदला / OTP पुन्हा पाठवा',
+                ),
                 style: TextStyle(color: AdminColors.primary),
               ),
             ),
             const SizedBox(height: 8),
             _primaryButton(
-              label: tr('Verify & Login', 'सत्यापित करें और लॉगिन करें'),
+              label: tr(
+                'Verify & Login',
+                'सत्यापित करें और लॉगिन करें',
+                'सत्यापित करा आणि लॉगिन करा',
+              ),
               loading: _otpLoading,
               onTap: _verifyOtp,
             ),
@@ -403,16 +437,24 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 24),
           _inputField(
             controller: _emailCtrl,
-            label: tr('Email', 'ईमेल'),
-            hint: tr('Enter your email address', 'अपना ईमेल पता डालें'),
+            label: tr('Email', 'ईमेल', 'ईमेल'),
+            hint: tr(
+              'Enter your email address',
+              'अपना ईमेल पता डालें',
+              'तुमचा ईमेल पत्ता टाका',
+            ),
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 16),
           _inputField(
             controller: _passwordCtrl,
-            label: tr('Password', 'पासवर्ड'),
-            hint: tr('Enter your password', 'अपना पासवर्ड डालें'),
+            label: tr('Password', 'पासवर्ड', 'पासवर्ड'),
+            hint: tr(
+              'Enter your password',
+              'अपना पासवर्ड डालें',
+              'तुमचा पासवर्ड टाका',
+            ),
             icon: Icons.lock_outlined,
             obscureText: _pwdObscure,
             suffixIcon: IconButton(
@@ -426,7 +468,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           ),
           const SizedBox(height: 24),
           _primaryButton(
-            label: tr('Login', 'लॉगिन'),
+            label: tr('Login', 'लॉगिन', 'लॉगिन'),
             loading: _emailLoading,
             onTap: _loginWithEmail,
           ),
@@ -546,7 +588,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
-          tr('New Guruji?', 'नए गुरुजी हैं?'),
+          tr('New Guruji?', 'नए गुरुजी हैं?', 'नवीन गुरुजी आहात?'),
           style: TextStyle(color: AdminColors.grey700, fontSize: 14),
         ),
         TextButton(
@@ -555,7 +597,7 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
             MaterialPageRoute(builder: (_) => const GurujiRegisterScreen()),
           ),
           child: Text(
-            tr('Register', 'रजिस्टर करें'),
+            tr('Register', 'रजिस्टर करें', 'नोंदणी करा'),
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 14,

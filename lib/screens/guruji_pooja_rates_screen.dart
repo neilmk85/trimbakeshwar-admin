@@ -91,6 +91,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
         tr(
           'Rate updated for ${rate.poojaName}.',
           '${rate.poojaName} के लिए दर अपडेट की गई।',
+          '${rate.poojaName} साठी दर अपडेट झाला.',
         ),
       );
       await _loadRates();
@@ -107,7 +108,11 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
     if (!mounted) return;
     if (err == null) {
       _showSnack(
-        tr('Reset to default rate.', 'डिफ़ॉल्ट दर पर रीसेट किया गया।'),
+        tr(
+          'Reset to default rate.',
+          'डिफ़ॉल्ट दर पर रीसेट किया गया।',
+          'डिफॉल्ट दरावर रीसेट केले.',
+        ),
       );
       await _loadRates();
     } else {
@@ -118,7 +123,11 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
   Future<void> _openRecordSheet() async {
     if (_rates.isEmpty) {
       _showSnack(
-        tr('No poojas available yet.', 'अभी तक कोई पूजा उपलब्ध नहीं है।'),
+        tr(
+          'No poojas available yet.',
+          'अभी तक कोई पूजा उपलब्ध नहीं है।',
+          'अजून कोणतीही पूजा उपलब्ध नाही.',
+        ),
         isError: true,
       );
       return;
@@ -143,13 +152,19 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
         tr(
           '${res.data!.poojaName} × ${res.data!.count} = ₹${res.data!.totalAmount} recorded.',
           '${res.data!.poojaName} × ${res.data!.count} = ₹${res.data!.totalAmount} दर्ज किया गया।',
+          '${res.data!.poojaName} × ${res.data!.count} = ₹${res.data!.totalAmount} नोंदवले.',
         ),
       );
       await _loadEntries();
       _tabController.animateTo(1);
     } else {
       _showSnack(
-        res.error ?? tr('Failed to record entry', 'एंट्री दर्ज करने में विफल'),
+        res.error ??
+            tr(
+              'Failed to record entry',
+              'एंट्री दर्ज करने में विफल',
+              'नोंद करण्यात अयशस्वी',
+            ),
         isError: true,
       );
     }
@@ -160,19 +175,21 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(tr('Delete this entry?', 'यह एंट्री हटाएं?')),
+        title: Text(
+          tr('Delete this entry?', 'यह एंट्री हटाएं?', 'ही नोंद हटवायची का?'),
+        ),
         content: Text(
           '${entry.poojaName} × ${entry.count} = ₹${entry.totalAmount}\n${_formatDate(entry.entryDate)}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text(tr('Cancel', 'रद्द करें')),
+            child: Text(tr('Cancel', 'रद्द करें', 'रद्द करा')),
           ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.red.shade600),
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text(tr('Delete', 'हटाएं')),
+            child: Text(tr('Delete', 'हटाएं', 'हटवा')),
           ),
         ],
       ),
@@ -184,7 +201,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
     );
     if (!mounted) return;
     if (err == null) {
-      _showSnack(tr('Entry deleted.', 'एंट्री हटाई गई।'));
+      _showSnack(tr('Entry deleted.', 'एंट्री हटाई गई।', 'नोंद हटवली.'));
       await _loadEntries();
     } else {
       _showSnack(err, isError: true);
@@ -194,18 +211,18 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
   String _formatDate(DateTime d) {
     final months = [
       '',
-      tr('Jan', 'जन'),
-      tr('Feb', 'फ़र'),
-      tr('Mar', 'मार्च'),
-      tr('Apr', 'अप्रैल'),
-      tr('May', 'मई'),
-      tr('Jun', 'जून'),
-      tr('Jul', 'जुलाई'),
-      tr('Aug', 'अग'),
-      tr('Sep', 'सित'),
-      tr('Oct', 'अक्टू'),
-      tr('Nov', 'नव'),
-      tr('Dec', 'दिस'),
+      tr('Jan', 'जन', 'जाने'),
+      tr('Feb', 'फ़र', 'फेब्रु'),
+      tr('Mar', 'मार्च', 'मार्च'),
+      tr('Apr', 'अप्रैल', 'एप्रि'),
+      tr('May', 'मई', 'मे'),
+      tr('Jun', 'जून', 'जून'),
+      tr('Jul', 'जुलाई', 'जुलै'),
+      tr('Aug', 'अग', 'ऑग'),
+      tr('Sep', 'सित', 'सप्टें'),
+      tr('Oct', 'अक्टू', 'ऑक्टो'),
+      tr('Nov', 'नव', 'नोव्हें'),
+      tr('Dec', 'दिस', 'डिसें'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
@@ -225,8 +242,8 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
           tabs: [
-            Tab(text: tr('Rates', 'दरें')),
-            Tab(text: tr('Payout History', 'भुगतान इतिहास')),
+            Tab(text: tr('Rates', 'दरें', 'दर')),
+            Tab(text: tr('Payout History', 'भुगतान इतिहास', 'भुगतान इतिहास')),
           ],
         ),
       ),
@@ -247,7 +264,11 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
           backgroundColor: Colors.transparent,
           elevation: 0,
           highlightElevation: 0,
-          tooltip: tr('Record Pooja Assignment', 'पूजा असाइनमेंट दर्ज करें'),
+          tooltip: tr(
+            'Record Pooja Assignment',
+            'पूजा असाइनमेंट दर्ज करें',
+            'पूजा असाइनमेंट नोंदवा',
+          ),
           child: const Icon(Icons.add_rounded, color: Colors.white, size: 28),
         ),
       ),
@@ -287,6 +308,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
                           tr(
                             'These are internal payout rates for ${widget.guruji.name} — they don\'t affect customer prices.',
                             'ये ${widget.guruji.name} के लिए आंतरिक भुगतान दरें हैं — इनसे ग्राहकों की कीमतों पर कोई असर नहीं पड़ता।',
+                            'हे ${widget.guruji.name} साठीचे अंतर्गत भुगतान दर आहेत — यामुळे ग्राहकांच्या किमतींवर काहीही परिणाम होत नाही.',
                           ),
                           style: TextStyle(
                             fontSize: 12.5,
@@ -334,7 +356,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        tr('Total Payout', 'कुल भुगतान'),
+                        tr('Total Payout', 'कुल भुगतान', 'एकूण भुगतान'),
                         style: const TextStyle(
                           color: Colors.white70,
                           fontSize: 13,
@@ -361,6 +383,7 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
                         tr(
                           'No entries yet. Tap + to record one.',
                           'अभी तक कोई एंट्री नहीं। एक दर्ज करने के लिए + दबाएं।',
+                          'अजून कोणतीही नोंद नाही. नोंद करण्यासाठी + दाबा.',
                         ),
                         style: TextStyle(color: AdminColors.grey500),
                       ),
@@ -397,7 +420,9 @@ class _GurujiPoojaRatesScreenState extends State<GurujiPoojaRatesScreen>
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: onRetry,
-            child: Text(tr('Retry', 'फिर से कोशिश करें')),
+            child: Text(
+              tr('Retry', 'फिर से कोशिश करें', 'पुन्हा प्रयत्न करा'),
+            ),
           ),
         ],
       ),
@@ -500,7 +525,7 @@ class _RateRowState extends State<_RateRow> {
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            tr('Custom', 'कस्टम'),
+                            tr('Custom', 'कस्टम', 'कस्टम'),
                             style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -510,7 +535,11 @@ class _RateRowState extends State<_RateRow> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          tr('Reset to default', 'डिफ़ॉल्ट पर रीसेट करें'),
+                          tr(
+                            'Reset to default',
+                            'डिफ़ॉल्ट पर रीसेट करें',
+                            'डिफॉल्टवर रीसेट करा',
+                          ),
                           style: TextStyle(
                             fontSize: 10.5,
                             color: AdminColors.grey500,
@@ -521,7 +550,7 @@ class _RateRowState extends State<_RateRow> {
                   )
                 else
                   Text(
-                    tr('Default rate', 'डिफ़ॉल्ट दर'),
+                    tr('Default rate', 'डिफ़ॉल्ट दर', 'डिफॉल्ट दर'),
                     style: TextStyle(
                       fontSize: 10.5,
                       color: AdminColors.grey500,
@@ -568,18 +597,18 @@ class _EntryRow extends StatelessWidget {
   String _formatDate(DateTime d) {
     final months = [
       '',
-      tr('Jan', 'जन'),
-      tr('Feb', 'फ़र'),
-      tr('Mar', 'मार्च'),
-      tr('Apr', 'अप्रैल'),
-      tr('May', 'मई'),
-      tr('Jun', 'जून'),
-      tr('Jul', 'जुलाई'),
-      tr('Aug', 'अग'),
-      tr('Sep', 'सित'),
-      tr('Oct', 'अक्टू'),
-      tr('Nov', 'नव'),
-      tr('Dec', 'दिस'),
+      tr('Jan', 'जन', 'जाने'),
+      tr('Feb', 'फ़र', 'फेब्रु'),
+      tr('Mar', 'मार्च', 'मार्च'),
+      tr('Apr', 'अप्रैल', 'एप्रि'),
+      tr('May', 'मई', 'मे'),
+      tr('Jun', 'जून', 'जून'),
+      tr('Jul', 'जुलाई', 'जुलै'),
+      tr('Aug', 'अग', 'ऑग'),
+      tr('Sep', 'सित', 'सप्टें'),
+      tr('Oct', 'अक्टू', 'ऑक्टो'),
+      tr('Nov', 'नव', 'नोव्हें'),
+      tr('Dec', 'दिस', 'डिसें'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
@@ -702,18 +731,18 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
   String _formatDate(DateTime d) {
     final months = [
       '',
-      tr('Jan', 'जन'),
-      tr('Feb', 'फ़र'),
-      tr('Mar', 'मार्च'),
-      tr('Apr', 'अप्रैल'),
-      tr('May', 'मई'),
-      tr('Jun', 'जून'),
-      tr('Jul', 'जुलाई'),
-      tr('Aug', 'अग'),
-      tr('Sep', 'सित'),
-      tr('Oct', 'अक्टू'),
-      tr('Nov', 'नव'),
-      tr('Dec', 'दिस'),
+      tr('Jan', 'जन', 'जाने'),
+      tr('Feb', 'फ़र', 'फेब्रु'),
+      tr('Mar', 'मार्च', 'मार्च'),
+      tr('Apr', 'अप्रैल', 'एप्रि'),
+      tr('May', 'मई', 'मे'),
+      tr('Jun', 'जून', 'जून'),
+      tr('Jul', 'जुलाई', 'जुलै'),
+      tr('Aug', 'अग', 'ऑग'),
+      tr('Sep', 'सित', 'सप्टें'),
+      tr('Oct', 'अक्टू', 'ऑक्टो'),
+      tr('Nov', 'नव', 'नोव्हें'),
+      tr('Dec', 'दिस', 'डिसें'),
     ];
     return '${d.day} ${months[d.month]} ${d.year}';
   }
@@ -724,7 +753,11 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            tr('Enter a valid number of poojas', 'पूजाओं की सही संख्या डालें'),
+            tr(
+              'Enter a valid number of poojas',
+              'पूजाओं की सही संख्या डालें',
+              'पूजांची योग्य संख्या टाका',
+            ),
           ),
         ),
       );
@@ -766,7 +799,11 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
             ),
             const SizedBox(height: 16),
             Text(
-              tr('Record Pooja Assignment', 'पूजा असाइनमेंट दर्ज करें'),
+              tr(
+                'Record Pooja Assignment',
+                'पूजा असाइनमेंट दर्ज करें',
+                'पूजा असाइनमेंट नोंदवा',
+              ),
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
@@ -775,7 +812,11 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
             ),
             const SizedBox(height: 4),
             Text(
-              tr('For ${widget.guruji.name}', '${widget.guruji.name} के लिए'),
+              tr(
+                'For ${widget.guruji.name}',
+                '${widget.guruji.name} के लिए',
+                '${widget.guruji.name} साठी',
+              ),
               style: TextStyle(fontSize: 12.5, color: AdminColors.grey600),
             ),
             const SizedBox(height: 18),
@@ -783,7 +824,7 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
               initialValue: _selectedPoojaId,
               isExpanded: true,
               decoration: InputDecoration(
-                labelText: tr('Pooja', 'पूजा'),
+                labelText: tr('Pooja', 'पूजा', 'पूजा'),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -805,7 +846,7 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
               borderRadius: BorderRadius.circular(12),
               child: InputDecorator(
                 decoration: InputDecoration(
-                  labelText: tr('Date', 'तारीख'),
+                  labelText: tr('Date', 'तारीख', 'तारीख'),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -820,7 +861,11 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                labelText: tr('Number of Poojas', 'पूजाओं की संख्या'),
+                labelText: tr(
+                  'Number of Poojas',
+                  'पूजाओं की संख्या',
+                  'पूजांची संख्या',
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -839,6 +884,7 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
                   Text(
                     tr(
                       'Rate: ₹${_selectedRate.rate} × $count',
+                      'दर: ₹${_selectedRate.rate} × $count',
                       'दर: ₹${_selectedRate.rate} × $count',
                     ),
                     style: TextStyle(fontSize: 13, color: AdminColors.grey700),
@@ -868,7 +914,11 @@ class _RecordEntrySheetState extends State<_RecordEntrySheet> {
                 ),
                 onPressed: _submit,
                 child: Text(
-                  tr('Record Assignment', 'असाइनमेंट दर्ज करें'),
+                  tr(
+                    'Record Assignment',
+                    'असाइनमेंट दर्ज करें',
+                    'असाइनमेंट नोंदवा',
+                  ),
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,

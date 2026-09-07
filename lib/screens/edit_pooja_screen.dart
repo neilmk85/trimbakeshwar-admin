@@ -144,11 +144,19 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     final name = _nameCtrl.text.trim();
     final price = int.tryParse(_priceCtrl.text.trim());
     if (name.isEmpty) {
-      _snack(tr('Pooja name is required', 'पूजा का नाम आवश्यक है'));
+      _snack(
+        tr('Pooja name is required', 'पूजा का नाम आवश्यक है', 'पूजेचे नाव आवश्यक आहे'),
+      );
       return;
     }
     if (price == null || price <= 0) {
-      _snack(tr('Please enter a valid price', 'कृपया सही कीमत डालें'));
+      _snack(
+        tr(
+          'Please enter a valid price',
+          'कृपया सही कीमत डालें',
+          'कृपया योग्य किंमत टाका',
+        ),
+      );
       return;
     }
 
@@ -182,7 +190,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              tr('Pooja updated successfully', 'पूजा सफलतापूर्वक अपडेट की गई'),
+              tr(
+                'Pooja updated successfully',
+                'पूजा सफलतापूर्वक अपडेट की गई',
+                'पूजा यशस्वीरित्या अपडेट झाली',
+              ),
             ),
           ),
         );
@@ -231,7 +243,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 size: 20,
               ),
               label: Text(
-                tr('Save', 'सेव करें'),
+                tr('Save', 'सेव करें', 'जतन करा'),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -244,17 +256,17 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         children: [
-          _sectionHeader(tr('Basic Info', 'बुनियादी जानकारी')),
+          _sectionHeader(tr('Basic Info', 'बुनियादी जानकारी', 'मूलभूत माहिती')),
           const SizedBox(height: 12),
           _field(
             _nameCtrl,
-            tr('Pooja Name *', 'पूजा का नाम *'),
+            tr('Pooja Name *', 'पूजा का नाम *', 'पूजेचे नाव *'),
             Icons.auto_awesome_rounded,
           ),
           const SizedBox(height: 12),
           _field(
             _descCtrl,
-            tr('Short Description', 'संक्षिप्त विवरण'),
+            tr('Short Description', 'संक्षिप्त विवरण', 'थोडक्यात माहिती'),
             Icons.short_text_rounded,
             maxLines: 2,
           ),
@@ -265,7 +277,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 flex: 3,
                 child: _field(
                   _priceCtrl,
-                  tr('Price per Person (₹) *', 'प्रति व्यक्ति कीमत (₹) *'),
+                  tr(
+                    'Price per Person (₹) *',
+                    'प्रति व्यक्ति कीमत (₹) *',
+                    'प्रति व्यक्ती किंमत (₹) *',
+                  ),
                   Icons.currency_rupee_rounded,
                   numeric: true,
                 ),
@@ -275,7 +291,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 flex: 2,
                 child: _field(
                   _displayOrderCtrl,
-                  tr('Display Order', 'डिस्प्ले क्रम'),
+                  tr('Display Order', 'डिस्प्ले क्रम', 'डिस्प्ले क्रम'),
                   Icons.sort_rounded,
                   numeric: true,
                 ),
@@ -285,7 +301,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
           const SizedBox(height: 12),
           _field(
             _stayRateCtrl,
-            tr('Stay Rate per Night (₹)', 'प्रति रात ठहरने की दर (₹)'),
+            tr(
+              'Stay Rate per Night (₹)',
+              'प्रति रात ठहरने की दर (₹)',
+              'प्रति रात्र निवासाचा दर (₹)',
+            ),
             Icons.hotel_rounded,
             numeric: true,
           ),
@@ -296,6 +316,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
               tr(
                 'Set to 0 to disable stay booking for this pooja.',
                 'इस पूजा के लिए ठहरने की बुकिंग बंद करने हेतु 0 डालें।',
+                'या पूजेसाठी निवास बुकिंग बंद करण्यासाठी 0 टाका.',
               ),
               style: TextStyle(fontSize: 11, color: AdminColors.grey500),
             ),
@@ -306,7 +327,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
               Expanded(
                 child: _field(
                   _durationCtrl,
-                  tr('Duration (e.g. 1 Day)', 'अवधि (जैसे 1 दिन)'),
+                  tr(
+                    'Duration (e.g. 1 Day)',
+                    'अवधि (जैसे 1 दिन)',
+                    'कालावधी (उदा. 1 दिवस)',
+                  ),
                   Icons.schedule_rounded,
                 ),
               ),
@@ -314,7 +339,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
               Expanded(
                 child: _field(
                   _iconCtrl,
-                  tr('Icon Name', 'आइकन का नाम'),
+                  tr('Icon Name', 'आइकन का नाम', 'आयकनचे नाव'),
                   Icons.insert_emoticon_rounded,
                 ),
               ),
@@ -322,81 +347,104 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Color', 'रंग')),
+          _sectionHeader(tr('Color', 'रंग', 'रंग')),
           const SizedBox(height: 12),
           _colorPicker(),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Status', 'स्थिति')),
+          _sectionHeader(tr('Status', 'स्थिति', 'स्थिती')),
           const SizedBox(height: 12),
           _statusToggle(),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Private / Separate Pooja', 'निजी / अलग पूजा')),
+          _sectionHeader(
+            tr('Private / Separate Pooja', 'निजी / अलग पूजा', 'खाजगी / वेगळी पूजा'),
+          ),
           const SizedBox(height: 12),
           _privatePoojaToggle(),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Guruji Rate', 'गुरुजी की दर')),
+          _sectionHeader(tr('Guruji Rate', 'गुरुजी की दर', 'गुरुजींचा दर')),
           const SizedBox(height: 4),
           Text(
             tr(
               'Default payout for this pooja, shown against every Guruji unless overridden individually.',
               'इस पूजा के लिए डिफ़ॉल्ट भुगतान, जब तक अलग से बदला न जाए तब तक हर गुरुजी के सामने यही दिखाया जाता है।',
+              'या पूजेसाठीचा डिफॉल्ट भुगतान, वेगळा बदल केला नसेल तर प्रत्येक गुरुजींसमोर हाच दाखवला जातो.',
             ),
             style: TextStyle(fontSize: 12, color: AdminColors.grey600),
           ),
           const SizedBox(height: 12),
           _field(
             _gurujiDefaultRateCtrl,
-            tr('Default Guruji Rate (₹)', 'डिफ़ॉल्ट गुरुजी दर (₹)'),
+            tr(
+              'Default Guruji Rate (₹)',
+              'डिफ़ॉल्ट गुरुजी दर (₹)',
+              'डिफॉल्ट गुरुजी दर (₹)',
+            ),
             Icons.currency_rupee_rounded,
             numeric: true,
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Muhurta Dates', 'मुहूर्त तिथियां')),
+          _sectionHeader(tr('Muhurta Dates', 'मुहूर्त तिथियां', 'मुहूर्त तारखा')),
           const SizedBox(height: 12),
           _muhurtaCalendar(),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Detailed Info', 'विस्तृत जानकारी')),
+          _sectionHeader(tr('Detailed Info', 'विस्तृत जानकारी', 'सविस्तर माहिती')),
           const SizedBox(height: 12),
           _field(
             _infoCtrl,
-            tr('Full description / info', 'पूरा विवरण / जानकारी'),
+            tr(
+              'Full description / info',
+              'पूरा विवरण / जानकारी',
+              'संपूर्ण माहिती / वर्णन',
+            ),
             Icons.info_outline_rounded,
             maxLines: 4,
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Before Instructions', 'पहले के निर्देश')),
+          _sectionHeader(
+            tr('Before Instructions', 'पहले के निर्देश', 'आधीच्या सूचना'),
+          ),
           const SizedBox(height: 8),
           _dynamicList(
             _beforeCtrls,
             hint: tr(
               'e.g. Take a holy bath before arriving',
               'जैसे आने से पहले पवित्र स्नान करें',
+              'उदा. येण्यापूर्वी पवित्र स्नान करा',
             ),
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('After Instructions', 'बाद के निर्देश')),
+          _sectionHeader(
+            tr('After Instructions', 'बाद के निर्देश', 'नंतरच्या सूचना'),
+          ),
           const SizedBox(height: 8),
           _dynamicList(
             _afterCtrls,
             hint: tr(
               'e.g. Maintain celibacy for 3 days',
               'जैसे 3 दिन ब्रह्मचर्य का पालन करें',
+              'उदा. 3 दिवस ब्रह्मचर्य पाळा',
             ),
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader(tr('Things to Bring', 'साथ लाने योग्य चीज़ें')),
+          _sectionHeader(
+            tr('Things to Bring', 'साथ लाने योग्य चीज़ें', 'सोबत आणायच्या वस्तू'),
+          ),
           const SizedBox(height: 8),
           _dynamicList(
             _bringCtrls,
-            hint: tr('e.g. White dhoti and saree', 'जैसे सफेद धोती और साड़ी'),
+            hint: tr(
+              'e.g. White dhoti and saree',
+              'जैसे सफेद धोती और साड़ी',
+              'उदा. पांढरे धोतर आणि साडी',
+            ),
           ),
           const SizedBox(height: 32),
 
@@ -422,7 +470,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                       ),
                     )
                   : Text(
-                      tr('Save Changes', 'बदलाव सेव करें'),
+                      tr('Save Changes', 'बदलाव सेव करें', 'बदल जतन करा'),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -553,7 +601,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tr('Separate / Private Pooja', 'अलग / निजी पूजा'),
+                    tr(
+                      'Separate / Private Pooja',
+                      'अलग / निजी पूजा',
+                      'वेगळी / खाजगी पूजा',
+                    ),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -564,10 +616,12 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                         ? tr(
                             'Enabled — users can book a private session',
                             'सक्षम — उपयोगकर्ता निजी सत्र बुक कर सकते हैं',
+                            'सुरू — वापरकर्ते खाजगी सत्र बुक करू शकतात',
                           )
                         : tr(
                             'Disabled — group pooja only',
                             'अक्षम — केवल सामूहिक पूजा',
+                            'बंद — फक्त सामूहिक पूजा',
                           ),
                     style: TextStyle(fontSize: 12, color: AdminColors.grey600),
                   ),
@@ -590,7 +644,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 padding: const EdgeInsets.only(top: 10),
                 child: _field(
                   _privatePoojaRateCtrl,
-                  tr('Private Pooja Rate (₹)', 'निजी पूजा दर (₹)'),
+                  tr(
+                    'Private Pooja Rate (₹)',
+                    'निजी पूजा दर (₹)',
+                    'खाजगी पूजा दर (₹)',
+                  ),
                   Icons.currency_rupee_rounded,
                   numeric: true,
                 ),
@@ -620,7 +678,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                tr('Pooja Status', 'पूजा की स्थिति'),
+                tr('Pooja Status', 'पूजा की स्थिति', 'पूजेची स्थिती'),
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -631,10 +689,12 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                     ? tr(
                         'Enabled — visible to users',
                         'सक्षम — उपयोगकर्ताओं को दिखेगी',
+                        'सुरू — वापरकर्त्यांना दिसेल',
                       )
                     : tr(
                         'Disabled — hidden from users',
                         'अक्षम — उपयोगकर्ताओं से छिपी रहेगी',
+                        'बंद — वापरकर्त्यांपासून लपलेली राहील',
                       ),
                 style: TextStyle(fontSize: 12, color: AdminColors.grey600),
               ),
@@ -670,28 +730,28 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
   }
 
   static List<String> get _weekLabels => [
-        tr('Su', 'रवि'),
-        tr('Mo', 'सोम'),
-        tr('Tu', 'मंगल'),
-        tr('We', 'बुध'),
-        tr('Th', 'गुरु'),
-        tr('Fr', 'शुक्र'),
-        tr('Sa', 'शनि'),
+        tr('Su', 'रवि', 'रवि'),
+        tr('Mo', 'सोम', 'सोम'),
+        tr('Tu', 'मंगल', 'मंगळ'),
+        tr('We', 'बुध', 'बुध'),
+        tr('Th', 'गुरु', 'गुरु'),
+        tr('Fr', 'शुक्र', 'शुक्र'),
+        tr('Sa', 'शनि', 'शनि'),
       ];
   static List<String> get _monthNames => [
         '',
-        tr('January', 'जनवरी'),
-        tr('February', 'फ़रवरी'),
-        tr('March', 'मार्च'),
-        tr('April', 'अप्रैल'),
-        tr('May', 'मई'),
-        tr('June', 'जून'),
-        tr('July', 'जुलाई'),
-        tr('August', 'अगस्त'),
-        tr('September', 'सितंबर'),
-        tr('October', 'अक्टूबर'),
-        tr('November', 'नवंबर'),
-        tr('December', 'दिसंबर'),
+        tr('January', 'जनवरी', 'जानेवारी'),
+        tr('February', 'फ़रवरी', 'फेब्रुवारी'),
+        tr('March', 'मार्च', 'मार्च'),
+        tr('April', 'अप्रैल', 'एप्रिल'),
+        tr('May', 'मई', 'मे'),
+        tr('June', 'जून', 'जून'),
+        tr('July', 'जुलाई', 'जुलै'),
+        tr('August', 'अगस्त', 'ऑगस्ट'),
+        tr('September', 'सितंबर', 'सप्टेंबर'),
+        tr('October', 'अक्टूबर', 'ऑक्टोबर'),
+        tr('November', 'नवंबर', 'नोव्हेंबर'),
+        tr('December', 'दिसंबर', 'डिसेंबर'),
       ];
 
   Widget _muhurtaCalendar() {
@@ -846,16 +906,20 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                                 ? tr(
                                     '1 muhurta date selected',
                                     '1 मुहूर्त तिथि चुनी गई',
+                                    '1 मुहूर्त तारीख निवडली',
                                   )
                                 : tr(
                                     '${_muhurtaDates.length} muhurta dates selected',
                                     '${_muhurtaDates.length} मुहूर्त तिथियां चुनी गईं',
+                                    '${_muhurtaDates.length} मुहूर्त तारखा निवडल्या',
                                   ))
                           : tr(
                               '${monthSelected.length} this month · '
                                   '${_muhurtaDates.length} selected across all months',
                               '${monthSelected.length} इस महीने · '
                                   '${_muhurtaDates.length} सभी महीनों में चुनी गईं',
+                              '${monthSelected.length} या महिन्यात · '
+                                  '${_muhurtaDates.length} सर्व महिन्यांत निवडलेल्या',
                             ),
                       style: TextStyle(
                         fontSize: 12,
@@ -872,7 +936,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                         ),
                       ),
                       child: Text(
-                        tr('Clear month', 'महीना साफ़ करें'),
+                        tr('Clear month', 'महीना साफ़ करें', 'महिना रिकामा करा'),
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.red.shade400,
@@ -961,7 +1025,7 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
           onPressed: () => setState(() => ctrls.add(TextEditingController())),
           icon: Icon(Icons.add_rounded, size: 16, color: AdminColors.primary),
           label: Text(
-            tr('Add item', 'आइटम जोड़ें'),
+            tr('Add item', 'आइटम जोड़ें', 'आयटम जोडा'),
             style: TextStyle(
               fontSize: 13,
               color: AdminColors.primary,
