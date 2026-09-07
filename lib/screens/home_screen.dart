@@ -22,10 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int _unreadBookings = 0;
 
   List<String> get _titles => [
-        tr('Bookings', 'बुकिंग'),
-        tr('Customers', 'ग्राहक'),
-        tr('Settings', 'सेटिंग्स'),
-        tr('Profile', 'प्रोफ़ाइल'),
+        tr('Bookings', 'बुकिंग', 'बुकिंग'),
+        tr('Customers', 'ग्राहक', 'ग्राहक'),
+        tr('Settings', 'सेटिंग्स', 'सेटिंग्ज'),
+        tr('Profile', 'प्रोफ़ाइल', 'प्रोफाइल'),
       ];
 
   static const _pages = [
@@ -51,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(tr('Your account is not authorized to access this app',
-                'आपका खाता इस ऐप को उपयोग करने के लिए अधिकृत नहीं है')),
+                'आपका खाता इस ऐप को उपयोग करने के लिए अधिकृत नहीं है',
+                'तुमचे खाते हे अ‍ॅप वापरण्यासाठी अधिकृत नाही')),
             duration: const Duration(seconds: 5),
           ),
         );
@@ -108,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(tr('New Booking!', 'नई बुकिंग!'),
+                    Text(tr('New Booking!', 'नई बुकिंग!', 'नवीन बुकिंग!'),
                         style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -126,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           action: SnackBarAction(
-            label: tr('View', 'देखें'),
+            label: tr('View', 'देखें', 'पहा'),
             textColor: const Color(0xFF69F0AE),
             onPressed: () {
               setState(() {
@@ -144,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final users = AdminDataService.dataNotifier.value.users;
     if (users.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('No customers to export yet', 'निर्यात करने के लिए अभी कोई ग्राहक नहीं है'))),
+        SnackBar(content: Text(tr('No customers to export yet', 'निर्यात करने के लिए अभी कोई ग्राहक नहीं है', 'एक्सपोर्ट करण्यासाठी अजून कोणताही ग्राहक नाही'))),
       );
       return;
     }
@@ -153,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(tr('Could not export customer list', 'ग्राहक सूची निर्यात नहीं हो सकी'))),
+        SnackBar(content: Text(tr('Could not export customer list', 'ग्राहक सूची निर्यात नहीं हो सकी', 'ग्राहक यादी एक्सपोर्ट करता आली नाही'))),
       );
     }
   }
@@ -192,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (_currentIndex == 1)
             IconButton(
               icon: const Icon(Icons.download_rounded, color: Colors.white),
-              tooltip: tr('Download customer list', 'ग्राहक सूची डाउनलोड करें'),
+              tooltip: tr('Download customer list', 'ग्राहक सूची डाउनलोड करें', 'ग्राहक यादी डाउनलोड करा'),
               onPressed: _exportCustomers,
             ),
           ValueListenableBuilder<bool>(
@@ -210,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 : IconButton(
                     icon: const Icon(Icons.refresh_rounded,
                         color: Colors.white),
-                    tooltip: tr('Refresh', 'रीफ़्रेश करें'),
+                    tooltip: tr('Refresh', 'रीफ़्रेश करें', 'रिफ्रेश करा'),
                     onPressed: AdminDataService.refresh,
                   ),
           ),
@@ -244,25 +245,25 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Icon(Icons.receipt_long_rounded,
                   color: AdminColors.primary),
             ),
-            label: tr('Bookings', 'बुकिंग'),
+            label: tr('Bookings', 'बुकिंग', 'बुकिंग'),
           ),
           NavigationDestination(
             icon: const Icon(Icons.people_outline_rounded),
             selectedIcon:
                 const Icon(Icons.people_rounded, color: AdminColors.primary),
-            label: tr('Customers', 'ग्राहक'),
+            label: tr('Customers', 'ग्राहक', 'ग्राहक'),
           ),
           NavigationDestination(
             icon: const Icon(Icons.settings_outlined),
             selectedIcon:
                 const Icon(Icons.settings_rounded, color: AdminColors.primary),
-            label: tr('Settings', 'सेटिंग्स'),
+            label: tr('Settings', 'सेटिंग्स', 'सेटिंग्ज'),
           ),
           NavigationDestination(
             icon: const Icon(Icons.person_outline_rounded),
             selectedIcon:
                 const Icon(Icons.person_rounded, color: AdminColors.primary),
-            label: tr('Profile', 'प्रोफ़ाइल'),
+            label: tr('Profile', 'प्रोफ़ाइल', 'प्रोफाइल'),
           ),
         ],
       ),
@@ -275,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_, data, __) {
         final lastUpdated = data.lastUpdated;
         final timeStr = lastUpdated == null
-            ? tr('Never', 'कभी नहीं')
+            ? tr('Never', 'कभी नहीं', 'कधीच नाही')
             : '${lastUpdated.hour.toString().padLeft(2, '0')}:${lastUpdated.minute.toString().padLeft(2, '0')}:${lastUpdated.second.toString().padLeft(2, '0')}';
         return Container(
           color: AdminColors.navyDeep,
@@ -295,7 +296,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 tr(
                     'Live  ·  ${data.users.length} Users  ·  ${data.orders.length} Bookings  ·  Last updated: $timeStr',
-                    'लाइव  ·  ${data.users.length} ग्राहक  ·  ${data.orders.length} बुकिंग  ·  अंतिम अपडेट: $timeStr'),
+                    'लाइव  ·  ${data.users.length} ग्राहक  ·  ${data.orders.length} बुकिंग  ·  अंतिम अपडेट: $timeStr',
+                    'लाइव्ह  ·  ${data.users.length} ग्राहक  ·  ${data.orders.length} बुकिंग  ·  शेवटचे अपडेट: $timeStr'),
                 style: const TextStyle(
                     color: Colors.white70, fontSize: 12),
               ),

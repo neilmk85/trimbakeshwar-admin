@@ -35,7 +35,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
     final password = _passwordCtrl.text;
 
     if (name.isEmpty || phone.length < 10 || email.isEmpty || password.isEmpty) {
-      _showSnack(tr('Please fill in all fields correctly', 'कृपया सभी जानकारी सही तरीके से भरें'));
+      _showSnack(tr('Please fill in all fields correctly', 'कृपया सभी जानकारी सही तरीके से भरें', 'कृपया सर्व माहिती व्यवस्थित भरा'));
       return;
     }
 
@@ -108,7 +108,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  tr('Registration\nSuccessful!', 'रजिस्ट्रेशन\nसफल हुआ!'),
+                  tr('Registration\nSuccessful!', 'रजिस्ट्रेशन\nसफल हुआ!', 'नोंदणी\nयशस्वी झाली!'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 26,
@@ -120,7 +120,8 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
                 const SizedBox(height: 12),
                 Text(
                   tr('$name has been registered\nas a Guruji successfully.',
-                      '$name को गुरुजी के रूप में\nसफलतापूर्वक रजिस्टर कर दिया गया है।'),
+                      '$name को गुरुजी के रूप में\nसफलतापूर्वक रजिस्टर कर दिया गया है।',
+                      '$name यांची गुरुजी म्हणून\nयशस्वीरित्या नोंदणी झाली आहे.'),
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 15,
@@ -141,7 +142,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
                           borderRadius: BorderRadius.circular(14)),
                       elevation: 0,
                     ),
-                    child: Text(tr('Continue', 'जारी रखें'),
+                    child: Text(tr('Continue', 'जारी रखें', 'सुरू ठेवा'),
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w700)),
                   ),
@@ -167,7 +168,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(tr('Register Guruji', 'गुरुजी रजिस्टर करें'),
+        title: Text(tr('Register Guruji', 'गुरुजी रजिस्टर करें', 'गुरुजी नोंदणी करा'),
             style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
@@ -195,7 +196,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
             _sectionIcon(),
             const SizedBox(height: 8),
             Text(
-              tr('Create Guruji Account', 'गुरुजी खाता बनाएं'),
+              tr('Create Guruji Account', 'गुरुजी खाता बनाएं', 'गुरुजी खाते तयार करा'),
               textAlign: TextAlign.center,
               style: const TextStyle(
                   fontSize: 18,
@@ -205,22 +206,23 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
             const SizedBox(height: 4),
             Text(
               tr('Fill in the details below to register',
-                  'रजिस्टर करने के लिए नीचे दी गई जानकारी भरें'),
+                  'रजिस्टर करने के लिए नीचे दी गई जानकारी भरें',
+                  'नोंदणी करण्यासाठी खालील माहिती भरा'),
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13, color: AdminColors.grey600),
             ),
             const SizedBox(height: 28),
             _inputField(
               controller: _nameCtrl,
-              label: tr('Full Name', 'पूरा नाम'),
-              hint: tr('Enter full name', 'पूरा नाम दर्ज करें'),
+              label: tr('Full Name', 'पूरा नाम', 'पूर्ण नाव'),
+              hint: tr('Enter full name', 'पूरा नाम दर्ज करें', 'पूर्ण नाव टाका'),
               icon: Icons.person_outline_rounded,
             ),
             const SizedBox(height: 16),
             _inputField(
               controller: _phoneCtrl,
-              label: tr('Phone Number', 'फ़ोन नंबर'),
-              hint: tr('10-digit mobile number', '10 अंकों का मोबाइल नंबर'),
+              label: tr('Phone Number', 'फ़ोन नंबर', 'फोन नंबर'),
+              hint: tr('10-digit mobile number', '10 अंकों का मोबाइल नंबर', '10 अंकी मोबाइल नंबर'),
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               inputFormatters: [
@@ -231,16 +233,16 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
             const SizedBox(height: 16),
             _inputField(
               controller: _emailCtrl,
-              label: tr('Email', 'ईमेल'),
-              hint: tr('Enter email address', 'ईमेल पता दर्ज करें'),
+              label: tr('Email', 'ईमेल', 'ईमेल'),
+              hint: tr('Enter email address', 'ईमेल पता दर्ज करें', 'ईमेल पत्ता टाका'),
               icon: Icons.email_outlined,
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             _inputField(
               controller: _passwordCtrl,
-              label: tr('Password', 'पासवर्ड'),
-              hint: tr('Create a password', 'पासवर्ड बनाएं'),
+              label: tr('Password', 'पासवर्ड', 'पासवर्ड'),
+              hint: tr('Create a password', 'पासवर्ड बनाएं', 'पासवर्ड तयार करा'),
               icon: Icons.lock_outlined,
               obscureText: _obscure,
               suffixIcon: IconButton(
@@ -253,7 +255,7 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
             ),
             const SizedBox(height: 28),
             _primaryButton(
-              label: tr('Register', 'रजिस्टर करें'),
+              label: tr('Register', 'रजिस्टर करें', 'नोंदणी करा'),
               loading: _loading,
               onTap: _register,
             ),
@@ -261,12 +263,12 @@ class _GurujiRegisterScreenState extends State<GurujiRegisterScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(tr('Already registered?', 'पहले से रजिस्टर्ड हैं?'),
+                Text(tr('Already registered?', 'पहले से रजिस्टर्ड हैं?', 'आधीच नोंदणीकृत आहात?'),
                     style:
                         TextStyle(color: AdminColors.grey700, fontSize: 14)),
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: Text(tr('Login', 'लॉगिन'),
+                  child: Text(tr('Login', 'लॉगिन', 'लॉगिन'),
                       style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 14,
