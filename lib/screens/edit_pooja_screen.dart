@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
+import '../l10n/tr.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
 
@@ -74,11 +75,13 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     _descCtrl = TextEditingController(text: p.description);
     _priceCtrl = TextEditingController(text: p.pricePerPerson.toString());
     _stayRateCtrl = TextEditingController(
-        text: p.stayRatePerNight > 0 ? p.stayRatePerNight.toString() : '');
+      text: p.stayRatePerNight > 0 ? p.stayRatePerNight.toString() : '',
+    );
     _iconCtrl = TextEditingController(text: p.iconName);
     _durationCtrl = TextEditingController(text: p.duration);
     _displayOrderCtrl = TextEditingController(
-        text: p.displayOrder?.toString() ?? '');
+      text: p.displayOrder?.toString() ?? '',
+    );
     _infoCtrl = TextEditingController(text: p.info);
     _beforeCtrls = _initList(p.beforeInstructions);
     _afterCtrls = _initList(p.afterInstructions);
@@ -100,9 +103,11 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     }
     _privatePooja = p.privatePooja;
     _privatePoojaRateCtrl = TextEditingController(
-        text: p.privatePoojaRate > 0 ? p.privatePoojaRate.toString() : '');
+      text: p.privatePoojaRate > 0 ? p.privatePoojaRate.toString() : '',
+    );
     _gurujiDefaultRateCtrl = TextEditingController(
-        text: p.gurujiDefaultRate > 0 ? p.gurujiDefaultRate.toString() : '');
+      text: p.gurujiDefaultRate > 0 ? p.gurujiDefaultRate.toString() : '',
+    );
   }
 
   List<TextEditingController> _initList(List<String> items) {
@@ -113,10 +118,19 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
   @override
   void dispose() {
     for (final c in [
-      _nameCtrl, _descCtrl, _priceCtrl, _stayRateCtrl, _iconCtrl,
-      _durationCtrl, _displayOrderCtrl, _infoCtrl, _privatePoojaRateCtrl,
+      _nameCtrl,
+      _descCtrl,
+      _priceCtrl,
+      _stayRateCtrl,
+      _iconCtrl,
+      _durationCtrl,
+      _displayOrderCtrl,
+      _infoCtrl,
+      _privatePoojaRateCtrl,
       _gurujiDefaultRateCtrl,
-      ..._beforeCtrls, ..._afterCtrls, ..._bringCtrls,
+      ..._beforeCtrls,
+      ..._afterCtrls,
+      ..._bringCtrls,
     ]) {
       c.dispose();
     }
@@ -129,8 +143,14 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
   Future<void> _save() async {
     final name = _nameCtrl.text.trim();
     final price = int.tryParse(_priceCtrl.text.trim());
-    if (name.isEmpty) { _snack('Pooja name is required'); return; }
-    if (price == null || price <= 0) { _snack('Please enter a valid price'); return; }
+    if (name.isEmpty) {
+      _snack(tr('Pooja name is required', 'पूजा का नाम आवश्यक है'));
+      return;
+    }
+    if (price == null || price <= 0) {
+      _snack(tr('Please enter a valid price', 'कृपया सही कीमत डालें'));
+      return;
+    }
 
     setState(() => _saving = true);
     final error = await AdminDataService.updatePooja(
@@ -160,14 +180,18 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
       } else {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pooja updated successfully')),
+          SnackBar(
+            content: Text(
+              tr('Pooja updated successfully', 'पूजा सफलतापूर्वक अपडेट की गई'),
+            ),
+          ),
         );
       }
     }
   }
 
-  void _snack(String msg) => ScaffoldMessenger.of(context)
-      .showSnackBar(SnackBar(content: Text(msg)));
+  void _snack(String msg) =>
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 
   @override
   Widget build(BuildContext context) {
@@ -193,130 +217,187 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 width: 18,
                 height: 18,
                 child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2),
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
               ),
             )
           else
             TextButton.icon(
               onPressed: _save,
-              icon: const Icon(Icons.check_rounded,
-                  color: Colors.white, size: 20),
-              label: const Text('Save',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 15)),
+              icon: const Icon(
+                Icons.check_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
+              label: Text(
+                tr('Save', 'सेव करें'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
             ),
         ],
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         children: [
-          _sectionHeader('Basic Info'),
+          _sectionHeader(tr('Basic Info', 'बुनियादी जानकारी')),
           const SizedBox(height: 12),
-          _field(_nameCtrl, 'Pooja Name *', Icons.auto_awesome_rounded),
+          _field(
+            _nameCtrl,
+            tr('Pooja Name *', 'पूजा का नाम *'),
+            Icons.auto_awesome_rounded,
+          ),
           const SizedBox(height: 12),
-          _field(_descCtrl, 'Short Description', Icons.short_text_rounded,
-              maxLines: 2),
+          _field(
+            _descCtrl,
+            tr('Short Description', 'संक्षिप्त विवरण'),
+            Icons.short_text_rounded,
+            maxLines: 2,
+          ),
           const SizedBox(height: 12),
-          Row(children: [
-            Expanded(
-              flex: 3,
-              child: _field(_priceCtrl, 'Price per Person (₹) *',
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: _field(
+                  _priceCtrl,
+                  tr('Price per Person (₹) *', 'प्रति व्यक्ति कीमत (₹) *'),
                   Icons.currency_rupee_rounded,
-                  numeric: true),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              flex: 2,
-              child: _field(_displayOrderCtrl, 'Display Order',
+                  numeric: true,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: _field(
+                  _displayOrderCtrl,
+                  tr('Display Order', 'डिस्प्ले क्रम'),
                   Icons.sort_rounded,
-                  numeric: true),
-            ),
-          ]),
+                  numeric: true,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
-          _field(_stayRateCtrl, 'Stay Rate per Night (₹)',
-              Icons.hotel_rounded,
-              numeric: true),
+          _field(
+            _stayRateCtrl,
+            tr('Stay Rate per Night (₹)', 'प्रति रात ठहरने की दर (₹)'),
+            Icons.hotel_rounded,
+            numeric: true,
+          ),
           const SizedBox(height: 4),
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 8),
             child: Text(
-              'Set to 0 to disable stay booking for this pooja.',
+              tr(
+                'Set to 0 to disable stay booking for this pooja.',
+                'इस पूजा के लिए ठहरने की बुकिंग बंद करने हेतु 0 डालें।',
+              ),
               style: TextStyle(fontSize: 11, color: AdminColors.grey500),
             ),
           ),
           const SizedBox(height: 8),
-          Row(children: [
-            Expanded(
-              child: _field(_durationCtrl, 'Duration (e.g. 1 Day)',
-                  Icons.schedule_rounded),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _field(_iconCtrl, 'Icon Name',
-                  Icons.insert_emoticon_rounded),
-            ),
-          ]),
+          Row(
+            children: [
+              Expanded(
+                child: _field(
+                  _durationCtrl,
+                  tr('Duration (e.g. 1 Day)', 'अवधि (जैसे 1 दिन)'),
+                  Icons.schedule_rounded,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _field(
+                  _iconCtrl,
+                  tr('Icon Name', 'आइकन का नाम'),
+                  Icons.insert_emoticon_rounded,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 24),
 
-          _sectionHeader('Color'),
+          _sectionHeader(tr('Color', 'रंग')),
           const SizedBox(height: 12),
           _colorPicker(),
           const SizedBox(height: 24),
 
-          _sectionHeader('Status'),
+          _sectionHeader(tr('Status', 'स्थिति')),
           const SizedBox(height: 12),
           _statusToggle(),
           const SizedBox(height: 24),
 
-          _sectionHeader('Private / Separate Pooja'),
+          _sectionHeader(tr('Private / Separate Pooja', 'निजी / अलग पूजा')),
           const SizedBox(height: 12),
           _privatePoojaToggle(),
           const SizedBox(height: 24),
 
-          _sectionHeader('Guruji Rate'),
+          _sectionHeader(tr('Guruji Rate', 'गुरुजी की दर')),
           const SizedBox(height: 4),
           Text(
-            'Default payout for this pooja, shown against every Guruji unless overridden individually.',
+            tr(
+              'Default payout for this pooja, shown against every Guruji unless overridden individually.',
+              'इस पूजा के लिए डिफ़ॉल्ट भुगतान, जब तक अलग से बदला न जाए तब तक हर गुरुजी के सामने यही दिखाया जाता है।',
+            ),
             style: TextStyle(fontSize: 12, color: AdminColors.grey600),
           ),
           const SizedBox(height: 12),
           _field(
             _gurujiDefaultRateCtrl,
-            'Default Guruji Rate (₹)',
+            tr('Default Guruji Rate (₹)', 'डिफ़ॉल्ट गुरुजी दर (₹)'),
             Icons.currency_rupee_rounded,
             numeric: true,
           ),
           const SizedBox(height: 24),
 
-          _sectionHeader('Muhurta Dates'),
+          _sectionHeader(tr('Muhurta Dates', 'मुहूर्त तिथियां')),
           const SizedBox(height: 12),
           _muhurtaCalendar(),
           const SizedBox(height: 24),
 
-          _sectionHeader('Detailed Info'),
+          _sectionHeader(tr('Detailed Info', 'विस्तृत जानकारी')),
           const SizedBox(height: 12),
-          _field(_infoCtrl, 'Full description / info',
-              Icons.info_outline_rounded,
-              maxLines: 4),
+          _field(
+            _infoCtrl,
+            tr('Full description / info', 'पूरा विवरण / जानकारी'),
+            Icons.info_outline_rounded,
+            maxLines: 4,
+          ),
           const SizedBox(height: 24),
 
-          _sectionHeader('Before Instructions'),
+          _sectionHeader(tr('Before Instructions', 'पहले के निर्देश')),
           const SizedBox(height: 8),
-          _dynamicList(_beforeCtrls,
-              hint: 'e.g. Take a holy bath before arriving'),
+          _dynamicList(
+            _beforeCtrls,
+            hint: tr(
+              'e.g. Take a holy bath before arriving',
+              'जैसे आने से पहले पवित्र स्नान करें',
+            ),
+          ),
           const SizedBox(height: 24),
 
-          _sectionHeader('After Instructions'),
+          _sectionHeader(tr('After Instructions', 'बाद के निर्देश')),
           const SizedBox(height: 8),
-          _dynamicList(_afterCtrls,
-              hint: 'e.g. Maintain celibacy for 3 days'),
+          _dynamicList(
+            _afterCtrls,
+            hint: tr(
+              'e.g. Maintain celibacy for 3 days',
+              'जैसे 3 दिन ब्रह्मचर्य का पालन करें',
+            ),
+          ),
           const SizedBox(height: 24),
 
-          _sectionHeader('Things to Bring'),
+          _sectionHeader(tr('Things to Bring', 'साथ लाने योग्य चीज़ें')),
           const SizedBox(height: 8),
-          _dynamicList(_bringCtrls, hint: 'e.g. White dhoti and saree'),
+          _dynamicList(
+            _bringCtrls,
+            hint: tr('e.g. White dhoti and saree', 'जैसे सफेद धोती और साड़ी'),
+          ),
           const SizedBox(height: 32),
 
           SizedBox(
@@ -328,17 +409,25 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                 backgroundColor: AdminColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               child: _saving
                   ? const SizedBox(
                       width: 22,
                       height: 22,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2.5))
-                  : const Text('Save Changes',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      tr('Save Changes', 'बदलाव सेव करें'),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
             ),
           ),
         ],
@@ -347,13 +436,14 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
   }
 
   Widget _sectionHeader(String title) => Text(
-        title,
-        style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-            color: AdminColors.grey600,
-            letterSpacing: 0.6),
-      );
+    title,
+    style: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      color: AdminColors.grey600,
+      letterSpacing: 0.6,
+    ),
+  );
 
   Widget _field(
     TextEditingController ctrl,
@@ -361,193 +451,216 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     IconData icon, {
     int maxLines = 1,
     bool numeric = false,
-  }) =>
-      TextFormField(
-        controller: ctrl,
-        maxLines: maxLines,
-        keyboardType: numeric ? TextInputType.number : TextInputType.text,
-        inputFormatters:
-            numeric ? [FilteringTextInputFormatter.digitsOnly] : null,
-        textCapitalization: numeric
-            ? TextCapitalization.none
-            : TextCapitalization.sentences,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: AdminColors.primary, size: 20),
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AdminColors.grey300),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: AdminColors.grey300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide:
-                const BorderSide(color: AdminColors.primary, width: 1.5),
-          ),
-        ),
-      );
+  }) => TextFormField(
+    controller: ctrl,
+    maxLines: maxLines,
+    keyboardType: numeric ? TextInputType.number : TextInputType.text,
+    inputFormatters: numeric ? [FilteringTextInputFormatter.digitsOnly] : null,
+    textCapitalization: numeric
+        ? TextCapitalization.none
+        : TextCapitalization.sentences,
+    decoration: InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: AdminColors.primary, size: 20),
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AdminColors.grey300),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: AdminColors.grey300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AdminColors.primary, width: 1.5),
+      ),
+    ),
+  );
 
   Widget _colorPicker() => Wrap(
-        spacing: 12,
-        runSpacing: 12,
-        children: List.generate(_kColorOptions.length, (i) {
-          final selected = _colorIndex == i;
-          return GestureDetector(
-            onTap: () => setState(() => _colorIndex = i),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: _kColorOptions[i],
-                shape: BoxShape.circle,
-                border: selected
-                    ? Border.all(
-                        color: _kColorOptions[i].computeLuminance() > 0.6
-                            ? Colors.black54
-                            : Colors.white,
-                        width: 3)
-                    : Border.all(color: Colors.grey.shade300, width: 1),
-                boxShadow: selected
-                    ? [
-                        BoxShadow(
-                            color: _kColorOptions[i].withValues(alpha: 0.4),
-                            blurRadius: 10,
-                            spreadRadius: 2)
-                      ]
-                    : null,
-              ),
-              child: selected
-                  ? Icon(Icons.check_rounded,
-                      color: _kColorOptions[i].computeLuminance() > 0.6
-                          ? Colors.black87
-                          : Colors.white,
-                      size: 20)
-                  : null,
-            ),
-          );
-        }),
+    spacing: 12,
+    runSpacing: 12,
+    children: List.generate(_kColorOptions.length, (i) {
+      final selected = _colorIndex == i;
+      return GestureDetector(
+        onTap: () => setState(() => _colorIndex = i),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: _kColorOptions[i],
+            shape: BoxShape.circle,
+            border: selected
+                ? Border.all(
+                    color: _kColorOptions[i].computeLuminance() > 0.6
+                        ? Colors.black54
+                        : Colors.white,
+                    width: 3,
+                  )
+                : Border.all(color: Colors.grey.shade300, width: 1),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: _kColorOptions[i].withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
+          ),
+          child: selected
+              ? Icon(
+                  Icons.check_rounded,
+                  color: _kColorOptions[i].computeLuminance() > 0.6
+                      ? Colors.black87
+                      : Colors.white,
+                  size: 20,
+                )
+              : null,
+        ),
       );
+    }),
+  );
 
   Widget _privatePoojaToggle() => Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                  color: _privatePooja
-                      ? const Color(0xFF6A1B9A).withValues(alpha: 0.4)
-                      : AdminColors.grey300),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.lock_person_rounded,
-                    size: 22,
-                    color: _privatePooja
-                        ? const Color(0xFF6A1B9A)
-                        : AdminColors.grey500),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Separate / Private Pooja',
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.w600)),
-                      Text(
-                        _privatePooja
-                            ? 'Enabled — users can book a private session'
-                            : 'Disabled — group pooja only',
-                        style: TextStyle(
-                            fontSize: 12, color: AdminColors.grey600),
-                      ),
-                    ],
-                  ),
-                ),
-                Switch(
-                  value: _privatePooja,
-                  onChanged: (v) => setState(() => _privatePooja = v),
-                  activeColor: const Color(0xFF6A1B9A),
-                ),
-              ],
-            ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeInOut,
-            child: _privatePooja
-                ? Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: _field(
-                      _privatePoojaRateCtrl,
-                      'Private Pooja Rate (₹)',
-                      Icons.currency_rupee_rounded,
-                      numeric: true,
-                    ),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      );
-
-  Widget _statusToggle() => Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    children: [
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AdminColors.grey300),
+          border: Border.all(
+            color: _privatePooja
+                ? const Color(0xFF6A1B9A).withValues(alpha: 0.4)
+                : AdminColors.grey300,
+          ),
         ),
         child: Row(
           children: [
-            Icon(Icons.power_settings_new_rounded,
-                size: 22,
-                color: _enabled
-                    ? Colors.green.shade600
-                    : AdminColors.grey500),
+            Icon(
+              Icons.lock_person_rounded,
+              size: 22,
+              color: _privatePooja
+                  ? const Color(0xFF6A1B9A)
+                  : AdminColors.grey500,
+            ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Pooja Status',
-                      style: TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
                   Text(
-                    _enabled
-                        ? 'Enabled — visible to users'
-                        : 'Disabled — hidden from users',
-                    style: TextStyle(
-                        fontSize: 12, color: AdminColors.grey600),
+                    tr('Separate / Private Pooja', 'अलग / निजी पूजा'),
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    _privatePooja
+                        ? tr(
+                            'Enabled — users can book a private session',
+                            'सक्षम — उपयोगकर्ता निजी सत्र बुक कर सकते हैं',
+                          )
+                        : tr(
+                            'Disabled — group pooja only',
+                            'अक्षम — केवल सामूहिक पूजा',
+                          ),
+                    style: TextStyle(fontSize: 12, color: AdminColors.grey600),
                   ),
                 ],
               ),
             ),
             Switch(
-              value: _enabled,
-              onChanged: (v) => setState(() => _enabled = v),
-              activeColor: AdminColors.primary,
+              value: _privatePooja,
+              onChanged: (v) => setState(() => _privatePooja = v),
+              activeColor: const Color(0xFF6A1B9A),
             ),
           ],
         ),
-      );
+      ),
+      AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        child: _privatePooja
+            ? Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: _field(
+                  _privatePoojaRateCtrl,
+                  tr('Private Pooja Rate (₹)', 'निजी पूजा दर (₹)'),
+                  Icons.currency_rupee_rounded,
+                  numeric: true,
+                ),
+              )
+            : const SizedBox.shrink(),
+      ),
+    ],
+  );
+
+  Widget _statusToggle() => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: AdminColors.grey300),
+    ),
+    child: Row(
+      children: [
+        Icon(
+          Icons.power_settings_new_rounded,
+          size: 22,
+          color: _enabled ? Colors.green.shade600 : AdminColors.grey500,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                tr('Pooja Status', 'पूजा की स्थिति'),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                _enabled
+                    ? tr(
+                        'Enabled — visible to users',
+                        'सक्षम — उपयोगकर्ताओं को दिखेगी',
+                      )
+                    : tr(
+                        'Disabled — hidden from users',
+                        'अक्षम — उपयोगकर्ताओं से छिपी रहेगी',
+                      ),
+                style: TextStyle(fontSize: 12, color: AdminColors.grey600),
+              ),
+            ],
+          ),
+        ),
+        Switch(
+          value: _enabled,
+          onChanged: (v) => setState(() => _enabled = v),
+          activeColor: AdminColors.primary,
+        ),
+      ],
+    ),
+  );
 
   // ── Multi-date inline calendar ─────────────────────────────────────────────
 
-  bool _isMuhurta(DateTime d) => _muhurtaDates
-      .any((m) => m.year == d.year && m.month == d.month && m.day == d.day);
+  bool _isMuhurta(DateTime d) => _muhurtaDates.any(
+    (m) => m.year == d.year && m.month == d.month && m.day == d.day,
+  );
 
   void _toggleDate(DateTime d) {
     setState(() {
       final idx = _muhurtaDates.indexWhere(
-          (m) => m.year == d.year && m.month == d.month && m.day == d.day);
+        (m) => m.year == d.year && m.month == d.month && m.day == d.day,
+      );
       if (idx >= 0) {
         _muhurtaDates.removeAt(idx);
       } else {
@@ -558,8 +671,19 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
 
   static const _weekLabels = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
   static const _monthNames = [
-    '', 'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
+    '',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   Widget _muhurtaCalendar() {
@@ -573,10 +697,9 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     final rows = (totalCells / 7).ceil();
 
     // Dates selected in the current view month
-    final monthSelected = _muhurtaDates
-        .where((d) => d.year == year && d.month == month)
-        .toList()
-      ..sort((a, b) => a.day.compareTo(b.day));
+    final monthSelected =
+        _muhurtaDates.where((d) => d.year == year && d.month == month).toList()
+          ..sort((a, b) => a.day.compareTo(b.day));
 
     return Container(
       decoration: BoxDecoration(
@@ -592,8 +715,9 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
             child: Row(
               children: [
                 IconButton(
-                  onPressed: () => setState(() => _calendarMonth =
-                      DateTime(year, month - 1)),
+                  onPressed: () => setState(
+                    () => _calendarMonth = DateTime(year, month - 1),
+                  ),
                   icon: const Icon(Icons.chevron_left_rounded, size: 22),
                   color: AdminColors.grey600,
                   visualDensity: VisualDensity.compact,
@@ -603,12 +727,15 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
                     '${_monthNames[month]} $year',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w700),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 IconButton(
-                  onPressed: () => setState(() => _calendarMonth =
-                      DateTime(year, month + 1)),
+                  onPressed: () => setState(
+                    () => _calendarMonth = DateTime(year, month + 1),
+                  ),
                   icon: const Icon(Icons.chevron_right_rounded, size: 22),
                   color: AdminColors.grey600,
                   visualDensity: VisualDensity.compact,
@@ -621,15 +748,22 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
-              children: _weekLabels.map((lbl) => Expanded(
-                child: Center(
-                  child: Text(lbl,
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AdminColors.grey500)),
-                ),
-              )).toList(),
+              children: _weekLabels
+                  .map(
+                    (lbl) => Expanded(
+                      child: Center(
+                        child: Text(
+                          lbl,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: AdminColors.grey500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
           const SizedBox(height: 4),
@@ -691,32 +825,52 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
               child: Row(
                 children: [
-                  Icon(Icons.event_available_rounded,
-                      size: 15, color: AdminColors.primary),
+                  Icon(
+                    Icons.event_available_rounded,
+                    size: 15,
+                    color: AdminColors.primary,
+                  ),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       monthSelected.length == _muhurtaDates.length
                           ? (_muhurtaDates.length == 1
-                              ? '1 muhurta date selected'
-                              : '${_muhurtaDates.length} muhurta dates selected')
-                          : '${monthSelected.length} this month · '
-                              '${_muhurtaDates.length} selected across all months',
+                                ? tr(
+                                    '1 muhurta date selected',
+                                    '1 मुहूर्त तिथि चुनी गई',
+                                  )
+                                : tr(
+                                    '${_muhurtaDates.length} muhurta dates selected',
+                                    '${_muhurtaDates.length} मुहूर्त तिथियां चुनी गईं',
+                                  ))
+                          : tr(
+                              '${monthSelected.length} this month · '
+                                  '${_muhurtaDates.length} selected across all months',
+                              '${monthSelected.length} इस महीने · '
+                                  '${_muhurtaDates.length} सभी महीनों में चुनी गईं',
+                            ),
                       style: TextStyle(
-                          fontSize: 12,
-                          color: AdminColors.primary,
-                          fontWeight: FontWeight.w600),
+                        fontSize: 12,
+                        color: AdminColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   if (monthSelected.isNotEmpty)
                     GestureDetector(
-                      onTap: () => setState(() => _muhurtaDates.removeWhere(
-                          (d) => d.year == year && d.month == month)),
-                      child: Text('Clear month',
-                          style: TextStyle(
-                              fontSize: 11,
-                              color: Colors.red.shade400,
-                              fontWeight: FontWeight.w500)),
+                      onTap: () => setState(
+                        () => _muhurtaDates.removeWhere(
+                          (d) => d.year == year && d.month == month,
+                        ),
+                      ),
+                      child: Text(
+                        tr('Clear month', 'महीना साफ़ करें'),
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.red.shade400,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -727,73 +881,86 @@ class _EditPoojaScreenState extends State<EditPoojaScreen> {
     );
   }
 
-  Widget _dynamicList(List<TextEditingController> ctrls,
-      {required String hint}) {
+  Widget _dynamicList(
+    List<TextEditingController> ctrls, {
+    required String hint,
+  }) {
     return Column(
       children: [
-        ...ctrls.asMap().entries.map((e) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: e.value,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: InputDecoration(
-                        hintText: hint,
-                        hintStyle: TextStyle(
-                            fontSize: 13, color: AdminColors.grey400),
-                        prefixText: '${e.key + 1}.  ',
-                        prefixStyle: TextStyle(
-                            fontSize: 13, color: AdminColors.grey500),
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              BorderSide(color: AdminColors.grey300),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide:
-                              BorderSide(color: AdminColors.grey300),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                              color: AdminColors.primary, width: 1.5),
+        ...ctrls.asMap().entries.map(
+          (e) => Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: e.value,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      hintStyle: TextStyle(
+                        fontSize: 13,
+                        color: AdminColors.grey400,
+                      ),
+                      prefixText: '${e.key + 1}.  ',
+                      prefixStyle: TextStyle(
+                        fontSize: 13,
+                        color: AdminColors.grey500,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: AdminColors.grey300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: AdminColors.grey300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: AdminColors.primary,
+                          width: 1.5,
                         ),
                       ),
                     ),
                   ),
-                  if (ctrls.length > 1) ...[
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: () => setState(() {
-                        e.value.dispose();
-                        ctrls.removeAt(e.key);
-                      }),
-                      child: Icon(Icons.remove_circle_outline_rounded,
-                          color: Colors.red.shade300, size: 22),
+                ),
+                if (ctrls.length > 1) ...[
+                  const SizedBox(width: 6),
+                  GestureDetector(
+                    onTap: () => setState(() {
+                      e.value.dispose();
+                      ctrls.removeAt(e.key);
+                    }),
+                    child: Icon(
+                      Icons.remove_circle_outline_rounded,
+                      color: Colors.red.shade300,
+                      size: 22,
                     ),
-                  ],
+                  ),
                 ],
-              ),
-            )),
+              ],
+            ),
+          ),
+        ),
         TextButton.icon(
-          onPressed: () =>
-              setState(() => ctrls.add(TextEditingController())),
-          icon: Icon(Icons.add_rounded,
-              size: 16, color: AdminColors.primary),
-          label: Text('Add item',
-              style: TextStyle(
-                  fontSize: 13,
-                  color: AdminColors.primary,
-                  fontWeight: FontWeight.w600)),
-          style: TextButton.styleFrom(
-              padding: EdgeInsets.zero),
+          onPressed: () => setState(() => ctrls.add(TextEditingController())),
+          icon: Icon(Icons.add_rounded, size: 16, color: AdminColors.primary),
+          label: Text(
+            tr('Add item', 'आइटम जोड़ें'),
+            style: TextStyle(
+              fontSize: 13,
+              color: AdminColors.primary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
         ),
       ],
     );

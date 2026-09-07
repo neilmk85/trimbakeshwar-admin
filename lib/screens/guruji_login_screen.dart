@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
+import '../l10n/tr.dart';
 import '../services/guruji_auth_service.dart';
 import 'guruji_register_screen.dart';
 
@@ -46,7 +47,12 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
   Future<void> _sendOtp() async {
     final phone = _otpPhoneCtrl.text.trim();
     if (phone.length < 10) {
-      _showSnack('Please enter a valid 10-digit phone number');
+      _showSnack(
+        tr(
+          'Please enter a valid 10-digit phone number',
+          'कृपया सही 10 अंकों का फ़ोन नंबर डालें',
+        ),
+      );
       return;
     }
     setState(() => _otpLoading = true);
@@ -58,7 +64,10 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
       });
     }
     if (error == null) {
-      _showSnack('OTP sent to WhatsApp!', duration: 4);
+      _showSnack(
+        tr('OTP sent to WhatsApp!', 'OTP WhatsApp पर भेजा गया!'),
+        duration: 4,
+      );
     } else if (error.contains('not authorized')) {
       _showSnack(error, duration: 4);
     } else {
@@ -70,7 +79,9 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     final phone = _otpPhoneCtrl.text.trim();
     final otp = _otpCtrl.text.trim();
     if (otp.length != 4) {
-      _showSnack('Please enter the 4-digit OTP');
+      _showSnack(
+        tr('Please enter the 4-digit OTP', 'कृपया 4 अंकों का OTP डालें'),
+      );
       return;
     }
     setState(() => _otpLoading = true);
@@ -83,7 +94,9 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text;
     if (email.isEmpty || password.isEmpty) {
-      _showSnack('Please enter email and password');
+      _showSnack(
+        tr('Please enter email and password', 'कृपया ईमेल और पासवर्ड डालें'),
+      );
       return;
     }
     setState(() => _emailLoading = true);
@@ -139,26 +152,34 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                     color: const Color(0xFFFFF3E0),
                     shape: BoxShape.circle,
                     border: Border.all(
-                        color: const Color(0xFFFF9800), width: 2),
+                      color: const Color(0xFFFF9800),
+                      width: 2,
+                    ),
                   ),
-                  child: const Icon(Icons.person_off_rounded,
-                      color: Color(0xFFFF9800), size: 40),
+                  child: const Icon(
+                    Icons.person_off_rounded,
+                    color: Color(0xFFFF9800),
+                    size: 40,
+                  ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'User Not Registered',
+                Text(
+                  tr('User Not Registered', 'यूज़र रजिस्टर्ड नहीं है'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF1A1A2E),
                   ),
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'No account found with these credentials.\nPlease register as a Guruji first.',
+                Text(
+                  tr(
+                    'No account found with these credentials.\nPlease register as a Guruji first.',
+                    'इन जानकारियों से कोई खाता नहीं मिला।\nकृपया पहले गुरुजी के रूप में रजिस्टर करें।',
+                  ),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF6B7280),
                     height: 1.5,
@@ -174,12 +195,16 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           side: const BorderSide(color: Color(0xFFD1D5DB)),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Close',
-                            style: TextStyle(
-                                color: Color(0xFF6B7280),
-                                fontWeight: FontWeight.w600)),
+                        child: Text(
+                          tr('Close', 'बंद करें'),
+                          style: const TextStyle(
+                            color: Color(0xFF6B7280),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -190,7 +215,8 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (_) => const GurujiRegisterScreen()),
+                              builder: (_) => const GurujiRegisterScreen(),
+                            ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -199,10 +225,13 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                           padding: const EdgeInsets.symmetric(vertical: 13),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
-                        child: const Text('Register',
-                            style: TextStyle(fontWeight: FontWeight.w700)),
+                        child: Text(
+                          tr('Register', 'रजिस्टर करें'),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
                       ),
                     ),
                   ],
@@ -216,12 +245,14 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
   }
 
   void _showSnack(String msg, {int duration = 3}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      duration: Duration(seconds: duration),
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        duration: Duration(seconds: duration),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   @override
@@ -241,19 +272,25 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Center(
-                child: Text('ॐ',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w300)),
+                child: Text(
+                  'ॐ',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: 8),
-            const Text('Trimbakeshwar Guruji',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5)),
+            Text(
+              tr('Trimbakeshwar Guruji', 'Trimbakeshwar गुरुजी'),
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
           ],
         ),
         centerTitle: true,
@@ -273,20 +310,19 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          labelStyle:
-              const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-          tabs: const [
-            Tab(text: 'OTP Login'),
-            Tab(text: 'Email Login'),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+          tabs: [
+            Tab(text: tr('OTP Login', 'OTP लॉगिन')),
+            Tab(text: tr('Email Login', 'ईमेल लॉगिन')),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildOtpTab(),
-          _buildEmailTab(),
-        ],
+        children: [_buildOtpTab(), _buildEmailTab()],
       ),
     );
   }
@@ -302,8 +338,8 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 24),
           _inputField(
             controller: _otpPhoneCtrl,
-            label: 'Phone Number',
-            hint: '10-digit mobile number',
+            label: tr('Phone Number', 'फ़ोन नंबर'),
+            hint: tr('10-digit mobile number', '10 अंकों का मोबाइल नंबर'),
             icon: Icons.phone_outlined,
             keyboardType: TextInputType.phone,
             inputFormatters: [
@@ -315,15 +351,15 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 16),
           if (!_otpSent)
             _primaryButton(
-              label: 'Get OTP',
+              label: tr('Get OTP', 'OTP प्राप्त करें'),
               loading: _otpLoading,
               onTap: _sendOtp,
             )
           else ...[
             _inputField(
               controller: _otpCtrl,
-              label: 'Enter OTP',
-              hint: '4-digit OTP',
+              label: tr('Enter OTP', 'OTP डालें'),
+              hint: tr('4-digit OTP', '4 अंकों का OTP'),
               icon: Icons.lock_outlined,
               keyboardType: TextInputType.number,
               inputFormatters: [
@@ -337,12 +373,14 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                 _otpSent = false;
                 _otpCtrl.clear();
               }),
-              child: Text('Change Number / Resend OTP',
-                  style: TextStyle(color: AdminColors.primary)),
+              child: Text(
+                tr('Change Number / Resend OTP', 'नंबर बदलें / OTP फिर भेजें'),
+                style: TextStyle(color: AdminColors.primary),
+              ),
             ),
             const SizedBox(height: 8),
             _primaryButton(
-              label: 'Verify & Login',
+              label: tr('Verify & Login', 'सत्यापित करें और लॉगिन करें'),
               loading: _otpLoading,
               onTap: _verifyOtp,
             ),
@@ -365,29 +403,30 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           const SizedBox(height: 24),
           _inputField(
             controller: _emailCtrl,
-            label: 'Email',
-            hint: 'Enter your email address',
+            label: tr('Email', 'ईमेल'),
+            hint: tr('Enter your email address', 'अपना ईमेल पता डालें'),
             icon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
           ),
           const SizedBox(height: 16),
           _inputField(
             controller: _passwordCtrl,
-            label: 'Password',
-            hint: 'Enter your password',
+            label: tr('Password', 'पासवर्ड'),
+            hint: tr('Enter your password', 'अपना पासवर्ड डालें'),
             icon: Icons.lock_outlined,
             obscureText: _pwdObscure,
             suffixIcon: IconButton(
               icon: Icon(
-                  _pwdObscure ? Icons.visibility_off : Icons.visibility,
-                  color: AdminColors.grey500,
-                  size: 20),
+                _pwdObscure ? Icons.visibility_off : Icons.visibility,
+                color: AdminColors.grey500,
+                size: 20,
+              ),
               onPressed: () => setState(() => _pwdObscure = !_pwdObscure),
             ),
           ),
           const SizedBox(height: 24),
           _primaryButton(
-            label: 'Login',
+            label: tr('Login', 'लॉगिन'),
             loading: _emailLoading,
             onTap: _loginWithEmail,
           ),
@@ -408,11 +447,14 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
           shape: BoxShape.circle,
         ),
         child: const Center(
-          child: Text('ॐ',
-              style: TextStyle(
-                  fontSize: 32,
-                  color: AdminColors.primary,
-                  fontWeight: FontWeight.w300)),
+          child: Text(
+            'ॐ',
+            style: TextStyle(
+              fontSize: 32,
+              color: AdminColors.primary,
+              fontWeight: FontWeight.w300,
+            ),
+          ),
         ),
       ),
     );
@@ -452,11 +494,12 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              const BorderSide(color: AdminColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AdminColors.primary, width: 1.5),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
       ),
     );
   }
@@ -473,8 +516,9 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
         style: ElevatedButton.styleFrom(
           backgroundColor: AdminColors.primary,
           foregroundColor: Colors.white,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 2,
         ),
         child: loading
@@ -482,10 +526,17 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
                 width: 22,
                 height: 22,
                 child: CircularProgressIndicator(
-                    color: Colors.white, strokeWidth: 2.5))
-            : Text(label,
+                  color: Colors.white,
+                  strokeWidth: 2.5,
+                ),
+              )
+            : Text(
+                label,
                 style: const TextStyle(
-                    fontSize: 16, fontWeight: FontWeight.w600)),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
@@ -494,19 +545,23 @@ class _GurujiLoginScreenState extends State<GurujiLoginScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('New Guruji?',
-            style: TextStyle(color: AdminColors.grey700, fontSize: 14)),
+        Text(
+          tr('New Guruji?', 'नए गुरुजी हैं?'),
+          style: TextStyle(color: AdminColors.grey700, fontSize: 14),
+        ),
         TextButton(
           onPressed: () => Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (_) => const GurujiRegisterScreen()),
+            MaterialPageRoute(builder: (_) => const GurujiRegisterScreen()),
           ),
-          child: Text('Register',
-              style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                  color: AdminColors.primary)),
+          child: Text(
+            tr('Register', 'रजिस्टर करें'),
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              color: AdminColors.primary,
+            ),
+          ),
         ),
       ],
     );
