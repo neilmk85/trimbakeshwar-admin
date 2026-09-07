@@ -19,18 +19,19 @@ class SettingsScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _sectionTitle(tr('Manage', 'प्रबंधन')),
+        _sectionTitle(tr('Manage', 'प्रबंधन', 'व्यवस्थापन')),
         const SizedBox(height: 10),
         _SettingsCard(
           icon: Icons.auto_awesome_rounded,
           color: AdminColors.primary,
-          title: tr('Poojas', 'पूजाएं'),
-          subtitle: tr('Enable/disable poojas and edit pricing', 'पूजाएं चालू/बंद करें और कीमत बदलें'),
+          title: tr('Poojas', 'पूजाएं', 'पूजा'),
+          subtitle: tr('Enable/disable poojas and edit pricing', 'पूजाएं चालू/बंद करें और कीमत बदलें',
+              'पूजा सुरू/बंद करा आणि किंमत बदला'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Poojas', 'पूजाएं'),
+                title: tr('Poojas', 'पूजाएं', 'पूजा'),
                 child: const PoojasScreen(),
               ),
             ),
@@ -40,13 +41,14 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.groups_rounded,
           color: const Color(0xFF6A1B9A),
-          title: tr('Gurujis', 'गुरुजी'),
-          subtitle: tr('Manage Gurujis and set per-Guruji pooja rates', 'गुरुजी जोड़ें और उनकी पूजा दरें तय करें'),
+          title: tr('Gurujis', 'गुरुजी', 'गुरुजी'),
+          subtitle: tr('Manage Gurujis and set per-Guruji pooja rates', 'गुरुजी जोड़ें और उनकी पूजा दरें तय करें',
+              'गुरुजी जोडा आणि त्यांचे पूजा दर ठरवा'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Gurujis', 'गुरुजी'),
+                title: tr('Gurujis', 'गुरुजी', 'गुरुजी'),
                 child: const GurujisScreen(),
               ),
             ),
@@ -56,13 +58,14 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.bar_chart_rounded,
           color: const Color(0xFF00838F),
-          title: tr('Reports', 'रिपोर्ट'),
-          subtitle: tr('Revenue summaries and booking statistics', 'आय का सार और बुकिंग आंकड़े'),
+          title: tr('Reports', 'रिपोर्ट', 'अहवाल'),
+          subtitle: tr('Revenue summaries and booking statistics', 'आय का सार और बुकिंग आंकड़े',
+              'उत्पन्नाचा सारांश आणि बुकिंग आकडेवारी'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Reports', 'रिपोर्ट'),
+                title: tr('Reports', 'रिपोर्ट', 'अहवाल'),
                 child: const ReportsScreen(),
               ),
             ),
@@ -72,13 +75,14 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.bed_rounded,
           color: const Color(0xFF00695C),
-          title: tr('Rooms', 'कमरे'),
-          subtitle: tr('Add, edit and manage available room listings', 'उपलब्ध कमरों को जोड़ें, बदलें और प्रबंधित करें'),
+          title: tr('Rooms', 'कमरे', 'खोल्या'),
+          subtitle: tr('Add, edit and manage available room listings', 'उपलब्ध कमरों को जोड़ें, बदलें और प्रबंधित करें',
+              'उपलब्ध खोल्या जोडा, बदला आणि व्यवस्थापित करा'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Rooms', 'कमरे'),
+                title: tr('Rooms', 'कमरे', 'खोल्या'),
                 child: const AdminRoomsScreen(),
               ),
             ),
@@ -88,13 +92,15 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.meeting_room_rounded,
           color: const Color(0xFFEF6C00),
-          title: tr('Room Availability', 'कमरों की उपलब्धता'),
-          subtitle: tr('Block rooms for walk-in guests and view live occupancy', 'सीधे आए मेहमानों के लिए कमरे रोकें और मौजूदा स्थिति देखें'),
+          title: tr('Room Availability', 'कमरों की उपलब्धता', 'खोल्यांची उपलब्धता'),
+          subtitle: tr('Block rooms for walk-in guests and view live occupancy',
+              'सीधे आए मेहमानों के लिए कमरे रोकें और मौजूदा स्थिति देखें',
+              'थेट आलेल्या पाहुण्यांसाठी खोल्या राखीव ठेवा आणि सद्य स्थिती पाहा'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Room Availability', 'कमरों की उपलब्धता'),
+                title: tr('Room Availability', 'कमरों की उपलब्धता', 'खोल्यांची उपलब्धता'),
                 child: const RoomBlocksScreen(),
               ),
             ),
@@ -104,14 +110,15 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.call_rounded,
           color: const Color(0xFF2E7D32),
-          title: tr('Call Auto-Reply', 'कॉल ऑटो-रिप्लाई'),
+          title: tr('Call Auto-Reply', 'कॉल ऑटो-रिप्लाई', 'कॉल ऑटो-रिप्लाय'),
           subtitle: tr('Auto SMS and WhatsApp for missed, received and rejected calls',
-              'मिस्ड, रिसीव्ड और रिजेक्टेड कॉल के लिए ऑटो SMS और WhatsApp'),
+              'मिस्ड, रिसीव्ड और रिजेक्टेड कॉल के लिए ऑटो SMS और WhatsApp',
+              'मिस्ड, रिसीव्ह्ड आणि नाकारलेल्या कॉलसाठी ऑटो SMS आणि WhatsApp'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Call Auto-Reply', 'कॉल ऑटो-रिप्लाई'),
+                title: tr('Call Auto-Reply', 'कॉल ऑटो-रिप्लाई', 'कॉल ऑटो-रिप्लाय'),
                 child: const CallIntegrationSetupScreen(),
               ),
             ),
@@ -121,26 +128,27 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.person_search_rounded,
           color: const Color(0xFF6A1B9A),
-          title: tr('Unknown Callers', 'अज्ञात कॉलर'),
+          title: tr('Unknown Callers', 'अज्ञात कॉलर', 'अज्ञात कॉलर'),
           subtitle: tr('Callers not in your customer list — save them as customers',
-              'ऐसे कॉलर जो आपकी ग्राहक सूची में नहीं हैं — उन्हें ग्राहक के रूप में सेव करें'),
+              'ऐसे कॉलर जो आपकी ग्राहक सूची में नहीं हैं — उन्हें ग्राहक के रूप में सेव करें',
+              'जे कॉलर तुमच्या ग्राहक यादीत नाहीत — त्यांना ग्राहक म्हणून जतन करा'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Unknown Callers', 'अज्ञात कॉलर'),
+                title: tr('Unknown Callers', 'अज्ञात कॉलर', 'अज्ञात कॉलर'),
                 child: const UnknownCallersScreen(),
               ),
             ),
           ),
         ),
         const SizedBox(height: 24),
-        _sectionTitle(tr('Customize', 'कस्टमाइज़ करें')),
+        _sectionTitle(tr('Customize', 'कस्टमाइज़ करें', 'सानुकूल करा')),
         const SizedBox(height: 10),
         _SettingsCard(
           icon: Icons.language_rounded,
           color: const Color(0xFF00838F),
-          title: tr('Language', 'भाषा'),
+          title: tr('Language', 'भाषा', 'भाषा'),
           subtitle: LocaleService.isHindi
               ? 'हिंदी (Hindi)'
               : LocaleService.isMarathi
@@ -152,13 +160,14 @@ class SettingsScreen extends StatelessWidget {
         _SettingsCard(
           icon: Icons.share_rounded,
           color: const Color(0xFF6366F1),
-          title: tr('Social Media', 'सोशल मीडिया'),
-          subtitle: tr('Add Facebook, Instagram and YouTube links', 'Facebook, Instagram और YouTube लिंक जोड़ें'),
+          title: tr('Social Media', 'सोशल मीडिया', 'सोशल मीडिया'),
+          subtitle: tr('Add Facebook, Instagram and YouTube links', 'Facebook, Instagram और YouTube लिंक जोड़ें',
+              'Facebook, Instagram आणि YouTube लिंक जोडा'),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => _FullScreenPage(
-                title: tr('Social Media Links', 'सोशल मीडिया लिंक'),
+                title: tr('Social Media Links', 'सोशल मीडिया लिंक', 'सोशल मीडिया लिंक'),
                 child: const SocialMediaSettingsScreen(),
               ),
             ),
@@ -182,7 +191,7 @@ class SettingsScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(tr('App Language', 'ऐप की भाषा'),
+                child: Text(tr('App Language', 'ऐप की भाषा', 'अ‍ॅपची भाषा'),
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               ),
             ),
