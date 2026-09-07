@@ -8,6 +8,7 @@ import 'dart:async';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import '../l10n/tr.dart';
 
 class AdminRoomsScreen extends StatefulWidget {
   const AdminRoomsScreen({super.key});
@@ -82,16 +83,17 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Delete Room'),
-        content: Text('Delete "${room.name}"? This cannot be undone.'),
+        title: Text(tr('Delete Room', 'कमरा हटाएं')),
+        content: Text(tr('Delete "${room.name}"? This cannot be undone.',
+            '"${room.name}" हटाएं? यह वापस नहीं लिया जा सकता।')),
         actions: [
           TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel')),
+              child: Text(tr('Cancel', 'रद्द करें'))),
           TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child:
-                  const Text('Delete', style: TextStyle(color: Colors.red))),
+              child: Text(tr('Delete', 'हटाएं'),
+                  style: const TextStyle(color: Colors.red))),
         ],
       ),
     );
@@ -114,8 +116,8 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
         onPressed: _showAddSheet,
         backgroundColor: AdminColors.primary,
         icon: const Icon(Icons.add_rounded, color: Colors.white),
-        label: const Text('Add Room',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+        label: Text(tr('Add Room', 'कमरा जोड़ें'),
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -135,7 +137,7 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
                       TextButton.icon(
                         onPressed: _load,
                         icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Retry'),
+                        label: Text(tr('Retry', 'फिर से कोशिश करें')),
                       ),
                     ],
                   ),
@@ -148,8 +150,10 @@ class _AdminRoomsScreenState extends State<AdminRoomsScreen> {
                           const Icon(Icons.hotel_rounded,
                               size: 52, color: Colors.black26),
                           const SizedBox(height: 12),
-                          const Text('No rooms yet. Tap + to add one.',
-                              style: TextStyle(
+                          Text(
+                              tr('No rooms yet. Tap + to add one.',
+                                  'अभी कोई कमरा नहीं है। जोड़ने के लिए + दबाएं।'),
+                              style: const TextStyle(
                                   color: Colors.black45, fontSize: 13)),
                         ],
                       ),
@@ -300,7 +304,9 @@ class _RoomTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          room.available ? 'Available' : 'Unavailable',
+                          room.available
+                              ? tr('Available', 'उपलब्ध')
+                              : tr('Unavailable', 'अनुपलब्ध'),
                           style: TextStyle(
                             fontSize: 11.5,
                             fontWeight: FontWeight.w600,
@@ -319,7 +325,7 @@ class _RoomTile extends StatelessWidget {
                   onPressed: onEdit,
                   icon: const Icon(Icons.edit_rounded, size: 20),
                   color: AdminColors.primary,
-                  tooltip: 'Edit',
+                  tooltip: tr('Edit', 'संपादित करें'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
                 ),
@@ -329,7 +335,7 @@ class _RoomTile extends StatelessWidget {
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline_rounded, size: 20),
                   color: Colors.red,
-                  tooltip: 'Delete',
+                  tooltip: tr('Delete', 'हटाएं'),
                   constraints: const BoxConstraints(),
                   padding: const EdgeInsets.all(6),
                 ),
@@ -469,15 +475,15 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Change Room Photo',
+              tr('Change Room Photo', 'कमरे की फोटो बदलें'),
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 20),
             _photoOption(
               icon: Icons.camera_alt_rounded,
               iconColor: const Color(0xFF7C3AED),
-              label: 'Take Photo',
-              subtitle: 'Capture a new photo',
+              label: tr('Take Photo', 'फोटो लें'),
+              subtitle: tr('Capture a new photo', 'नई फोटो खींचें'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImageFromCamera();
@@ -487,8 +493,8 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
             _photoOption(
               icon: Icons.image_rounded,
               iconColor: const Color(0xFF10B981),
-              label: 'Choose from Gallery',
-              subtitle: 'Select from your photos',
+              label: tr('Choose from Gallery', 'गैलरी से चुनें'),
+              subtitle: tr('Select from your photos', 'अपनी फोटो में से चुनें'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImageFromGallery();
@@ -499,8 +505,8 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
               _photoOption(
                 icon: Icons.delete_rounded,
                 iconColor: const Color(0xFFEF4444),
-                label: 'Remove Photo',
-                subtitle: 'Remove current photo',
+                label: tr('Remove Photo', 'फोटो हटाएं'),
+                subtitle: tr('Remove current photo', 'मौजूदा फोटो हटाएं'),
                 onTap: () {
                   Navigator.pop(context);
                   setState(() {
@@ -516,7 +522,7 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  'Cancel',
+                  tr('Cancel', 'रद्द करें'),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -545,7 +551,7 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(tr('Error: $e', 'त्रुटि: $e')),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
           ),
@@ -568,7 +574,7 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(tr('Error: $e', 'त्रुटि: $e')),
             backgroundColor: Colors.red.shade600,
             behavior: SnackBarBehavior.floating,
           ),
@@ -639,8 +645,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                       Icon(Icons.check_circle_rounded,
                           color: Colors.green.shade600, size: 20),
                       const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text('Photo uploaded successfully'),
+                      Expanded(
+                        child: Text(tr('Photo uploaded successfully',
+                            'फोटो सफलतापूर्वक अपलोड हो गई')),
                       ),
                     ],
                   ),
@@ -673,7 +680,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                 Icon(Icons.error_outline_rounded,
                     color: Colors.red.shade600, size: 20),
                 const SizedBox(width: 8),
-                const Expanded(child: Text('Upload timed out. Please try again.')),
+                Expanded(
+                    child: Text(tr('Upload timed out. Please try again.',
+                        'अपलोड समय समाप्त हो गया। कृपया फिर से कोशिश करें।'))),
               ],
             ),
             backgroundColor: Colors.red.shade600,
@@ -697,7 +706,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                 Icon(Icons.error_outline_rounded,
                     color: Colors.red.shade600, size: 20),
                 const SizedBox(width: 8),
-                Expanded(child: Text('Upload failed: $e')),
+                Expanded(
+                    child:
+                        Text(tr('Upload failed: $e', 'अपलोड विफल: $e'))),
               ],
             ),
             backgroundColor: Colors.red.shade600,
@@ -730,11 +741,13 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
     if (_selectedImageFile == null && _imageUrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.error_outline_rounded, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(child: Text('Please select a photo for the room')),
+              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: Text(tr('Please select a photo for the room',
+                      'कृपया कमरे के लिए एक फोटो चुनें'))),
             ],
           ),
           backgroundColor: Colors.red.shade600,
@@ -748,11 +761,13 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
     if (_selectedImageFile != null && _imageUrl.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Row(
+          content: Row(
             children: [
-              Icon(Icons.error_outline_rounded, color: Colors.white),
-              SizedBox(width: 8),
-              Expanded(child: Text('Photo upload failed. Please try again.')),
+              const Icon(Icons.error_outline_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                  child: Text(tr('Photo upload failed. Please try again.',
+                      'फोटो अपलोड विफल हुआ। कृपया फिर से कोशिश करें।'))),
             ],
           ),
           backgroundColor: Colors.red.shade600,
@@ -826,8 +841,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(widget.room == null
-                    ? 'Room created successfully'
-                    : 'Room updated successfully'),
+                    ? tr('Room created successfully', 'कमरा सफलतापूर्वक बनाया गया')
+                    : tr('Room updated successfully',
+                        'कमरा सफलतापूर्वक अपडेट हुआ')),
               ),
             ],
           ),
@@ -863,25 +879,30 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
               ),
               const SizedBox(height: 16),
               Text(
-                isEdit ? 'Edit Room' : 'Add New Room',
+                isEdit
+                    ? tr('Edit Room', 'कमरा संपादित करें')
+                    : tr('Add New Room', 'नया कमरा जोड़ें'),
                 style: const TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 20),
-              _field(_name, 'Room Name', required: true),
+              _field(_name, tr('Room Name', 'कमरे का नाम'), required: true),
               const SizedBox(height: 12),
               Row(children: [
-                Expanded(child: _field(_price, 'Price / Night (₹)',
-                    keyboardType: TextInputType.number, required: true)),
+                Expanded(
+                    child: _field(_price, tr('Price / Night (₹)', 'कीमत / रात (₹)'),
+                        keyboardType: TextInputType.number, required: true)),
                 const SizedBox(width: 12),
-                Expanded(child: _field(_capacity, 'Capacity (e.g. 2 Persons)')),
+                Expanded(
+                    child: _field(_capacity,
+                        tr('Capacity (e.g. 2 Persons)', 'क्षमता (जैसे 2 व्यक्ति)'))),
               ]),
               const SizedBox(height: 12),
               // Type selector
               Row(children: [
-                const Text('Type:',
-                    style:
-                        TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                Text(tr('Type:', 'प्रकार:'),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600, fontSize: 13)),
                 const SizedBox(width: 12),
                 _typeChip('Non-AC'),
                 const SizedBox(width: 8),
@@ -901,15 +922,17 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                     const Icon(Icons.meeting_room_rounded,
                         size: 18, color: AdminColors.primary),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Number of Rooms',
-                              style: TextStyle(
+                          Text(tr('Number of Rooms', 'कमरों की संख्या'),
+                              style: const TextStyle(
                                   fontSize: 13, fontWeight: FontWeight.w600)),
-                          Text('Total rooms of this type',
-                              style: TextStyle(
+                          Text(
+                              tr('Total rooms of this type',
+                                  'इस प्रकार के कुल कमरे'),
+                              style: const TextStyle(
                                   fontSize: 11, color: Color(0xFF9E9E9E))),
                         ],
                       ),
@@ -934,17 +957,19 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              _field(_amenitiesRaw, 'Amenities (comma-separated)',
-                  hint: 'e.g. Fan, Hot water, TV'),
+              _field(_amenitiesRaw,
+                  tr('Amenities (comma-separated)', 'सुविधाएं (कॉमा से अलग करें)'),
+                  hint: tr('e.g. Fan, Hot water, TV', 'जैसे पंखा, गरम पानी, टीवी')),
               const SizedBox(height: 12),
-              _field(_description, 'Description', maxLines: 3),
+              _field(_description, tr('Description', 'विवरण'), maxLines: 3),
               const SizedBox(height: 12),
               // Photo picker
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Room Photo',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                  Text(tr('Room Photo', 'कमरे की फोटो'),
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 8),
 
                   // Photo preview section (both fresh uploads and existing images)
@@ -986,9 +1011,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
-                                    'Upload Complete',
-                                    style: TextStyle(
+                                  Text(
+                                    tr('Upload Complete', 'अपलोड पूरा हुआ'),
+                                    style: const TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black87,
@@ -1026,7 +1051,7 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                                 Icon(Icons.edit_rounded, size: 16, color: AdminColors.primary),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Change Photo',
+                                  tr('Change Photo', 'फोटो बदलें'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -1054,9 +1079,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'Uploading photo...',
-                                style: TextStyle(
+                              Text(
+                                tr('Uploading photo...', 'फोटो अपलोड हो रही है...'),
+                                style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: AdminColors.primary,
@@ -1107,9 +1132,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                             Icon(Icons.cloud_upload_outlined,
                                 size: 40, color: AdminColors.primary),
                             const SizedBox(height: 12),
-                            const Text(
-                              'Tap to upload photo',
-                              style: TextStyle(
+                            Text(
+                              tr('Tap to upload photo', 'फोटो अपलोड करने के लिए टैप करें'),
+                              style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF1A1A2E),
@@ -1117,7 +1142,8 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'PNG, JPG or PDF (max. 800x800px)',
+                              tr('PNG, JPG or PDF (max. 800x800px)',
+                                  'PNG, JPG या PDF (अधिकतम 800x800px)'),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.grey.shade600,
@@ -1132,12 +1158,12 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
               const SizedBox(height: 12),
               Row(children: [
                 Expanded(
-                    child: _field(_displayOrder, 'Display Order',
+                    child: _field(_displayOrder, tr('Display Order', 'प्रदर्शन क्रम'),
                         keyboardType: TextInputType.number)),
                 const SizedBox(width: 16),
                 Row(children: [
-                  const Text('Available:',
-                      style: TextStyle(
+                  Text(tr('Available:', 'उपलब्ध:'),
+                      style: const TextStyle(
                           fontWeight: FontWeight.w600, fontSize: 13)),
                   const SizedBox(width: 8),
                   Switch(
@@ -1165,7 +1191,10 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
                           height: 20,
                           child: CircularProgressIndicator(
                               strokeWidth: 2, color: Colors.white))
-                      : Text(isEdit ? 'Save Changes' : 'Add Room',
+                      : Text(
+                          isEdit
+                              ? tr('Save Changes', 'बदलाव सेव करें')
+                              : tr('Add Room', 'कमरा जोड़ें'),
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 15,
@@ -1312,7 +1341,9 @@ class _RoomFormSheetState extends State<_RoomFormSheet> {
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       ),
       validator: required
-          ? (v) => (v == null || v.trim().isEmpty) ? 'Required' : null
+          ? (v) => (v == null || v.trim().isEmpty)
+              ? tr('Required', 'आवश्यक')
+              : null
           : null,
     );
   }

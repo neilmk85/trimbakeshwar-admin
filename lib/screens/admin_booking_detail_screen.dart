@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import '../l10n/tr.dart';
 
 class AdminBookingDetailScreen extends StatefulWidget {
   final AdminOrder order;
@@ -80,9 +81,9 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
   // ── Status helpers ───────────────────────────────────────────────────────────
 
   String get _statusLabel {
-    if (_order.cancelled) return 'Cancelled';
-    if (_order.rescheduled) return 'Rescheduled';
-    return 'Confirmed';
+    if (_order.cancelled) return tr('Cancelled', 'रद्द');
+    if (_order.rescheduled) return tr('Rescheduled', 'पुनर्निर्धारित');
+    return tr('Confirmed', 'पक्की');
   }
 
   IconData get _statusIcon {
@@ -106,19 +107,20 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Cancel Booking'),
+        title: Text(tr('Cancel Booking', 'बुकिंग रद्द करें')),
         content: Text(
-          'Cancel booking for "${_order.poojaName}"?\nOrder: ${_order.orderId}',
+          tr('Cancel booking for "${_order.poojaName}"?\nOrder: ${_order.orderId}',
+              '"${_order.poojaName}" की बुकिंग रद्द करें?\nऑर्डर: ${_order.orderId}'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('No'),
+            child: Text(tr('No', 'नहीं')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Yes, Cancel'),
+            child: Text(tr('Yes, Cancel', 'हाँ, रद्द करें')),
           ),
         ],
       ),
@@ -144,7 +146,7 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
           : DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
-      helpText: 'Select new Pooja date',
+      helpText: tr('Select new Pooja date', 'नई पूजा तारीख चुनें'),
       builder: (ctx, child) => Theme(
         data: Theme.of(ctx).copyWith(
           colorScheme: const ColorScheme.light(primary: AdminColors.primary),
@@ -157,22 +159,27 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reschedule Booking'),
+        title: Text(tr('Reschedule Booking', 'बुकिंग पुनर्निर्धारित करें')),
         content: Text(
-          'Change pooja date for "${_order.poojaName}" to '
-          '${_formatDate(picked)}?\n\n'
-          'An email will be sent to the user and all guruji.',
+          tr(
+            'Change pooja date for "${_order.poojaName}" to '
+                '${_formatDate(picked)}?\n\n'
+                'An email will be sent to the user and all guruji.',
+            '"${_order.poojaName}" की पूजा तारीख बदलकर '
+                '${_formatDate(picked)} करें?\n\n'
+                'भक्त और सभी गुरुजी को ईमेल भेजा जाएगा।',
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(tr('Cancel', 'रद्द करें')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(
                 foregroundColor: Colors.blue.shade700),
-            child: const Text('Reschedule'),
+            child: Text(tr('Reschedule', 'पुनर्निर्धारित करें')),
           ),
         ],
       ),
@@ -190,8 +197,9 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Booking rescheduled. Email sent.'),
+        SnackBar(
+          content: Text(tr('Booking rescheduled. Email sent.',
+              'बुकिंग पुनर्निर्धारित हो गई। ईमेल भेज दिया गया।')),
           backgroundColor: Colors.green,
         ),
       );
@@ -207,7 +215,7 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        title: const Text('Booking Details'),
+        title: Text(tr('Booking Details', 'बुकिंग विवरण')),
         flexibleSpace: Container(
           decoration: const BoxDecoration(gradient: AdminColors.appBarGradient),
         ),
@@ -282,10 +290,10 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
                       ),
                       if (_order.isPrivatePooja) ...[
                         const SizedBox(height: 4),
-                        const _Chip(
-                          label: 'Private',
+                        _Chip(
+                          label: tr('Private', 'निजी'),
                           icon: Icons.lock_person_outlined,
-                          color: Color(0xFF6A1B9A),
+                          color: const Color(0xFF6A1B9A),
                         ),
                       ],
                     ],
@@ -296,94 +304,109 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
             const SizedBox(height: 16),
 
             // ── Booking Reference ────────────────────────────────────────────
-            _Section(title: 'Booking Reference', children: [
+            _Section(title: tr('Booking Reference', 'बुकिंग संदर्भ'), children: [
               _DetailRow(
-                  label: 'Order ID', value: _order.orderId, copyable: true),
+                  label: tr('Order ID', 'ऑर्डर आईडी'),
+                  value: _order.orderId,
+                  copyable: true),
               _DetailRow(
-                  label: 'Booked On',
+                  label: tr('Booked On', 'बुक की गई'),
                   value: _formatDateTime(_order.bookedOn)),
             ]),
 
             // ── Pooja Details ────────────────────────────────────────────────
             if (!_order.isRoomOnly)
-              _Section(title: 'Pooja Details', children: [
-                _DetailRow(label: 'Pooja Name', value: _order.poojaName),
+              _Section(title: tr('Pooja Details', 'पूजा विवरण'), children: [
                 _DetailRow(
-                  label: 'Pooja Date',
+                    label: tr('Pooja Name', 'पूजा का नाम'),
+                    value: _order.poojaName),
+                _DetailRow(
+                  label: tr('Pooja Date', 'पूजा तारीख'),
                   value: _formatDate(_order.poojaDate),
                 ),
                 _DetailRow(
-                  label: 'Type',
+                  label: tr('Type', 'प्रकार'),
                   value: _order.isPrivatePooja
-                      ? 'Private Pooja'
-                      : 'Public Pooja',
+                      ? tr('Private Pooja', 'निजी पूजा')
+                      : tr('Public Pooja', 'सार्वजनिक पूजा'),
                 ),
                 if (_order.gotra.isNotEmpty)
-                  _DetailRow(label: 'Gotra', value: _order.gotra),
+                  _DetailRow(label: tr('Gotra', 'गोत्र'), value: _order.gotra),
                 if (_order.rescheduled)
-                  const _DetailRow(
-                    label: 'Status',
-                    value: 'Rescheduled',
+                  _DetailRow(
+                    label: tr('Status', 'स्थिति'),
+                    value: tr('Rescheduled', 'पुनर्निर्धारित'),
                     highlight: true,
                   ),
               ]),
 
             // ── Stay Details (room-only bookings) ────────────────────────────
             if (_order.isRoomOnly)
-              _Section(title: 'Stay Details', children: [
+              _Section(title: tr('Stay Details', 'ठहरने का विवरण'), children: [
                 if (_order.roomName?.isNotEmpty == true)
-                  _DetailRow(label: 'Room', value: _order.roomName!),
+                  _DetailRow(
+                      label: tr('Room', 'कमरा'), value: _order.roomName!),
                 if (_order.checkInDate != null)
                   _DetailRow(
-                      label: 'Check-in Date',
+                      label: tr('Check-in Date', 'चेक-इन तारीख'),
                       value: _formatDate(_order.checkInDate!)),
                 _DetailRow(
-                    label: 'Rooms', value: '${_order.numberOfRooms}'),
+                    label: tr('Rooms', 'कमरे'),
+                    value: '${_order.numberOfRooms}'),
                 _DetailRow(
-                    label: 'Nights', value: '${_order.numberOfNights}'),
+                    label: tr('Nights', 'रातें'),
+                    value: '${_order.numberOfNights}'),
               ]),
 
             // ── People ───────────────────────────────────────────────────────
-            _Section(title: 'People', children: [
+            _Section(title: tr('People', 'लोग'), children: [
               _DetailRow(
-                  label: 'Number of People',
+                  label: tr('Number of People', 'व्यक्तियों की संख्या'),
                   value: '${_order.numberOfPeople}'),
             ]),
 
             // ── Accommodation add-on (pooja + stay) ──────────────────────────
             if (!_order.isRoomOnly && _order.numberOfRooms > 0)
-              _Section(title: 'Accommodation', children: [
+              _Section(title: tr('Accommodation', 'आवास'), children: [
                 if (_order.roomName?.isNotEmpty == true)
-                  _DetailRow(label: 'Room', value: _order.roomName!),
+                  _DetailRow(
+                      label: tr('Room', 'कमरा'), value: _order.roomName!),
                 _DetailRow(
-                    label: 'Rooms', value: '${_order.numberOfRooms}'),
+                    label: tr('Rooms', 'कमरे'),
+                    value: '${_order.numberOfRooms}'),
                 _DetailRow(
-                    label: 'Nights', value: '${_order.numberOfNights}'),
+                    label: tr('Nights', 'रातें'),
+                    value: '${_order.numberOfNights}'),
                 if (_order.stayRatePerRoom > 0)
                   _DetailRow(
-                      label: 'Rate / Room / Night',
+                      label:
+                          tr('Rate / Room / Night', 'दर / कमरा / रात'),
                       value: _formatAmount(_order.stayRatePerRoom)),
               ]),
 
             // ── Cost Breakdown ───────────────────────────────────────────────
-            _Section(title: 'Cost Breakdown', children: [
+            _Section(title: tr('Cost Breakdown', 'कुल खर्च विवरण'), children: [
               if (!_order.isRoomOnly && _order.poojaAmount > 0)
                 _DetailRow(
                   label: _order.isPrivatePooja
-                      ? 'Private Pooja Cost'
-                      : 'Pooja Cost',
+                      ? tr('Private Pooja Cost', 'निजी पूजा शुल्क')
+                      : tr('Pooja Cost', 'पूजा शुल्क'),
                   value: _order.numberOfPeople > 1
                       ? '${_formatAmount(_order.poojaAmount ~/ _order.numberOfPeople)} × ${_order.numberOfPeople} = ${_formatAmount(_order.poojaAmount)}'
                       : _formatAmount(_order.poojaAmount),
                 ),
               if (_order.numberOfRooms > 0 && _order.stayRatePerRoom > 0)
                 _DetailRow(
-                  label: 'Stay Cost',
-                  value:
-                      '${_formatAmount(_order.stayRatePerRoom)} × ${_order.numberOfRooms} rm × ${_order.numberOfNights} night${_order.numberOfNights > 1 ? 's' : ''} = ${_formatAmount(_order.stayAmount)}',
+                  label: tr('Stay Cost', 'ठहरने का शुल्क'),
+                  value: tr(
+                    '${_formatAmount(_order.stayRatePerRoom)} × ${_order.numberOfRooms} rm × ${_order.numberOfNights} night${_order.numberOfNights > 1 ? 's' : ''} = ${_formatAmount(_order.stayAmount)}',
+                    '${_formatAmount(_order.stayRatePerRoom)} × ${_order.numberOfRooms} कमरे × ${_order.numberOfNights} रात = ${_formatAmount(_order.stayAmount)}',
+                  ),
                 ),
               _AmountRow(
-                label: _order.cancelled ? 'Total Amount' : 'Total Paid',
+                label: _order.cancelled
+                    ? tr('Total Amount', 'कुल राशि')
+                    : tr('Total Paid', 'कुल भुगतान'),
                 value: _formatAmount(_order.totalAmount),
                 cancelled: _order.cancelled,
                 color: _accentColor,
@@ -392,41 +415,52 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
 
             // ── Booked By ────────────────────────────────────────────────────
             if (_order.userName.isNotEmpty || _order.userPhone.isNotEmpty)
-              _Section(title: 'Booked By', children: [
+              _Section(title: tr('Booked By', 'बुक करने वाला'), children: [
                 if (_order.userName.isNotEmpty)
-                  _DetailRow(label: 'Name', value: _order.userName),
+                  _DetailRow(label: tr('Name', 'नाम'), value: _order.userName),
                 if (_order.userPhone.isNotEmpty)
-                  _DetailRow(label: 'Phone', value: _order.userPhone),
+                  _DetailRow(
+                      label: tr('Phone', 'फ़ोन नंबर'),
+                      value: _order.userPhone),
               ]),
 
             // ── Pooja For / Booked For ───────────────────────────────────────
             if (_order.bookedForName.isNotEmpty ||
                 _order.bookedForPhone.isNotEmpty)
-              _Section(title: 'Booked For', children: [
+              _Section(title: tr('Booked For', 'जिनके लिए बुक की'), children: [
                 if (_order.bookedForName.isNotEmpty)
-                  _DetailRow(label: 'Name', value: _order.bookedForName),
+                  _DetailRow(
+                      label: tr('Name', 'नाम'), value: _order.bookedForName),
                 if (_order.bookedForPhone.isNotEmpty)
-                  _DetailRow(label: 'Phone', value: _order.bookedForPhone),
+                  _DetailRow(
+                      label: tr('Phone', 'फ़ोन नंबर'),
+                      value: _order.bookedForPhone),
                 if (_order.bookedForEmail.isNotEmpty)
-                  _DetailRow(label: 'Email', value: _order.bookedForEmail),
+                  _DetailRow(
+                      label: tr('Email', 'ईमेल'),
+                      value: _order.bookedForEmail),
                 if (_order.bookedForCity.isNotEmpty)
-                  _DetailRow(label: 'City', value: _order.bookedForCity),
+                  _DetailRow(
+                      label: tr('City', 'शहर'), value: _order.bookedForCity),
                 if (_order.bookedForZipCode.isNotEmpty)
                   _DetailRow(
-                      label: 'ZIP / PIN', value: _order.bookedForZipCode),
+                      label: tr('ZIP / PIN', 'पिन कोड'),
+                      value: _order.bookedForZipCode),
                 if (_order.bookedForCountry.isNotEmpty)
                   _DetailRow(
-                      label: 'Country', value: _order.bookedForCountry),
+                      label: tr('Country', 'देश'),
+                      value: _order.bookedForCountry),
               ]),
 
             if (_order.bookedForName.isEmpty &&
                 _order.bookedForPhone.isEmpty &&
                 (_order.userName.isNotEmpty || _order.userPhone.isNotEmpty))
-              _Section(title: 'Pooja For', children: [
+              _Section(title: tr('Pooja For', 'पूजा जिनके लिए'), children: [
                 if (_order.userName.isNotEmpty)
-                  _DetailRow(label: 'Name', value: _order.userName),
+                  _DetailRow(label: tr('Name', 'नाम'), value: _order.userName),
                 if (_order.userPhone.isNotEmpty)
-                  _DetailRow(label: 'Phone', value: _order.userPhone),
+                  _DetailRow(
+                      label: tr('Phone', 'फ़ोन नंबर'), value: _order.userPhone),
               ]),
           ],
         ),
@@ -468,7 +502,7 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
                               icon: const Icon(
                                   Icons.edit_calendar_rounded,
                                   size: 16),
-                              label: const Text('Reschedule'),
+                              label: Text(tr('Reschedule', 'पुनर्निर्धारित करें')),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: Colors.blue.shade700,
                                 side: BorderSide(
@@ -487,8 +521,8 @@ class _AdminBookingDetailScreenState extends State<AdminBookingDetailScreen> {
                             onPressed: _confirmCancel,
                             icon: const Icon(Icons.cancel_outlined,
                                 size: 16, color: Colors.white),
-                            label: const Text('Cancel Booking',
-                                style: TextStyle(color: Colors.white)),
+                            label: Text(tr('Cancel Booking', 'बुकिंग रद्द करें'),
+                                style: const TextStyle(color: Colors.white)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red.shade700,
                               padding: const EdgeInsets.symmetric(
@@ -665,7 +699,7 @@ class _DetailRow extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: value));
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('$label copied'),
+                    content: Text(tr('$label copied', '$label कॉपी हो गया')),
                     duration: const Duration(seconds: 1),
                     behavior: SnackBarBehavior.floating,
                   ),
