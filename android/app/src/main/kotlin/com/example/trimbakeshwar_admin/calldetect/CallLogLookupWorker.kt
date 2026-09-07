@@ -108,6 +108,7 @@ class CallLogLookupWorker(appContext: Context, params: WorkerParameters) :
                 Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
             )
             .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
+            .setInitialDelay(CallIntegrationPrefs.sendDelaySeconds(applicationContext), TimeUnit.SECONDS)
             .build()
 
         WorkManager.getInstance(applicationContext).enqueueUniqueWork(

@@ -29,6 +29,14 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
   bool _waMissed = false;
   bool _waReceived = false;
   bool _waRejected = false;
+  int _sendDelaySeconds = 0;
+
+  static const _delayOptions = {
+    0: 'Immediately',
+    60: 'After 1 minute',
+    120: 'After 2 minutes',
+    300: 'After 5 minutes',
+  };
 
   bool _permissionsGranted = false;
   bool _batteryOptimizationIgnored = false;
@@ -65,6 +73,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
           _waMissed = settings['waMissed'] as bool? ?? false;
           _waReceived = settings['waReceived'] as bool? ?? false;
           _waRejected = settings['waRejected'] as bool? ?? false;
+          _sendDelaySeconds = (settings['sendDelaySeconds'] as num?)?.toInt() ?? 0;
         });
       }
     } catch (_) {
@@ -129,6 +138,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
         'waMissed': _waMissed,
         'waReceived': _waReceived,
         'waRejected': _waRejected,
+        'sendDelaySeconds': _sendDelaySeconds,
       });
       if (mounted) _showSnack('Call integration settings saved');
     } catch (_) {
@@ -170,6 +180,30 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
               activeThumbColor: AdminColors.primary,
               value: _enabled,
               onChanged: (v) => setState(() => _enabled = v),
+            ),
+          ),
+          const SizedBox(height: 16),
+          _card(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Send delay',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                const SizedBox(height: 4),
+                Text('When to send the SMS/WhatsApp after the call ends',
+                    style: TextStyle(fontSize: 12, color: AdminColors.grey600)),
+                ..._delayOptions.entries.map(
+                  (entry) => RadioListTile<int>(
+                    contentPadding: EdgeInsets.zero,
+                    dense: true,
+                    title: Text(entry.value, style: const TextStyle(fontSize: 14)),
+                    value: entry.key,
+                    groupValue: _sendDelaySeconds,
+                    activeColor: AdminColors.primary,
+                    onChanged: (v) => setState(() => _sendDelaySeconds = v ?? 0),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 16),

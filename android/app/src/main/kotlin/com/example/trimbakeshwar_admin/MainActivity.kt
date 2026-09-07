@@ -64,6 +64,7 @@ class MainActivity : FlutterActivity() {
         "waMissed" to CallIntegrationPrefs.whatsappEnabled(this, "missed"),
         "waReceived" to CallIntegrationPrefs.whatsappEnabled(this, "received"),
         "waRejected" to CallIntegrationPrefs.whatsappEnabled(this, "rejected"),
+        "sendDelaySeconds" to CallIntegrationPrefs.sendDelaySeconds(this),
     )
 
     private fun applySettings(args: Map<*, *>) {
@@ -71,6 +72,7 @@ class MainActivity : FlutterActivity() {
         (args["gurujiPhone"] as? String)?.let { CallIntegrationPrefs.setGurujiPhone(this, it) }
         (args["deviceKey"] as? String)?.let { CallIntegrationPrefs.setDeviceKey(this, it) }
         (args["apiBaseUrl"] as? String)?.let { CallIntegrationPrefs.setApiBaseUrl(this, it) }
+        (args["sendDelaySeconds"] as? Number)?.let { CallIntegrationPrefs.setSendDelaySeconds(this, it.toLong()) }
 
         CallIntegrationPrefs.setChannelSettings(
             context = this,

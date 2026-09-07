@@ -51,6 +51,16 @@ object CallIntegrationPrefs {
     fun whatsappEnabled(context: Context, callType: String): Boolean =
         prefs(context).getBoolean("wa_$callType", false)
 
+    /** Guruji-set delay, in seconds, between the call ending and the SMS/
+     * WhatsApp follow-up being sent (0 = immediately). Applies to both
+     * channels — read by [CallLogLookupWorker] when scheduling
+     * [CallEventWorker]. */
+    fun sendDelaySeconds(context: Context): Long =
+        prefs(context).getLong("send_delay_seconds", 0L)
+    fun setSendDelaySeconds(context: Context, seconds: Long) {
+        prefs(context).edit().putLong("send_delay_seconds", seconds).apply()
+    }
+
     fun setChannelSettings(
         context: Context,
         smsMissed: Boolean,
