@@ -54,12 +54,13 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
     final persons = int.tryParse(_personsCtrl.text.trim());
     if (persons == null || persons < 1) {
       _snack(tr('Please enter a valid persons per room value',
-          'कृपया प्रति कमरा व्यक्तियों की सही संख्या डालें'));
+          'कृपया प्रति कमरा व्यक्तियों की सही संख्या डालें',
+          'कृपया प्रति खोली व्यक्तींची योग्य संख्या टाका'));
       return;
     }
     final price = rooms > 0 ? (int.tryParse(_priceCtrl.text.trim()) ?? 0) : 0;
     if (rooms > 0 && price == 0) {
-      _snack(tr('Please enter a price', 'कृपया कीमत डालें'));
+      _snack(tr('Please enter a price', 'कृपया कीमत डालें', 'कृपया किंमत टाका'));
       return;
     }
 
@@ -74,7 +75,9 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
     );
     if (mounted) {
       setState(() => _saving = false);
-      _snack(error ?? tr('Accommodation settings saved', 'आवास सेटिंग्स सेव हो गईं'));
+      _snack(error ??
+          tr('Accommodation settings saved', 'आवास सेटिंग्स सेव हो गईं',
+              'आवास सेटिंग्स जतन झाल्या'));
     }
   }
 
@@ -101,7 +104,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
         : persons * price;
     final total = ratePerRoom * rooms;
     return tr('₹$ratePerRoom / room / night  ·  ₹$total total / night',
-        '₹$ratePerRoom / कमरा / रात  ·  ₹$total कुल / रात');
+        '₹$ratePerRoom / कमरा / रात  ·  ₹$total कुल / रात',
+        '₹$ratePerRoom / खोली / रात  ·  ₹$total एकूण / रात');
   }
 
   @override
@@ -112,23 +116,28 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _sectionHeader(tr('Room Configuration', 'कमरा कॉन्फ़िगरेशन')),
+        _sectionHeader(
+            tr('Room Configuration', 'कमरा कॉन्फ़िगरेशन', 'खोली कॉन्फिगरेशन')),
         const SizedBox(height: 12),
         _field(
             _roomsCtrl,
-            tr('Total Rooms Available', 'उपलब्ध कुल कमरे'),
+            tr('Total Rooms Available', 'उपलब्ध कुल कमरे', 'उपलब्ध एकूण खोल्या'),
             Icons.meeting_room_rounded,
             numeric: true,
             onChanged: (_) => setState(() {})),
         const SizedBox(height: 4),
         _hint(tr('Set to 0 to disable accommodation booking.',
-            'आवास बुकिंग बंद करने के लिए 0 डालें।')),
+            'आवास बुकिंग बंद करने के लिए 0 डालें।',
+            'आवास बुकिंग बंद करण्यासाठी 0 टाका.')),
         const SizedBox(height: 12),
-        _field(_personsCtrl, tr('Persons per Room', 'प्रति कमरा व्यक्ति'),
+        _field(
+            _personsCtrl,
+            tr('Persons per Room', 'प्रति कमरा व्यक्ति', 'प्रति खोली व्यक्ती'),
             Icons.people_rounded,
             numeric: true),
         const SizedBox(height: 4),
-        _hint(tr('Maximum occupancy per room.', 'प्रति कमरा अधिकतम व्यक्ति।')),
+        _hint(tr('Maximum occupancy per room.', 'प्रति कमरा अधिकतम व्यक्ति।',
+            'प्रति खोली जास्तीत जास्त व्यक्ती.')),
         const SizedBox(height: 24),
 
         Opacity(
@@ -138,7 +147,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _sectionHeader(tr('Pricing (per night)', 'कीमत (प्रति रात)')),
+                _sectionHeader(tr('Pricing (per night)', 'कीमत (प्रति रात)',
+                    'किंमत (प्रति रात्र)')),
                 const SizedBox(height: 12),
 
                 // Toggle
@@ -150,9 +160,10 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                   padding: const EdgeInsets.all(4),
                   child: Row(
                     children: [
-                      _toggleBtn(tr('Per Room', 'प्रति कमरा'),
+                      _toggleBtn(tr('Per Room', 'प्रति कमरा', 'प्रति खोली'),
                           _PricingMode.perRoom, Icons.bed_rounded),
-                      _toggleBtn(tr('Per Person', 'प्रति व्यक्ति'),
+                      _toggleBtn(
+                          tr('Per Person', 'प्रति व्यक्ति', 'प्रति व्यक्ती'),
                           _PricingMode.perPerson, Icons.person_rounded),
                     ],
                   ),
@@ -162,8 +173,10 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                 _field(
                   _priceCtrl,
                   _pricingMode == _PricingMode.perRoom
-                      ? tr('Price per Room (₹)', 'प्रति कमरा कीमत (₹)')
-                      : tr('Price per Person (₹)', 'प्रति व्यक्ति कीमत (₹)'),
+                      ? tr('Price per Room (₹)', 'प्रति कमरा कीमत (₹)',
+                          'प्रति खोली किंमत (₹)')
+                      : tr('Price per Person (₹)', 'प्रति व्यक्ति कीमत (₹)',
+                          'प्रति व्यक्ती किंमत (₹)'),
                   _pricingMode == _PricingMode.perRoom
                       ? Icons.bed_rounded
                       : Icons.person_rounded,
@@ -223,7 +236,8 @@ class _AccommodationScreenState extends State<AccommodationScreen> {
                     height: 22,
                     child: CircularProgressIndicator(
                         color: Colors.white, strokeWidth: 2.5))
-                : Text(tr('Save Settings', 'सेटिंग्स सेव करें'),
+                : Text(
+                    tr('Save Settings', 'सेटिंग्स सेव करें', 'सेटिंग्स जतन करा'),
                     style:
                         const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
