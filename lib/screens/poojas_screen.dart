@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../constants/app_colors.dart';
 import '../models/admin_models.dart';
 import '../services/admin_data_service.dart';
+import '../l10n/tr.dart';
 import 'edit_pooja_screen.dart';
 
 // ── Preset colors for new poojas ─────────────────────────────────────────────
@@ -88,10 +89,10 @@ class PoojasScreen extends StatelessWidget {
         valueListenable: AdminDataService.dataNotifier,
         builder: (_, data, __) {
           if (data.poojas.isEmpty) {
-            return const Center(
+            return Center(
               child: Text(
-                'Loading poojas...',
-                style: TextStyle(color: Colors.grey),
+                tr('Loading poojas...', 'पूजाएं लोड हो रही हैं...'),
+                style: const TextStyle(color: Colors.grey),
               ),
             );
           }
@@ -167,7 +168,8 @@ class _PoojaCard extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '₹${pooja.pricePerPerson} per person',
+                        tr('₹${pooja.pricePerPerson} per person',
+                            '₹${pooja.pricePerPerson} प्रति व्यक्ति'),
                         style: TextStyle(
                           fontSize: 12,
                           color: AdminColors.grey500,
@@ -194,7 +196,9 @@ class _PoojaCard extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    pooja.enabled ? 'Active' : 'Disabled',
+                    pooja.enabled
+                        ? tr('Active', 'सक्रिय')
+                        : tr('Disabled', 'निष्क्रिय'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -212,7 +216,7 @@ class _PoojaCard extends StatelessWidget {
                     size: 18,
                     color: AdminColors.primary,
                   ),
-                  tooltip: 'Edit',
+                  tooltip: tr('Edit', 'संपादित करें'),
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -295,11 +299,11 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
     final name = _nameCtrl.text.trim();
     final price = int.tryParse(_priceCtrl.text.trim());
     if (name.isEmpty) {
-      _snack('Pooja name is required');
+      _snack(tr('Pooja name is required', 'पूजा का नाम आवश्यक है'));
       return;
     }
     if (price == null || price <= 0) {
-      _snack('Please enter a valid price');
+      _snack(tr('Please enter a valid price', 'कृपया सही राशि दर्ज करें'));
       return;
     }
 
@@ -325,7 +329,9 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
       } else {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Pooja created successfully')),
+          SnackBar(
+              content: Text(tr('Pooja created successfully',
+                  'पूजा सफलतापूर्वक बनाई गई'))),
         );
       }
     }
@@ -351,9 +357,9 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
               children: [
                 _handle(),
                 const SizedBox(height: 16),
-                const Text(
-                  'New Pooja',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                Text(
+                  tr('New Pooja', 'नई पूजा'),
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
                 ),
                 const Divider(height: 24),
               ],
@@ -370,13 +376,13 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                 MediaQuery.of(context).viewInsets.bottom + 32,
               ),
               children: [
-                _sectionHeader('Basic Info'),
+                _sectionHeader(tr('Basic Info', 'बुनियादी जानकारी')),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _nameCtrl,
                   textCapitalization: TextCapitalization.words,
                   decoration: _inputDecoration(
-                    'Pooja Name *',
+                    tr('Pooja Name *', 'पूजा का नाम *'),
                     Icons.auto_awesome_rounded,
                   ),
                 ),
@@ -386,7 +392,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                   maxLines: 2,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: _inputDecoration(
-                    'Short Description',
+                    tr('Short Description', 'संक्षिप्त विवरण'),
                     Icons.short_text_rounded,
                   ),
                 ),
@@ -402,7 +408,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         decoration: _inputDecoration(
-                          'Price per Person (₹) *',
+                          tr('Price per Person (₹) *', 'प्रति व्यक्ति कीमत (₹) *'),
                           Icons.currency_rupee_rounded,
                         ),
                       ),
@@ -417,7 +423,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                           FilteringTextInputFormatter.digitsOnly,
                         ],
                         decoration: _inputDecoration(
-                          'Display Order',
+                          tr('Display Order', 'प्रदर्शन क्रम'),
                           Icons.sort_rounded,
                         ),
                       ),
@@ -431,7 +437,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                       child: TextFormField(
                         controller: _durationCtrl,
                         decoration: _inputDecoration(
-                          'Duration (e.g. 1 Day)',
+                          tr('Duration (e.g. 1 Day)', 'अवधि (जैसे 1 दिन)'),
                           Icons.schedule_rounded,
                         ),
                       ),
@@ -441,7 +447,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                       child: TextFormField(
                         controller: _iconCtrl,
                         decoration: _inputDecoration(
-                          'Icon Name',
+                          tr('Icon Name', 'आइकन का नाम'),
                           Icons.insert_emoticon_rounded,
                         ),
                       ),
@@ -450,48 +456,52 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
                 ),
                 const SizedBox(height: 20),
 
-                _sectionHeader('Color'),
+                _sectionHeader(tr('Color', 'रंग')),
                 const SizedBox(height: 12),
                 _colorPicker(),
                 const SizedBox(height: 20),
 
-                _sectionHeader('Detailed Info'),
+                _sectionHeader(tr('Detailed Info', 'विस्तृत जानकारी')),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _infoCtrl,
                   maxLines: 4,
                   textCapitalization: TextCapitalization.sentences,
                   decoration: _inputDecoration(
-                    'Full description / info',
+                    tr('Full description / info', 'पूरा विवरण / जानकारी'),
                     Icons.info_outline_rounded,
                   ),
                 ),
                 const SizedBox(height: 20),
 
-                _sectionHeader('Before Instructions'),
+                _sectionHeader(tr('Before Instructions', 'पहले की सूचनाएं')),
                 const SizedBox(height: 8),
                 _dynamicList(
                   _beforeCtrls,
-                  hint: 'e.g. Take a holy bath before arriving',
+                  hint: tr('e.g. Take a holy bath before arriving',
+                      'जैसे आने से पहले पवित्र स्नान करें'),
                 ),
                 const SizedBox(height: 20),
 
-                _sectionHeader('After Instructions'),
+                _sectionHeader(tr('After Instructions', 'बाद की सूचनाएं')),
                 const SizedBox(height: 8),
                 _dynamicList(
                   _afterCtrls,
-                  hint: 'e.g. Maintain celibacy for 3 days',
+                  hint: tr('e.g. Maintain celibacy for 3 days',
+                      'जैसे 3 दिन ब्रह्मचर्य का पालन करें'),
                 ),
                 const SizedBox(height: 20),
 
-                _sectionHeader('Things to Bring'),
+                _sectionHeader(tr('Things to Bring', 'साथ लाने योग्य वस्तुएं')),
                 const SizedBox(height: 8),
-                _dynamicList(_bringCtrls, hint: 'e.g. White dhoti and saree'),
+                _dynamicList(_bringCtrls,
+                    hint: tr('e.g. White dhoti and saree',
+                        'जैसे सफ़ेद धोती और साड़ी')),
                 const SizedBox(height: 20),
 
                 _statusToggle(),
                 const SizedBox(height: 24),
-                _submitButton('Create Pooja', _saving, _save),
+                _submitButton(tr('Create Pooja', 'पूजा बनाएं'), _saving, _save),
               ],
             ),
           ),
@@ -628,7 +638,7 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
           onPressed: () => setState(() => ctrls.add(TextEditingController())),
           icon: Icon(Icons.add_rounded, size: 16, color: AdminColors.primary),
           label: Text(
-            'Add item',
+            tr('Add item', 'आइटम जोड़ें'),
             style: TextStyle(
               fontSize: 13,
               color: AdminColors.primary,
@@ -661,14 +671,16 @@ class _AddPoojaSheetState extends State<_AddPoojaSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Pooja Status',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              Text(
+                tr('Pooja Status', 'पूजा की स्थिति'),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               Text(
                 _enabled
-                    ? 'Enabled — visible to users'
-                    : 'Disabled — hidden from users',
+                    ? tr('Enabled — visible to users',
+                        'सक्रिय — उपयोगकर्ताओं को दिखाई देगी')
+                    : tr('Disabled — hidden from users',
+                        'निष्क्रिय — उपयोगकर्ताओं से छिपी रहेगी'),
                 style: TextStyle(fontSize: 12, color: AdminColors.grey600),
               ),
             ],
