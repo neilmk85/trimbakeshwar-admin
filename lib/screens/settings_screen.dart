@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
+import '../services/locale_service.dart';
 import 'admin_rooms_screen.dart';
 import 'call_integration_setup_screen.dart';
 import 'gurujis_screen.dart';
@@ -134,6 +135,14 @@ class SettingsScreen extends StatelessWidget {
         _sectionTitle('Customize'),
         const SizedBox(height: 10),
         _SettingsCard(
+          icon: Icons.language_rounded,
+          color: const Color(0xFF00838F),
+          title: 'Language',
+          subtitle: LocaleService.isHindi ? 'हिंदी (Hindi)' : 'English',
+          onTap: () => _showLanguagePicker(context),
+        ),
+        const SizedBox(height: 12),
+        _SettingsCard(
           icon: Icons.share_rounded,
           color: const Color(0xFF6366F1),
           title: 'Social Media',
@@ -149,6 +158,51 @@ class SettingsScreen extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('App Language',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              ),
+            ),
+            ListTile(
+              title: const Text('English'),
+              trailing: !LocaleService.isHindi
+                  ? const Icon(Icons.check_rounded, color: AdminColors.primary)
+                  : null,
+              onTap: () {
+                LocaleService.setLanguage('en');
+                Navigator.pop(sheetContext);
+              },
+            ),
+            ListTile(
+              title: const Text('हिंदी (Hindi)'),
+              trailing: LocaleService.isHindi
+                  ? const Icon(Icons.check_rounded, color: AdminColors.primary)
+                  : null,
+              onTap: () {
+                LocaleService.setLanguage('hi');
+                Navigator.pop(sheetContext);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
     );
   }
 
