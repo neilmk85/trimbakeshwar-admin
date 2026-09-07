@@ -29,14 +29,7 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
   bool _waMissed = false;
   bool _waReceived = false;
   bool _waRejected = false;
-  int _sendDelaySeconds = 0;
-
-  static const _delayOptions = {
-    0: 'Immediately',
-    60: 'After 1 minute',
-    120: 'After 2 minutes',
-    300: 'After 5 minutes',
-  };
+  int _sendDelaySeconds = 0; // 0 = immediately, else a whole number of minutes in seconds
 
   bool _permissionsGranted = false;
   bool _batteryOptimizationIgnored = false;
@@ -192,17 +185,8 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
                 const SizedBox(height: 4),
                 Text('When to send the SMS/WhatsApp after the call ends',
                     style: TextStyle(fontSize: 12, color: AdminColors.grey600)),
-                ..._delayOptions.entries.map(
-                  (entry) => RadioListTile<int>(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    title: Text(entry.value, style: const TextStyle(fontSize: 14)),
-                    value: entry.key,
-                    groupValue: _sendDelaySeconds,
-                    activeColor: AdminColors.primary,
-                    onChanged: (v) => setState(() => _sendDelaySeconds = v ?? 0),
-                  ),
-                ),
+                const SizedBox(height: 12),
+                _delayPicker(),
               ],
             ),
           ),
@@ -303,6 +287,45 @@ class _CallIntegrationSetupScreenState extends State<CallIntegrationSetupScreen>
           TextButton(onPressed: onTap, child: const Text('Fix')),
         ],
       ),
+    );
+  }
+
+  Widget _delayPicker() {
+    final minutes = (_sendDelaySeconds ~/ 60).clamp(0, 60);
+
+    void setMinutes(int m) => setState(() => _sendDelaySeconds = m.clamp(0, 60) * 60);
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.remove_circle_outline_rounded),
+              color: AdminColors.primary,
+              onPressed: minutes > 0 ? () => setMinutes(minutes - 1) : null,
+            ),
+            Text(
+              minutes == 0 ? 'Immediately' : '$minutes minute${minutes == 1 ? '' : 's'}',
+              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Color(0xFF1A1A2E)),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add_circle_outline_rounded),
+              color: AdminColors.primary,
+              onPressed: minutes < 60 ? () => setMinutes(minutes + 1) : null,
+            ),
+          ],
+        ),
+        Slider(
+          value: minutes.toDouble(),
+          min: 0,
+          max: 60,
+          divisions: 60,
+          activeColor: AdminColors.primary,
+          label: minutes == 0 ? 'Immediately' : '$minutes min',
+          onChanged: (v) => setMinutes(v.round()),
+        ),
+      ],
     );
   }
 
